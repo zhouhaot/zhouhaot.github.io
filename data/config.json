@@ -1,0 +1,53 @@
+{
+  "theme": "cyberpunk",
+  "site": {
+    "title": "VOID.DEV",
+    "subtitle": "数字世界的造梦者",
+    "description": "一个关于前端工程、创意交互与数字美学的个人博客",
+    "url": "https://username.github.io",
+    "author": "Zero",
+    "logo": "⚡"
+  },
+  "hero": {
+    "greeting": "你好，我是",
+    "name": "Zero",
+    "tagline": "我在代码与像素的边界，编织数字世界的梦",
+    "description": "全栈开发者 / 交互设计师 / 数字艺术家。专注于用技术创造令人屏息的视觉体验。",
+    "cta": "探索我的世界",
+    "cta2": "阅读博客"
+  },
+  "about": {
+    "avatar": "",
+    "bio": [
+      "我是 Zero，一个游走在代码与设计之间的数字工匠。白天写 TypeScript，晚上做粒子特效。",
+      "我相信好的代码应该像诗一样优雅，好的设计应该像呼吸一样自然。",
+      "过去 8 年，我在大厂做过基础架构，在创业公司搭过设计系统，现在自由地探索技术与艺术的交叉地带。",
+      "热衷于 WebGL、Creative Coding、Generative Art，偶尔在 B 站直播写代码。"
+    ],
+    "skills": [
+      { "name": "Frontend", "level": 95, "items": ["React", "Vue", "TypeScript", "Next.js", "Astro"] },
+      { "name": "Creative", "level": 88, "items": ["Three.js", "GLSL", "GSAP", "Framer Motion", "p5.js"] },
+      { "name": "Design", "level": 82, "items": ["Figma", "Motion Design", "Typography", "Color Theory"] },
+      { "name": "Backend", "level": 75, "items": ["Node.js", "Go", "PostgreSQL", "Redis", "Docker"] }
+    ],
+    "experience": [
+      { "year": "2024-至今", "role": "独立开发者 & 创意工程师", "company": "自由职业", "desc": "探索 Web3 与生成艺术的交叉领域，为品牌打造沉浸式数字体验" },
+      { "year": "2021-2024", "role": "高级前端工程师", "company": "字节跳动", "desc": "负责抖音创作者平台的前端架构与动效系统设计" },
+      { "year": "2018-2021", "role": "前端开发", "company": "蚂蚁集团", "desc": "参与 Ant Design 组件库开发，搭建内部低代码平台" }
+    ]
+  },
+  "social": [
+    { "name": "GitHub", "url": "https://github.com/username", "icon": "github" },
+    { "name": "Twitter", "url": "https://twitter.com/username", "icon": "twitter" },
+    { "name": "Bilibili", "url": "https://space.bilibili.com", "icon": "bilibili" },
+    { "name": "Email", "url": "mailto:hello@example.com", "icon": "email" }
+  ],
+  "nav": [
+    { "label": "首页", "href": "#hero" },
+    { "label": "关于", "href": "#about" },
+    { "label": "博客", "href": "#blog" },
+    { "label": "作品", "href": "#projects" },
+    { "label": "联系", "href": "#contact" }
+  ],
+  "footer": "Crafted with passion & pixels."
+}

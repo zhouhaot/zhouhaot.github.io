@@ -1,0 +1,46 @@
+[
+  {
+    "id": "neon-particles",
+    "title": "Neon Particles",
+    "description": "一个基于 Canvas 2D 的高性能粒子系统，支持鼠标交互、颜色主题切换和实时参数调节。纯原生 JS 实现，零依赖，gzip 后仅 4KB。",
+    "tags": ["Canvas", "Animation", "JavaScript"],
+    "category": "frontend",
+    "tech": ["Vanilla JS", "Canvas 2D", "CSS Custom Properties"],
+    "link": "https://github.com/username/neon-particles",
+    "demo": "https://username.github.io/neon-particles",
+    "year": "2025"
+  },
+  {
+    "id": "glassmorphism-ui",
+    "title": "Glassmorphism UI Kit",
+    "description": "一套完整的毛玻璃风格 UI 组件库，包含 20+ 组件，支持亮色/暗色主题，内置动效系统。基于 CSS backdrop-filter 和自定义属性实现。",
+    "tags": ["UI Kit", "CSS", "Design System"],
+    "category": "design",
+    "tech": ["HTML", "CSS", "JavaScript", "Figma"],
+    "link": "https://github.com/username/glassmorphism-ui",
+    "demo": "https://username.github.io/glassmorphism-ui",
+    "year": "2025"
+  },
+  {
+    "id": "shader-playground",
+    "title": "Shader Playground",
+    "description": "一个在线 Shader 编辑器，支持实时预览、语法高亮和社区分享。使用 WebGL 2.0 渲染，支持 GLSL ES 3.0 语法。",
+    "tags": ["WebGL", "Editor", "Creative"],
+    "category": "frontend",
+    "tech": ["React", "WebGL 2.0", "Monaco Editor", "Firebase"],
+    "link": "https://github.com/username/shader-playground",
+    "demo": "https://shader-playground.vercel.app",
+    "year": "2024"
+  },
+  {
+    "id": "motion-design-system",
+    "title": "Motion Design System",
+    "description": "为大型应用设计的动效规范系统。定义了缓动曲线、持续时间、编排规则的标准化方案，并提供了 React 和 Vue 的实现。",
+    "tags": ["Motion", "Design System", "Animation"],
+    "category": "design",
+    "tech": ["TypeScript", "React", "Vue", "Framer Motion"],
+    "link": "https://github.com/username/motion-design-system",
+    "demo": "",
+    "year": "2024"
+  }
+]

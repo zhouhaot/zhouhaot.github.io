@@ -1,0 +1,48 @@
+# GitHub Pages 自动部署工作流
+# ============================================
+# 使用方法：
+# 1. 在 GitHub 仓库 Settings → Pages 中，将 Source 设置为 "GitHub Actions"
+# 2. 推送代码到 main 分支即可自动部署
+# 3. 访问 https://<username>.github.io 查看网站
+# ============================================
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 设置 GITHUB_TOKEN 权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只允许一个部署，跳过排队中的运行
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 上传整个项目根目录（纯静态站点，无需构建）
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VOID.DEV — 管理后台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin">
+    <!-- Sidebar (desktop: left panel, mobile: bottom tab bar) -->
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <h1 class="sidebar__logo">VOID<span>.DEV</span></h1>
+        <p class="sidebar__sub">管理后台</p>
+      </div>
+      <nav class="sidebar__nav">
+        <button class="sidebar__link active" data-tab="settings"><span class="sidebar__icon">⚙️</span><span class="sidebar__label">设置</span></button>
+        <button class="sidebar__link" data-tab="profile"><span class="sidebar__icon">👤</span><span class="sidebar__label">信息</span></button>
+        <button class="sidebar__link" data-tab="posts"><span class="sidebar__icon">📝</span><span class="sidebar__label">文章</span></button>
+        <button class="sidebar__link" data-tab="projects"><span class="sidebar__icon">🎯</span><span class="sidebar__label">项目</span></button>
+        <button class="sidebar__link" data-tab="theme"><span class="sidebar__icon">🎨</span><span class="sidebar__label">主题</span></button>
+        <button class="sidebar__link" data-tab="data"><span class="sidebar__icon">💾</span><span class="sidebar__label">数据</span></button>
+      </nav>
+      <div class="sidebar__footer">
+        <a href="../" target="_blank" class="sidebar__preview">🔗 预览网站</a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+
+      <!-- ======================== Settings ======================== -->
+      <section class="tab active" id="tab-settings">
+        <div class="page-head">
+          <h2 class="page-head__title">站点设置</h2>
+        </div>
+        <form id="settings-form" class="form">
+          <div class="card">
+            <h3 class="card__title">基本信息</h3>
+            <div class="form__group">
+              <label>站点标题</label>
+              <input type="text" name="site.title" placeholder="VOID.DEV">
+            </div>
+            <div class="form__group">
+              <label>站点副标题</label>
+              <input type="text" name="site.subtitle" placeholder="数字世界的造梦者">
+            </div>
+            <div class="form__group">
+              <label>站点描述</label>
+              <textarea name="site.description" rows="2" placeholder="站点 meta 描述"></textarea>
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label>站点 URL</label>
+                <input type="text" name="site.url" placeholder="https://username.github.io">
+              </div>
+              <div class="form__group">
+                <label>作者名</label>
+                <input type="text" name="site.author" placeholder="Zero">
+              </div>
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label>Logo（Emoji）</label>
+                <input type="text" name="site.logo" placeholder="⚡">
+              </div>
+              <div class="form__group">
+                <label>页脚文字</label>
+                <input type="text" name="footer" placeholder="Crafted with passion & pixels.">
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card__title">Hero 区</h3>
+            <div class="form__row">
+              <div class="form__group">
+                <label>问候语</label>
+                <input type="text" name="hero.greeting" placeholder="你好，我是">
+              </div>
+              <div class="form__group">
+                <label>名字</label>
+                <input type="text" name="hero.name" placeholder="Zero">
+              </div>
+            </div>
+            <div class="form__group">
+              <label>标语</label>
+              <input type="text" name="hero.tagline" placeholder="一句话标语">
+            </div>
+            <div class="form__group">
+              <label>描述</label>
+              <textarea name="hero.description" rows="2"></textarea>
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label>主按钮</label>
+                <input type="text" name="hero.cta" placeholder="探索我的世界">
+              </div>
+              <div class="form__group">
+                <label>副按钮</label>
+                <input type="text" name="hero.cta2" placeholder="阅读博客">
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card__title">导航栏</h3>
+            <div id="nav-editor"></div>
+            <button type="button" class="btn btn--sm" onclick="addNavItem()">+ 添加导航项</button>
+          </div>
+
+          <div class="card">
+            <h3 class="card__title">社交链接</h3>
+            <div id="social-editor"></div>
+            <button type="button" class="btn btn--sm" onclick="addSocial()">+ 添加链接</button>
+          </div>
+
+          <div class="form__actions">
+            <button type="submit" class="btn btn--primary">保存设置</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ======================== Profile ======================== -->
+      <section class="tab" id="tab-profile">
+        <div class="page-head">
+          <h2 class="page-head__title">个人信息</h2>
+        </div>
+        <form id="profile-form" class="form">
+          <div class="card">
+            <h3 class="card__title">个人简介</h3>
+            <div id="bio-editor"></div>
+            <button type="button" class="btn btn--sm" onclick="addBio()">+ 添加段落</button>
+          </div>
+          <div class="card">
+            <h3 class="card__title">技能</h3>
+            <div id="skills-editor"></div>
+            <button type="button" class="btn btn--sm" onclick="addSkill()">+ 添加技能</button>
+          </div>
+          <div class="card">
+            <h3 class="card__title">工作经历</h3>
+            <div id="experience-editor"></div>
+            <button type="button" class="btn btn--sm" onclick="addExperience()">+ 添加经历</button>
+          </div>
+          <div class="form__actions">
+            <button type="submit" class="btn btn--primary">保存个人信息</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ======================== Posts ======================== -->
+      <section class="tab" id="tab-posts">
+        <div class="page-head">
+          <h2 class="page-head__title">文章管理</h2>
+          <button class="btn btn--primary" onclick="showPostEditor()">+ 新建</button>
+        </div>
+        <div id="posts-list" class="items-list"></div>
+        <!-- Post Editor Modal -->
+        <div id="post-editor" class="modal" style="display:none">
+          <div class="modal__content">
+            <div class="modal__header">
+              <h3 id="post-editor-title">新建文章</h3>
+              <button class="modal__close" onclick="hidePostEditor()">✕</button>
+            </div>
+            <form id="post-form" class="form">
+              <div class="form__group">
+                <label>文章 ID</label>
+                <input type="text" name="id" placeholder="my-awesome-post" required>
+              </div>
+              <div class="form__group">
+                <label>标题</label>
+                <input type="text" name="title" required>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label>日期</label>
+                  <input type="date" name="date" required>
+                </div>
+                <div class="form__group">
+                  <label>阅读时间</label>
+                  <input type="text" name="readTime" placeholder="8 min">
+                </div>
+              </div>
+              <div class="form__group">
+                <label>标签（逗号分隔）</label>
+                <input type="text" name="tags" placeholder="JavaScript, React">
+              </div>
+              <div class="form__group">
+                <label>分类</label>
+                <select name="category">
+                  <option value="tech">技术</option>
+                  <option value="design">设计</option>
+                  <option value="life">生活</option>
+                </select>
+              </div>
+              <div class="form__group">
+                <label>摘要</label>
+                <textarea name="excerpt" rows="3"></textarea>
+              </div>
+              <div class="form__group">
+                <label>正文（Markdown）</label>
+                <textarea name="content" rows="12" class="mono"></textarea>
+              </div>
+              <div class="form__actions">
+                <button type="button" class="btn" onclick="hidePostEditor()">取消</button>
+                <button type="submit" class="btn btn--primary">保存</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== Projects ======================== -->
+      <section class="tab" id="tab-projects">
+        <div class="page-head">
+          <h2 class="page-head__title">项目管理</h2>
+          <button class="btn btn--primary" onclick="showProjectEditor()">+ 新建</button>
+        </div>
+        <div id="projects-list" class="items-list"></div>
+        <!-- Project Editor Modal -->
+        <div id="project-editor" class="modal" style="display:none">
+          <div class="modal__content">
+            <div class="modal__header">
+              <h3 id="project-editor-title">新建项目</h3>
+              <button class="modal__close" onclick="hideProjectEditor()">✕</button>
+            </div>
+            <form id="project-form" class="form">
+              <div class="form__group">
+                <label>项目 ID</label>
+                <input type="text" name="id" placeholder="my-project" required>
+              </div>
+              <div class="form__group">
+                <label>项目名称</label>
+                <input type="text" name="title" required>
+              </div>
+              <div class="form__group">
+                <label>描述</label>
+                <textarea name="description" rows="3"></textarea>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label>年份</label>
+                  <input type="text" name="year" placeholder="2025">
+                </div>
+                <div class="form__group">
+                  <label>分类</label>
+                  <select name="category">
+                    <option value="frontend">前端</option>
+                    <option value="design">设计</option>
+                    <option value="other">其他</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form__group">
+                <label>技术栈（逗号分隔）</label>
+                <input type="text" name="tech" placeholder="React, TypeScript">
+              </div>
+              <div class="form__group">
+                <label>标签（逗号分隔）</label>
+                <input type="text" name="tags" placeholder="Animation, Canvas">
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label>GitHub 链接</label>
+                  <input type="text" name="link" placeholder="https://github.com/...">
+                </div>
+                <div class="form__group">
+                  <label>Demo 链接</label>
+                  <input type="text" name="demo" placeholder="https://...">
+                </div>
+              </div>
+              <div class="form__actions">
+                <button type="button" class="btn" onclick="hideProjectEditor()">取消</button>
+                <button type="submit" class="btn btn--primary">保存</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== Theme ======================== -->
+      <section class="tab" id="tab-theme">
+        <div class="page-head">
+          <h2 class="page-head__title">主题切换</h2>
+          <button class="btn btn--primary" onclick="saveTheme()">保存选择</button>
+        </div>
+        <p class="tab__desc">选择一个主题风格，保存后刷新前台页面即可看到效果。</p>
+        <div id="theme-list" class="theme-grid"></div>
+
+        <div class="card" style="margin-top:24px">
+          <h3 class="card__title">导入自定义主题</h3>
+          <p class="card__desc">上传 CSS 和 JS 文件即可导入。开发主题请参考 README。</p>
+          <form class="form" onsubmit="event.preventDefault();importTheme()">
+            <div class="form__row">
+              <div class="form__group">
+                <label>主题名称</label>
+                <input type="text" id="theme-import-name" placeholder="ocean">
+              </div>
+              <div class="form__group">
+                <label>图标</label>
+                <input type="text" id="theme-import-icon" placeholder="🌊">
+              </div>
+            </div>
+            <div class="form__group">
+              <label>描述</label>
+              <input type="text" id="theme-import-desc" placeholder="蓝色系 + 波浪动效">
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label>CSS 文件</label>
+                <input type="file" id="theme-import-css" accept=".css">
+              </div>
+              <div class="form__group">
+                <label>JS 模板文件</label>
+                <input type="file" id="theme-import-js" accept=".js">
+              </div>
+            </div>
+            <button type="submit" class="btn btn--primary">导入主题</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ======================== Data ======================== -->
+      <section class="tab" id="tab-data">
+        <div class="page-head">
+          <h2 class="page-head__title">数据管理</h2>
+        </div>
+        <p class="tab__desc">导出/导入数据，或重置为默认值。</p>
+        <div class="data-actions">
+          <div class="data-card">
+            <h3>📦 导出</h3>
+            <p>下载全部数据为 JSON</p>
+            <button class="btn" onclick="exportAll()">导出全部</button>
+          </div>
+          <div class="data-card">
+            <h3>📥 导入</h3>
+            <p>从 JSON 恢复数据</p>
+            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importAll(event)">
+            <button class="btn" onclick="document.getElementById('import-file').click()">导入数据</button>
+          </div>
+          <div class="data-card">
+            <h3>📄 生成文件</h3>
+            <p>打包为可部署的 JSON</p>
+            <button class="btn" onclick="generateFiles()">生成文件</button>
+          </div>
+          <div class="data-card">
+            <h3>🔄 重置</h3>
+            <p>清除所有修改</p>
+            <button class="btn btn--danger" onclick="resetAll()">重置全部</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preview Footer (mobile) -->
+      <footer class="admin-footer">
+        <a href="../" target="_blank" class="admin-footer__link">🔗 预览网站</a>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+  <script src="admin.js"></script>
+</body>
+</html>

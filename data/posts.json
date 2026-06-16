@@ -1,0 +1,35 @@
+[
+  {
+    "id": "shader-art-with-webgl",
+    "title": "用 WebGL 着色器创造数字艺术：从零开始的 Shader 编程之旅",
+    "date": "2025-12-15",
+    "tags": ["WebGL", "Creative Coding", "GLSL"],
+    "category": "tech",
+    "excerpt": "着色器（Shader）是 GPU 上运行的小程序，能在毫秒内为数百万像素计算颜色。本文带你从最简单的 fragment shader 开始，逐步创造出流动的渐变、有机的噪声纹理和赛博朋克风格的视觉特效。",
+    "cover": "",
+    "readTime": "12 min",
+    "content": "## 为什么学 Shader？\n\n在这个 AI 生成一切的时代，手写 Shader 似乎是最后的「手工活」。但正是这种精确到像素的控制力，让你能创造出任何 AI 都无法预测的视觉效果。\n\n## 你的第一个 Shader\n\n```glsl\nvoid mainImage(out vec4 fragCoord, in vec2 uv) {\n    vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0, 2, 4));\n    fragCoord = vec4(col, 1.0);\n}\n```\n\n仅仅五行代码，就能在屏幕上渲染出流动的彩虹渐变。这就是 Shader 的魔力——用数学表达美。\n\n## 噪声：有机感的秘密\n\nPerlin 噪声和 Simplex 噪声是创造自然纹理的基石。云朵、大理石、火焰——这些都可以用噪声函数组合出来。\n\n```glsl\nfloat noise(vec2 p) {\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    float a = hash(i);\n    float b = hash(i + vec2(1.0, 0.0));\n    float c = hash(i + vec2(0.0, 1.0));\n    float d = hash(i + vec2(1.0, 1.0));\n    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);\n}\n```\n\n## 实战：赛博朋克城市天际线\n\n结合噪声、SDF（有符号距离场）和后期处理，我们可以创造出一个迷幻的赛博朋克城市轮廓...\n\n> 「在像素的海洋里，每个数学公式都是一首诗。」\n\n## 总结\n\nShader 编程的学习曲线陡峭，但回报巨大。建议从 Shadertoy 开始练习，每天写一个小 shader，三个月后你会发现自己看待视觉世界的方式完全不同了。"
+  },
+  {
+    "id": "design-system-philosophy",
+    "title": "设计系统不是组件库：我理解的 Design System 哲学",
+    "date": "2025-11-28",
+    "tags": ["设计系统", "前端架构", "Design"],
+    "category": "design",
+    "excerpt": "很多团队把 Design System 等同于一套 UI 组件库。但真正的设计系统是一套关于「如何做决策」的语言——从颜色间距到动效节奏，从组件 API 到文档规范，它是团队共识的代码化表达。",
+    "cover": "",
+    "readTime": "8 min",
+    "content": "## 误解：Design System = 组件库\n\n打开很多团队的「设计系统」仓库，你会看到一堆 Button、Input、Modal 组件。这些当然重要，但它们只是设计系统的冰山一角。\n\n## 设计系统的三层结构\n\n### 1. 设计令牌（Design Tokens）\n\n最底层是设计决策的原子化表达：\n\n```css\n:root {\n  --color-primary: oklch(65% 0.25 250);\n  --space-md: clamp(1rem, 0.92rem + 0.4vw, 1.25rem);\n  --duration-fast: 150ms;\n  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);\n}\n```\n\n这些 token 不属于任何组件，但所有组件都依赖它们。\n\n### 2. 模式语言（Pattern Language）\n\n如何处理表单验证的错误状态？什么时候用 Toast 而不是 Modal？分页和无限滚动怎么选？这些模式是团队的「默契」。\n\n### 3. 组件实现（Components）\n\n最后才是具体的组件代码。它应该是前两层的自然产物。\n\n## 好的设计系统像方言\n\n一个好的设计系统让团队成员能用简短的术语精确表达复杂的设计意图：\n\n> 「这个表单的错误反馈用 inline-validate 模式，token 用 --color-danger-500，动效用 --ease-spring。」\n\n三句话，零歧义。\n\n## 总结\n\n不要急于写组件。先把设计决策梳理清楚，用 token 固化下来，用模式语言建立共识。组件只是这些决策的最终表达。"
+  },
+  {
+    "id": "digital-nomad-reflections",
+    "title": "在巴厘岛写代码的第 100 天：数字游民的真实与幻象",
+    "date": "2025-10-05",
+    "tags": ["生活", "远程工作", "数字游民"],
+    "category": "life",
+    "excerpt": "社交媒体上的数字游民生活：海景咖啡厅、椰子树下的 MacBook、日落时分的冲浪。真实的数字游民生活：WiFi 不稳定、时区会议、孤独感、以及在异国他乡寻找归属感的漫长旅程。",
+    "cover": "",
+    "readTime": "10 min",
+    "content": "## Day 1: 天堂\n\n抵达 Canggu 的第一天，一切都是滤镜里的样子。稻田边的 co-working space，手冲咖啡，来自世界各地的开发者。我在 Instagram 发了一张照片，配文「办公室」。\n\n## Day 30: 裂缝\n\n新鲜感褪去后，现实开始露出真面目。WiFi 在暴雨天频繁断线，和国内团队的会议要在凌晨两点开。最要命的是——你开始想念楼下那家沙县小吃。\n\n## Day 60: 适应\n\n我开始建立自己的节奏。早上六点起床，在最安静的时段写最需要专注的代码。下午去健身房，晚上参加 co-working space 的社区活动。学会了用 Grab 点外卖，学会了用印尼语砍价。\n\n## Day 100: 清醒\n\n数字游民不是一种「更好的生活方式」，它只是一种「不同的生活方式」。它有自己的 trade-off：\n\n**你获得了：**\n- 时间自由\n- 地理自由\n- 新鲜的文化体验\n\n**你失去了：**\n- 稳定的社交圈\n- 熟悉的环境带来的安全感\n- 和家人朋友的物理距离\n\n## 给想尝试的人\n\n1. 先试一个月，不要一上来就买半年的公寓\n2. 选有成熟 co-working space 的城市\n3. 保持和国内团队的沟通频率\n4. 学会独处，但不要孤立自己\n5. 记住：你随时可以回去，这不是一条不归路\n\n> 「自由的代价是不确定性。接受这一点，你就自由了。」"
+  }
+]
