@@ -8,7 +8,18 @@
     "tech": ["Vanilla JS", "Canvas 2D", "CSS Custom Properties"],
     "link": "https://github.com/username/neon-particles",
     "demo": "https://username.github.io/neon-particles",
-    "year": "2025"
+    "year": "2025",
+    "cover": "",
+    "gallery": [],
+    "status": "已完成",
+    "highlights": [
+      "纯原生 JS 实现，零依赖",
+      "支持鼠标交互和颜色主题切换",
+      "gzip 后仅 4KB",
+      "60fps 流畅渲染"
+    ],
+    "content": "## 背景\n\n在探索 Canvas 动画的过程中，我发现大多数粒子库都过于臃肿。于是决定从零实现一个极致精简的粒子系统。\n\n## 技术方案\n\n使用 Canvas 2D API，通过 `requestAnimationFrame` 驱动动画循环。每个粒子包含位置、速度、半径和颜色属性，每帧更新位置并绘制。\n\n## 亮点\n\n- 粒子间连线：距离越近线条越粗，营造网络感\n- 鼠标斥力场：鼠标附近的粒子会被推开\n- 性能优化：空间分区减少 O(n²) 碰撞检测\n\n## 未来计划\n\n- 支持 WebGL 渲染后端\n- 添加粒子形状（三角形、六边形）\n- 支持粒子间碰撞物理",
+    "updatedAt": "2025-06-01"
   },
   {
     "id": "glassmorphism-ui",
@@ -19,7 +30,18 @@
     "tech": ["HTML", "CSS", "JavaScript", "Figma"],
     "link": "https://github.com/username/glassmorphism-ui",
     "demo": "https://username.github.io/glassmorphism-ui",
-    "year": "2025"
+    "year": "2025",
+    "cover": "",
+    "gallery": [],
+    "status": "已完成",
+    "highlights": [
+      "20+ 毛玻璃风格组件",
+      "支持亮色/暗色主题切换",
+      "内置动效系统",
+      "Figma 设计稿同步"
+    ],
+    "content": "## 设计理念\n\n毛玻璃效果（Glassmorphism）是近年来流行的设计趋势。本项目旨在提供一套开箱即用的组件库。\n\n## 组件列表\n\n- Button / IconButton\n- Card / GlassCard\n- Modal / Drawer\n- Input / Select / Checkbox\n- Navbar / Sidebar\n- Toast / Alert\n\n## 技术实现\n\n核心依赖 CSS `backdrop-filter: blur()` 和 `background: rgba()` 的组合。通过 CSS Custom Properties 实现主题切换。",
+    "updatedAt": "2025-05-20"
   },
   {
     "id": "shader-playground",
@@ -30,7 +52,18 @@
     "tech": ["React", "WebGL 2.0", "Monaco Editor", "Firebase"],
     "link": "https://github.com/username/shader-playground",
     "demo": "https://shader-playground.vercel.app",
-    "year": "2024"
+    "year": "2024",
+    "cover": "",
+    "gallery": [],
+    "status": "已完成",
+    "highlights": [
+      "实时 WebGL 预览",
+      "Monaco Editor 语法高亮",
+      "社区作品分享",
+      "支持 GLSL ES 3.0"
+    ],
+    "content": "## 起因\n\nShadertoy 是学习 Shader 的好地方，但它的编辑体验一般。我想做一个更现代的替代品。\n\n## 功能\n\n- 实时预览：代码修改立即反映到画布\n- 语法高亮：基于 Monaco Editor\n- 社区分享：作品保存到 Firebase\n- 多 Pass 支持：可以链接多个 Shader\n\n## 技术栈\n\n- React + TypeScript\n- Monaco Editor（VS Code 同款编辑器）\n- WebGL 2.0 渲染\n- Firebase Realtime Database",
+    "updatedAt": "2024-12-15"
   },
   {
     "id": "motion-design-system",
@@ -41,6 +74,17 @@
     "tech": ["TypeScript", "React", "Vue", "Framer Motion"],
     "link": "https://github.com/username/motion-design-system",
     "demo": "",
-    "year": "2024"
+    "year": "2024",
+    "cover": "",
+    "gallery": [],
+    "status": "进行中",
+    "highlights": [
+      "标准化缓动曲线和持续时间",
+      "React + Vue 双框架支持",
+      "动效编排规则",
+      "可交互文档站"
+    ],
+    "content": "## 问题\n\n大型团队中，动效往往是最后才考虑的事情。每个开发者自己定义 duration 和 easing，导致产品动效风格不统一。\n\n## 解决方案\n\n定义一套动效设计令牌（Design Tokens），包括：\n\n- 缓动曲线：ease-out-expo, ease-spring, ease-smooth 等\n- 持续时间：fast(150ms), normal(300ms), slow(500ms)\n- 编排规则：stagger 间隔、级联延迟\n\n## 进度\n\n- [x] Token 定义\n- [x] React 实现\n- [x] Vue 实现\n- [ ] 文档站\n- [ ] Figma 插件",
+    "updatedAt": "2024-11-01"
   }
 ]

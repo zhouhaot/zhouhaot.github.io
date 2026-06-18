@@ -357,6 +357,33 @@ body::before {
 .loader__text { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
+/* Project Detail */
+.project-detail { max-width: var(--max-width-narrow); margin: 0 auto; padding: calc(var(--nav-height) + var(--space-xl)) var(--space-lg) var(--space-2xl); }
+.project-detail__cover { margin-bottom: var(--space-xl); border-radius: var(--radius-lg); overflow: hidden; border: var(--glass-border); }
+.project-detail__cover img { width: 100%; display: block; }
+.project-detail__header { margin-bottom: var(--space-lg); }
+.project-detail__meta { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.project-detail__year { font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 600; }
+.project-detail__status { font-size: var(--text-xs); font-weight: 700; padding: 0.2em 0.8em; border-radius: var(--radius-full); background: oklch(75% 0.18 195 / 0.12); color: var(--color-primary); border: 1px solid oklch(75% 0.18 195 / 0.2); }
+.project-detail__title { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 900; letter-spacing: -0.03em; line-height: var(--leading-tight); margin-bottom: var(--space-md); }
+.project-detail__desc { font-size: var(--text-lg); color: var(--color-text-secondary); line-height: var(--leading-normal); }
+.project-detail__tech { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-xl); }
+.project-detail__highlights { margin-bottom: var(--space-xl); }
+.project-detail__highlights h3 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-md); color: var(--color-primary); }
+.project-detail__highlights ul { list-style: none; padding: 0; }
+.project-detail__highlights li { padding: var(--space-xs) 0; padding-left: var(--space-md); position: relative; color: var(--color-text-secondary); }
+.project-detail__highlights li::before { content: '→'; position: absolute; left: 0; color: var(--color-primary); }
+.project-detail__gallery { margin-bottom: var(--space-xl); }
+.project-detail__gallery h3 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-md); }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-md); }
+.gallery-item { border-radius: var(--radius-md); overflow: hidden; border: var(--glass-border); }
+.gallery-item img { width: 100%; display: block; transition: transform var(--duration-normal) var(--ease-smooth); }
+.gallery-item:hover img { transform: scale(1.05); }
+.project-detail__content { margin-bottom: var(--space-xl); }
+.project-detail__links { display: flex; gap: var(--space-md); margin-bottom: var(--space-lg); flex-wrap: wrap; }
+.project-detail__updated { font-size: var(--text-xs); color: var(--color-text-muted); }
+.project-card__status { font-size: var(--text-xs); font-weight: 600; padding: 0.15em 0.6em; border-radius: var(--radius-full); background: oklch(75% 0.18 195 / 0.08); color: var(--color-primary); margin-left: var(--space-sm); }
+
 /* Responsive */
 @media (max-width: 768px) {
   .nav__links {
@@ -392,6 +419,12 @@ body::before {
   .article { padding: calc(var(--nav-height) + var(--space-md)) var(--space-md) var(--space-xl); }
   .article__title { font-size: var(--text-2xl); }
   .article__content pre { font-size: 12px; padding: var(--space-sm); }
+
+  .project-detail { padding: calc(var(--nav-height) + var(--space-md)) var(--space-md) var(--space-xl); }
+  .project-detail__title { font-size: var(--text-2xl); }
+  .project-detail__links { flex-direction: column; }
+  .project-detail__links .btn { width: 100%; justify-content: center; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
 
   .contact__socials { gap: var(--space-sm); }
   .social-link { padding: 0.5em 1.2em; font-size: var(--text-xs); }

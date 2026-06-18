@@ -22,35 +22,67 @@
   const themeId = config.theme || 'cyberpunk';
   await Core.loadTheme(themeId);
 
-  /* ---- Blog Card Clicks ---- */
+  /* ---- Get theme helper ---- */
+  function getTheme() {
+    return window.THEMES && window.THEMES[themeId];
+  }
+
+  /* ---- Blog Card Clicks (event delegation) ---- */
   function initBlogCardClicks() {
-    document.querySelectorAll('.blog-card').forEach((card) => {
-      const handler = () => {
-        const postId = card.dataset.postId;
-        window.location.hash = '/post/' + postId;
-      };
-      card.addEventListener('click', handler);
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handler();
-        }
-      });
+    const grid = document.querySelector('[data-filterable="posts"]');
+    if (!grid) return;
+    grid.addEventListener('click', (e) => {
+      const card = e.target.closest('.blog-card');
+      if (!card) return;
+      window.location.hash = '/post/' + card.dataset.postId;
+    });
+    grid.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.blog-card');
+      if (!card) return;
+      e.preventDefault();
+      window.location.hash = '/post/' + card.dataset.postId;
     });
   }
 
-  /* ---- Project Filters ---- */
-  function initProjectFilters() {
-    const buttons = document.querySelectorAll('.filter-btn');
-    const cards = document.querySelectorAll('.project-card');
+  /* ---- Project Card Clicks (event delegation) ---- */
+  function initProjectCardClicks() {
+    const grid = document.querySelector('[data-filterable="projects"]');
+    if (!grid) return;
+    grid.addEventListener('click', (e) => {
+      // Don't hijack link clicks
+      if (e.target.closest('a')) return;
+      const card = e.target.closest('.project-card');
+      if (!card) return;
+      window.location.hash = '/project/' + card.dataset.projectId;
+    });
+    grid.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.project-card');
+      if (!card) return;
+      e.preventDefault();
+      window.location.hash = '/project/' + card.dataset.projectId;
+    });
+  }
 
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', () => {
+  /* ---- Dynamic Filter (works for both posts and projects) ---- */
+  function initFilters() {
+    document.querySelectorAll('.filter-bar').forEach(bar => {
+      const target = bar.dataset.filterTarget;
+      const grid = document.querySelector(`[data-filterable="${target}"]`);
+      if (!grid) return;
+
+      bar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
         const filter = btn.dataset.filter;
-        buttons.forEach((b) => b.classList.remove('active'));
+
+        // Update active button
+        bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        cards.forEach((card) => {
+        // Filter cards
+        grid.querySelectorAll('[data-category]').forEach(card => {
           if (filter === 'all' || card.dataset.category === filter) {
             card.classList.remove('hidden');
             card.style.animation = 'fadeInUp 0.4s var(--ease-out-expo) forwards';
@@ -68,19 +100,35 @@
     initScrollReveal();
     initSkillBars();
     init3DTilt();
-    initProjectFilters();
+    initFilters();
     initBlogCardClicks();
+    initProjectCardClicks();
     initMobileNav();
   }
 
   /* ---- Render Article ---- */
   function renderArticle(postId) {
     const post = posts.find(p => p.id === postId);
-    if (!post) { renderHome(); return; }
-
-    const theme = window.THEMES[themeId];
+    const theme = getTheme();
+    if (!post) {
+      if (theme && theme.render404) theme.render404('文章不存在');
+      return;
+    }
     if (theme && theme.renderArticle) {
       theme.renderArticle(post);
+    }
+  }
+
+  /* ---- Render Project Detail ---- */
+  function renderProject(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    const theme = getTheme();
+    if (!project) {
+      if (theme && theme.render404) theme.render404('项目不存在');
+      return;
+    }
+    if (theme && theme.renderProject) {
+      theme.renderProject(project);
     }
   }
 
@@ -89,6 +137,7 @@
   router
     .on('/', () => renderHome())
     .on('/post/:id', ({ id }) => renderArticle(id))
+    .on('/project/:id', ({ id }) => renderProject(id))
     .init();
 
   /* ---- Global Modules ---- */

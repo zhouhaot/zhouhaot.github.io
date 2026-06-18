@@ -110,13 +110,13 @@
           <div class="card">
             <h3 class="card__title">导航栏</h3>
             <div id="nav-editor"></div>
-            <button type="button" class="btn btn--sm" onclick="addNavItem()">+ 添加导航项</button>
+            <button type="button" class="btn btn--sm" data-action="add-nav-item">+ 添加导航项</button>
           </div>
 
           <div class="card">
             <h3 class="card__title">社交链接</h3>
             <div id="social-editor"></div>
-            <button type="button" class="btn btn--sm" onclick="addSocial()">+ 添加链接</button>
+            <button type="button" class="btn btn--sm" data-action="add-social">+ 添加链接</button>
           </div>
 
           <div class="form__actions">
@@ -134,17 +134,17 @@
           <div class="card">
             <h3 class="card__title">个人简介</h3>
             <div id="bio-editor"></div>
-            <button type="button" class="btn btn--sm" onclick="addBio()">+ 添加段落</button>
+            <button type="button" class="btn btn--sm" data-action="add-bio">+ 添加段落</button>
           </div>
           <div class="card">
             <h3 class="card__title">技能</h3>
             <div id="skills-editor"></div>
-            <button type="button" class="btn btn--sm" onclick="addSkill()">+ 添加技能</button>
+            <button type="button" class="btn btn--sm" data-action="add-skill">+ 添加技能</button>
           </div>
           <div class="card">
             <h3 class="card__title">工作经历</h3>
             <div id="experience-editor"></div>
-            <button type="button" class="btn btn--sm" onclick="addExperience()">+ 添加经历</button>
+            <button type="button" class="btn btn--sm" data-action="add-experience">+ 添加经历</button>
           </div>
           <div class="form__actions">
             <button type="submit" class="btn btn--primary">保存个人信息</button>
@@ -156,15 +156,14 @@
       <section class="tab" id="tab-posts">
         <div class="page-head">
           <h2 class="page-head__title">文章管理</h2>
-          <button class="btn btn--primary" onclick="showPostEditor()">+ 新建</button>
+          <button class="btn btn--primary" data-action="show-post-editor">+ 新建</button>
         </div>
         <div id="posts-list" class="items-list"></div>
-        <!-- Post Editor Modal -->
         <div id="post-editor" class="modal" style="display:none">
           <div class="modal__content">
             <div class="modal__header">
               <h3 id="post-editor-title">新建文章</h3>
-              <button class="modal__close" onclick="hidePostEditor()">✕</button>
+              <button class="modal__close" data-action="hide-post-editor">✕</button>
             </div>
             <form id="post-form" class="form">
               <div class="form__group">
@@ -206,7 +205,7 @@
                 <textarea name="content" rows="12" class="mono"></textarea>
               </div>
               <div class="form__actions">
-                <button type="button" class="btn" onclick="hidePostEditor()">取消</button>
+                <button type="button" class="btn" data-action="hide-post-editor">取消</button>
                 <button type="submit" class="btn btn--primary">保存</button>
               </div>
             </form>
@@ -218,15 +217,14 @@
       <section class="tab" id="tab-projects">
         <div class="page-head">
           <h2 class="page-head__title">项目管理</h2>
-          <button class="btn btn--primary" onclick="showProjectEditor()">+ 新建</button>
+          <button class="btn btn--primary" data-action="show-project-editor">+ 新建</button>
         </div>
         <div id="projects-list" class="items-list"></div>
-        <!-- Project Editor Modal -->
         <div id="project-editor" class="modal" style="display:none">
           <div class="modal__content">
             <div class="modal__header">
               <h3 id="project-editor-title">新建项目</h3>
-              <button class="modal__close" onclick="hideProjectEditor()">✕</button>
+              <button class="modal__close" data-action="hide-project-editor">✕</button>
             </div>
             <form id="project-form" class="form">
               <div class="form__group">
@@ -247,12 +245,26 @@
                   <input type="text" name="year" placeholder="2025">
                 </div>
                 <div class="form__group">
+                  <label>状态</label>
+                  <select name="status">
+                    <option value="已完成">已完成</option>
+                    <option value="进行中">进行中</option>
+                    <option value="概念">概念</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form__row">
+                <div class="form__group">
                   <label>分类</label>
                   <select name="category">
                     <option value="frontend">前端</option>
                     <option value="design">设计</option>
                     <option value="other">其他</option>
                   </select>
+                </div>
+                <div class="form__group">
+                  <label>封面图 URL</label>
+                  <input type="text" name="cover" placeholder="https://...jpg">
                 </div>
               </div>
               <div class="form__group">
@@ -262,6 +274,18 @@
               <div class="form__group">
                 <label>标签（逗号分隔）</label>
                 <input type="text" name="tags" placeholder="Animation, Canvas">
+              </div>
+              <div class="form__group">
+                <label>项目亮点（每行一个）</label>
+                <textarea name="highlights" rows="3" placeholder="零依赖&#10;60fps 渲染&#10;gzip 仅 4KB"></textarea>
+              </div>
+              <div class="form__group">
+                <label>截图地址（每行一个 URL）</label>
+                <textarea name="gallery" rows="2" placeholder="https://...1.jpg&#10;https://...2.jpg"></textarea>
+              </div>
+              <div class="form__group">
+                <label>项目详情（Markdown）</label>
+                <textarea name="content" rows="8" class="mono" placeholder="## 背景\n\n..."></textarea>
               </div>
               <div class="form__row">
                 <div class="form__group">
@@ -273,8 +297,12 @@
                   <input type="text" name="demo" placeholder="https://...">
                 </div>
               </div>
+              <div class="form__group">
+                <label>最后更新日期</label>
+                <input type="date" name="updatedAt">
+              </div>
               <div class="form__actions">
-                <button type="button" class="btn" onclick="hideProjectEditor()">取消</button>
+                <button type="button" class="btn" data-action="hide-project-editor">取消</button>
                 <button type="submit" class="btn btn--primary">保存</button>
               </div>
             </form>
@@ -286,7 +314,7 @@
       <section class="tab" id="tab-theme">
         <div class="page-head">
           <h2 class="page-head__title">主题切换</h2>
-          <button class="btn btn--primary" onclick="saveTheme()">保存选择</button>
+          <button class="btn btn--primary" data-action="save-theme">保存选择</button>
         </div>
         <p class="tab__desc">选择一个主题风格，保存后刷新前台页面即可看到效果。</p>
         <div id="theme-list" class="theme-grid"></div>
@@ -294,7 +322,7 @@
         <div class="card" style="margin-top:24px">
           <h3 class="card__title">导入自定义主题</h3>
           <p class="card__desc">上传 CSS 和 JS 文件即可导入。开发主题请参考 README。</p>
-          <form class="form" onsubmit="event.preventDefault();importTheme()">
+          <form id="theme-import-form" class="form">
             <div class="form__row">
               <div class="form__group">
                 <label>主题名称</label>
@@ -329,29 +357,51 @@
         <div class="page-head">
           <h2 class="page-head__title">数据管理</h2>
         </div>
-        <p class="tab__desc">导出/导入数据，或重置为默认值。</p>
-        <div class="data-actions">
-          <div class="data-card">
-            <h3>📦 导出</h3>
-            <p>下载全部数据为 JSON</p>
-            <button class="btn" onclick="exportAll()">导出全部</button>
+        <p class="tab__desc">导出/导入数据，支持分别导出或一键全部导出。导入前自动校验格式。</p>
+
+        <div class="card">
+          <h3 class="card__title">导出数据</h3>
+          <div class="data-actions">
+            <div class="data-card">
+              <h3>📦 全部</h3>
+              <p>config + posts + projects</p>
+              <button class="btn" data-action="export-all">导出全部</button>
+            </div>
+            <div class="data-card">
+              <h3>⚙️ 站点配置</h3>
+              <p>config.json</p>
+              <button class="btn" data-action="export-config">导出配置</button>
+            </div>
+            <div class="data-card">
+              <h3>📝 文章</h3>
+              <p>posts.json</p>
+              <button class="btn" data-action="export-posts">导出文章</button>
+            </div>
+            <div class="data-card">
+              <h3>🎯 项目</h3>
+              <p>projects.json</p>
+              <button class="btn" data-action="export-projects">导出项目</button>
+            </div>
           </div>
-          <div class="data-card">
-            <h3>📥 导入</h3>
-            <p>从 JSON 恢复数据</p>
-            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importAll(event)">
-            <button class="btn" onclick="document.getElementById('import-file').click()">导入数据</button>
-          </div>
-          <div class="data-card">
-            <h3>📄 生成文件</h3>
-            <p>打包为可部署的 JSON</p>
-            <button class="btn" onclick="generateFiles()">生成文件</button>
-          </div>
-          <div class="data-card">
-            <h3>🔄 重置</h3>
-            <p>清除所有修改</p>
-            <button class="btn btn--danger" onclick="resetAll()">重置全部</button>
-          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card__title">导入数据</h3>
+          <p class="card__desc">支持导入合并数据（含 config/posts/projects 的 JSON）或单独的数组/对象。格式错误会提示具体原因。</p>
+          <input type="file" id="import-file" accept=".json" style="display:none">
+          <button class="btn" data-action="import-data">📥 选择文件导入</button>
+        </div>
+
+        <div class="card">
+          <h3 class="card__title">生成部署文件</h3>
+          <p class="card__desc">将当前数据分别下载为 config.json、posts.json、projects.json，替换仓库 data/ 目录后推送即可部署。</p>
+          <button class="btn" data-action="generate-files">📄 生成文件</button>
+        </div>
+
+        <div class="card">
+          <h3 class="card__title">重置数据</h3>
+          <p class="card__desc">清除所有 localStorage 修改，恢复为仓库中的默认数据。</p>
+          <button class="btn btn--danger" data-action="reset-all">🔄 重置全部</button>
         </div>
       </section>
 

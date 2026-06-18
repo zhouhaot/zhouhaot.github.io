@@ -1,6 +1,6 @@
 /**
  * Theme: Cyberpunk — HTML Templates
- * Renders all page sections for the cyberpunk dark glassmorphism theme
+ * Dark glassmorphism + neon accents + particles
  */
 
 window.THEMES = window.THEMES || {};
@@ -26,6 +26,13 @@ window.THEMES.cyberpunk = {
     main.style.display = '';
     article.style.display = 'none';
     article.innerHTML = '';
+
+    // Dynamic categories from data
+    const postCategories = [...new Set(posts.map(p => p.category).filter(Boolean))];
+    const projectCategories = [...new Set(projects.map(p => p.category).filter(Boolean))];
+
+    // Category label map
+    const catLabels = { tech: '技术', design: '设计', life: '生活', frontend: '前端', other: '其他' };
 
     main.innerHTML = `
       <!-- Hero -->
@@ -86,16 +93,20 @@ window.THEMES.cyberpunk = {
             <h2 class="section__title">最新文章</h2>
             <p class="section__subtitle">关于技术、设计与生活的思考</p>
           </div>
-          <div class="blog-grid reveal-stagger">
+          <div class="filter-bar reveal" data-filter-target="posts">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            ${postCategories.map(c => `<button class="filter-btn" data-filter="${c}">${catLabels[c] || c}</button>`).join('')}
+          </div>
+          <div class="blog-grid reveal-stagger" data-filterable="posts">
             ${posts.map(p => `
-              <article class="blog-card" data-post-id="${p.id}" role="article" tabindex="0">
+              <article class="blog-card" data-post-id="${p.id}" data-category="${p.category || ''}" role="article" tabindex="0">
                 <div class="blog-card__cover"></div>
                 <div class="blog-card__body">
-                  <div class="blog-card__tags">${p.tags.map(t => `<span class="blog-card__tag">${t}</span>`).join('')}</div>
+                  <div class="blog-card__tags">${(p.tags || []).map(t => `<span class="blog-card__tag">${t}</span>`).join('')}</div>
                   <time class="blog-card__date" datetime="${p.date}">${Core.formatDate(p.date)}</time>
                   <h3 class="blog-card__title">${p.title}</h3>
                   <p class="blog-card__excerpt">${p.excerpt}</p>
-                  <div class="blog-card__meta"><span class="blog-card__read-time">${p.readTime} 阅读</span></div>
+                  <div class="blog-card__meta"><span class="blog-card__read-time">${p.readTime || ''} 阅读</span></div>
                 </div>
               </article>
             `).join('')}
@@ -111,18 +122,18 @@ window.THEMES.cyberpunk = {
             <h2 class="section__title">项目作品</h2>
             <p class="section__subtitle">用代码与设计探索可能性</p>
           </div>
-          <div class="filter-bar reveal">
+          <div class="filter-bar reveal" data-filter-target="projects">
             <button class="filter-btn active" data-filter="all">全部</button>
-            <button class="filter-btn" data-filter="frontend">前端</button>
-            <button class="filter-btn" data-filter="design">设计</button>
+            ${projectCategories.map(c => `<button class="filter-btn" data-filter="${c}">${catLabels[c] || c}</button>`).join('')}
           </div>
-          <div class="projects-grid reveal-stagger">
+          <div class="projects-grid reveal-stagger" data-filterable="projects">
             ${projects.map(p => `
-              <article class="project-card" data-category="${p.category}" role="article">
+              <article class="project-card" data-project-id="${p.id}" data-category="${p.category || ''}" role="article" tabindex="0">
                 <span class="project-card__year">${p.year}</span>
+                ${p.status ? `<span class="project-card__status">${p.status}</span>` : ''}
                 <h3 class="project-card__title">${p.title}</h3>
                 <p class="project-card__desc">${p.description}</p>
-                <div class="project-card__tech">${p.tech.map(t => `<span class="project-card__tech-tag">${t}</span>`).join('')}</div>
+                <div class="project-card__tech">${(p.tech || []).map(t => `<span class="project-card__tech-tag">${t}</span>`).join('')}</div>
                 <div class="project-card__links">
                   ${p.link ? `<a href="${p.link}" class="project-card__link" target="_blank" rel="noopener">GitHub →</a>` : ''}
                   ${p.demo ? `<a href="${p.demo}" class="project-card__link" target="_blank" rel="noopener">Demo →</a>` : ''}
@@ -162,15 +173,94 @@ window.THEMES.cyberpunk = {
       <article class="article">
         <a href="#/" class="article__back">← 返回文章列表</a>
         <header class="article__header">
-          <div class="article__tags">${post.tags.map(t => `<span class="blog-card__tag">${t}</span>`).join('')}</div>
+          <div class="article__tags">${(post.tags || []).map(t => `<span class="blog-card__tag">${t}</span>`).join('')}</div>
           <h1 class="article__title">${post.title}</h1>
           <div class="article__meta">
             <time datetime="${post.date}">${Core.formatDate(post.date)}</time>
-            <span>${post.readTime} 阅读</span>
+            <span>${post.readTime || ''} 阅读</span>
           </div>
         </header>
-        <div class="article__content">${Core.parseMarkdown(post.content)}</div>
+        <div class="article__content">${Core.parseMarkdown(post.content || '')}</div>
       </article>
+    `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  /** Render project detail page */
+  renderProject(project) {
+    const main = document.getElementById('main-content');
+    const article = document.getElementById('article-view');
+    main.style.display = 'none';
+    article.style.display = '';
+
+    const highlights = project.highlights || [];
+    const gallery = project.gallery || [];
+
+    article.innerHTML = `
+      <article class="project-detail">
+        <a href="#/" class="article__back">← 返回项目列表</a>
+
+        ${project.cover ? `<div class="project-detail__cover"><img src="${project.cover}" alt="${project.title}"></div>` : ''}
+
+        <header class="project-detail__header">
+          <div class="project-detail__meta">
+            <span class="project-detail__year">${project.year}</span>
+            ${project.status ? `<span class="project-detail__status">${project.status}</span>` : ''}
+          </div>
+          <h1 class="project-detail__title">${project.title}</h1>
+          <p class="project-detail__desc">${project.description}</p>
+        </header>
+
+        <div class="project-detail__tech">
+          ${(project.tech || []).map(t => `<span class="project-card__tech-tag">${t}</span>`).join('')}
+        </div>
+
+        ${highlights.length ? `
+          <div class="project-detail__highlights">
+            <h3>项目亮点</h3>
+            <ul>${highlights.map(h => `<li>${h}</li>`).join('')}</ul>
+          </div>
+        ` : ''}
+
+        ${gallery.length ? `
+          <div class="project-detail__gallery">
+            <h3>截图</h3>
+            <div class="gallery-grid">
+              ${gallery.map(img => `<div class="gallery-item"><img src="${img}" alt="screenshot" loading="lazy"></div>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${project.content ? `
+          <div class="project-detail__content article__content">
+            ${Core.parseMarkdown(project.content)}
+          </div>
+        ` : ''}
+
+        <div class="project-detail__links">
+          ${project.link ? `<a href="${project.link}" class="btn btn--primary" target="_blank" rel="noopener">GitHub →</a>` : ''}
+          ${project.demo ? `<a href="${project.demo}" class="btn btn--ghost" target="_blank" rel="noopener">Live Demo →</a>` : ''}
+        </div>
+
+        ${project.updatedAt ? `<p class="project-detail__updated">最后更新：${project.updatedAt}</p>` : ''}
+      </article>
+    `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  /** Render 404 page */
+  render404(message) {
+    const main = document.getElementById('main-content');
+    const article = document.getElementById('article-view');
+    main.style.display = 'none';
+    article.style.display = '';
+
+    article.innerHTML = `
+      <div class="project-detail" style="text-align:center;padding-top:var(--space-2xl)">
+        <h1 style="font-size:var(--text-3xl);margin-bottom:var(--space-md)">404</h1>
+        <p style="color:var(--color-text-secondary);margin-bottom:var(--space-xl)">${message || '页面不存在'}</p>
+        <a href="#/" class="btn btn--primary">返回首页</a>
+      </div>
     `;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },

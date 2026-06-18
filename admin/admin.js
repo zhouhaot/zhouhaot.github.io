@@ -95,9 +95,66 @@
       if (!btn) return;
       const action = btn.dataset.action;
       const index = parseInt(btn.dataset.index, 10);
-      if (actions[action]) actions[action](index, btn);
+      if (actions[action]) {
+        e.preventDefault();
+        actions[action](index, btn);
+      }
     });
   }
+
+  // Global action delegation on admin-main (catches all data-action clicks)
+  const adminMain = document.querySelector('.admin-main');
+  delegate(adminMain, {
+    'add-nav-item': () => { config.nav = config.nav || []; config.nav.push({ label: '新项', href: '#' }); renderNavEditor(); },
+    'add-social': () => { config.social = config.social || []; config.social.push({ name: 'New', url: '', icon: '' }); renderSocialEditor(); },
+    'add-bio': () => { config.about.bio.push(''); renderBioEditor(); },
+    'add-skill': () => { config.about.skills.push({ name: 'New', level: 50, items: [] }); renderSkillsEditor(); },
+    'add-experience': () => { config.about.experience.push({ year: '', role: '', company: '', desc: '' }); renderExperienceEditor(); },
+    'show-post-editor': () => showPostEditor(),
+    'hide-post-editor': () => hidePostEditor(),
+    'show-project-editor': () => showProjectEditor(),
+    'hide-project-editor': () => hideProjectEditor(),
+    'save-theme': () => { config.theme = selectedTheme; setLocal(KEYS.CONFIG, config); const name = [...THEMES, ...customThemes].find(t => t.id === selectedTheme)?.name || selectedTheme; toast('主题已切换为 ' + name, 'success'); },
+    'export-all': () => { downloadJSON({ config, posts, projects }, 'void-blog-data.json'); toast('全部数据已导出', 'success'); },
+    'export-config': () => { downloadJSON(config, 'config.json'); toast('站点配置已导出', 'success'); },
+    'export-posts': () => { downloadJSON(posts, 'posts.json'); toast('文章数据已导出', 'success'); },
+    'export-projects': () => { downloadJSON(projects, 'projects.json'); toast('项目数据已导出', 'success'); },
+    'import-data': () => document.getElementById('import-file').click(),
+    'generate-files': () => { downloadJSON(config, 'config.json'); downloadJSON(posts, 'posts.json'); downloadJSON(projects, 'projects.json'); toast('JSON 文件已下载，请替换 data/ 目录', 'success'); },
+    'reset-all': () => {
+      if (!confirm('确定重置所有数据？')) return;
+      localStorage.removeItem(KEYS.CONFIG);
+      localStorage.removeItem(KEYS.POSTS);
+      localStorage.removeItem(KEYS.PROJECTS);
+      localStorage.removeItem('void_custom_themes');
+      location.reload();
+    },
+  });
+
+  document.getElementById('import-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      let data;
+      try { data = JSON.parse(ev.target.result); } catch (err) { toast('JSON 解析失败：' + err.message, 'error'); return; }
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) { toast('格式错误：需要 JSON 对象', 'error'); return; }
+      if (!data.config && !data.posts && !data.projects) { toast('格式错误：需包含 config / posts / projects 至少一项', 'error'); return; }
+      const imported = [];
+      if (data.config) { if (typeof data.config !== 'object') { toast('config 格式错误', 'error'); return; } config = data.config; setLocal(KEYS.CONFIG, config); imported.push('站点配置'); }
+      if (data.posts) { if (!Array.isArray(data.posts)) { toast('posts 格式错误', 'error'); return; } posts = data.posts; setLocal(KEYS.POSTS, posts); imported.push('文章'); }
+      if (data.projects) { if (!Array.isArray(data.projects)) { toast('projects 格式错误', 'error'); return; } projects = data.projects; setLocal(KEYS.PROJECTS, projects); imported.push('项目'); }
+      renderAll();
+      toast('已导入：' + imported.join('、'), 'success');
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  document.getElementById('theme-import-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    importTheme();
+  });
 
   /* ============================
      Settings Form
@@ -134,11 +191,7 @@
     }
   });
 
-  window.addNavItem = function () {
-    if (!config.nav) config.nav = [];
-    config.nav.push({ label: '新项', href: '#' });
-    renderNavEditor();
-  };
+  // addNavItem handled by global delegation
 
   function renderSocialEditor() {
     const container = document.getElementById('social-editor');
@@ -162,11 +215,7 @@
     }
   });
 
-  window.addSocial = function () {
-    if (!config.social) config.social = [];
-    config.social.push({ name: 'New', url: '', icon: '' });
-    renderSocialEditor();
-  };
+  // addSocial handled by global delegation
 
   document.getElementById('settings-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -208,7 +257,7 @@
     }
   });
 
-  window.addBio = function () { config.about.bio.push(''); renderBioEditor(); };
+  // addBio handled by global delegation
 
   function renderSkillsEditor() {
     const container = document.getElementById('skills-editor');
@@ -235,7 +284,7 @@
     if (el.dataset.skillField === 'items') config.about.skills[i].items = el.value.split(',').map(s => s.trim());
   });
 
-  window.addSkill = function () { config.about.skills.push({ name: 'New', level: 50, items: [] }); renderSkillsEditor(); };
+  // addSkill handled by global delegation
 
   function renderExperienceEditor() {
     const container = document.getElementById('experience-editor');
@@ -261,7 +310,7 @@
     config.about.experience[i][el.dataset.expField] = el.value;
   });
 
-  window.addExperience = function () { config.about.experience.push({ year: '', role: '', company: '', desc: '' }); renderExperienceEditor(); };
+  // addExperience handled by global delegation
 
   document.getElementById('profile-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -303,7 +352,7 @@
     },
   });
 
-  window.showPostEditor = function (index) {
+  function showPostEditor(index) {
     const modal = document.getElementById('post-editor');
     const form = document.getElementById('post-form');
     form.reset();
@@ -330,7 +379,7 @@
     modal.style.display = 'flex';
   };
 
-  window.hidePostEditor = function () { document.getElementById('post-editor').style.display = 'none'; };
+  function hidePostEditor() { document.getElementById('post-editor').style.display = 'none'; }
 
   document.getElementById('post-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -392,7 +441,7 @@
     },
   });
 
-  window.showProjectEditor = function (index) {
+  function showProjectEditor(index) {
     const modal = document.getElementById('project-editor');
     const form = document.getElementById('project-form');
     form.reset();
@@ -405,22 +454,29 @@
       form.querySelector('[name="title"]').value = p.title;
       form.querySelector('[name="description"]').value = p.description || '';
       form.querySelector('[name="year"]').value = p.year || '';
+      form.querySelector('[name="status"]').value = p.status || '已完成';
       form.querySelector('[name="category"]').value = p.category || 'frontend';
+      form.querySelector('[name="cover"]').value = p.cover || '';
       form.querySelector('[name="tech"]').value = (p.tech || []).join(', ');
       form.querySelector('[name="tags"]').value = (p.tags || []).join(', ');
+      form.querySelector('[name="highlights"]').value = (p.highlights || []).join('\n');
+      form.querySelector('[name="gallery"]').value = (p.gallery || []).join('\n');
+      form.querySelector('[name="content"]').value = p.content || '';
       form.querySelector('[name="link"]').value = p.link || '';
       form.querySelector('[name="demo"]').value = p.demo || '';
+      form.querySelector('[name="updatedAt"]').value = p.updatedAt || '';
       form.dataset.editIndex = index;
     } else {
       document.getElementById('project-editor-title').textContent = '新建项目';
       form.querySelector('[name="id"]').readOnly = false;
       form.querySelector('[name="year"]').value = new Date().getFullYear();
+      form.querySelector('[name="updatedAt"]').value = new Date().toISOString().slice(0, 10);
       delete form.dataset.editIndex;
     }
     modal.style.display = 'flex';
   };
 
-  window.hideProjectEditor = function () { document.getElementById('project-editor').style.display = 'none'; };
+  function hideProjectEditor() { document.getElementById('project-editor').style.display = 'none'; }
 
   document.getElementById('project-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -430,11 +486,17 @@
       title: form.querySelector('[name="title"]').value.trim(),
       description: form.querySelector('[name="description"]').value.trim(),
       year: form.querySelector('[name="year"]').value.trim(),
+      status: form.querySelector('[name="status"]').value,
       category: form.querySelector('[name="category"]').value,
+      cover: form.querySelector('[name="cover"]').value.trim(),
       tech: form.querySelector('[name="tech"]').value.split(',').map(s => s.trim()).filter(Boolean),
       tags: form.querySelector('[name="tags"]').value.split(',').map(s => s.trim()).filter(Boolean),
+      highlights: form.querySelector('[name="highlights"]').value.split('\n').map(s => s.trim()).filter(Boolean),
+      gallery: form.querySelector('[name="gallery"]').value.split('\n').map(s => s.trim()).filter(Boolean),
+      content: form.querySelector('[name="content"]').value,
       link: form.querySelector('[name="link"]').value.trim(),
       demo: form.querySelector('[name="demo"]').value.trim(),
+      updatedAt: form.querySelector('[name="updatedAt"]').value || new Date().toISOString().slice(0, 10),
     };
 
     if (form.dataset.editIndex !== undefined) {
@@ -495,17 +557,12 @@
     },
   });
 
-  window.saveTheme = function () {
-    config.theme = selectedTheme;
-    setLocal(KEYS.CONFIG, config);
-    const name = [...THEMES, ...customThemes].find(t => t.id === selectedTheme)?.name || selectedTheme;
-    toast('主题已切换为 ' + name, 'success');
-  };
+  // saveTheme handled by global delegation
 
   /* ============================
      Theme Import
      ============================ */
-  window.importTheme = function () {
+  function importTheme() {
     const nameInput = document.getElementById('theme-import-name');
     const descInput = document.getElementById('theme-import-desc');
     const iconInput = document.getElementById('theme-import-icon');
@@ -592,47 +649,7 @@
   }
   loadCustomThemes();
 
-  /* ============================
-     Data Management
-     ============================ */
-  window.exportAll = function () {
-    const data = { config, posts, projects };
-    downloadJSON(data, 'void-blog-data.json');
-    toast('数据已导出', 'success');
-  };
-
-  window.importAll = function (event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (data.config) { config = data.config; setLocal(KEYS.CONFIG, config); }
-        if (data.posts) { posts = data.posts; setLocal(KEYS.POSTS, posts); }
-        if (data.projects) { projects = data.projects; setLocal(KEYS.PROJECTS, projects); }
-        renderAll();
-        toast('数据已导入', 'success');
-      } catch { toast('文件格式错误', 'error'); }
-    };
-    reader.readAsText(file);
-  };
-
-  window.resetAll = function () {
-    if (!confirm('确定重置所有数据？')) return;
-    localStorage.removeItem(KEYS.CONFIG);
-    localStorage.removeItem(KEYS.POSTS);
-    localStorage.removeItem(KEYS.PROJECTS);
-    localStorage.removeItem('void_custom_themes');
-    location.reload();
-  };
-
-  window.generateFiles = function () {
-    downloadJSON(config, 'config.json');
-    downloadJSON(posts, 'posts.json');
-    downloadJSON(projects, 'projects.json');
-    toast('JSON 文件已下载，请替换 data/ 目录', 'success');
-  };
+  /* Data management handled by global delegation */
 
   function downloadJSON(data, filename) {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
