@@ -8,6 +8,119 @@
   'use strict';
 
   /* ============================
+     Auth Manager
+     NOTE: 纯前端登录仅防误触，不能防止有意绕过
+     （用户可直接修改 localStorage）。如需真正安全，
+     请结合后端认证服务。
+     默认密码: admin123
+     ============================ */
+  const AuthManager = {
+    // admin123 的 SHA-256 哈希
+    DEFAULT_HASH: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
+    AUTH_KEY: 'void_auth',
+    HASH_KEY: 'void_auth_hash',
+
+    async _hash(password) {
+      const data = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    getStoredHash() {
+      return localStorage.getItem(this.HASH_KEY) || this.DEFAULT_HASH;
+    },
+
+    async check(password) {
+      const hash = await this._hash(password);
+      return hash === this.getStoredHash();
+    },
+
+    isLoggedIn() {
+      return sessionStorage.getItem(this.AUTH_KEY) === '1' || localStorage.getItem(this.AUTH_KEY) === '1';
+    },
+
+    login(remember) {
+      const storage = remember ? localStorage : sessionStorage;
+      storage.setItem(this.AUTH_KEY, '1');
+    },
+
+    logout() {
+      sessionStorage.removeItem(this.AUTH_KEY);
+      localStorage.removeItem(this.AUTH_KEY);
+    },
+
+    async changePassword(oldPwd, newPwd) {
+      const valid = await this.check(oldPwd);
+      if (!valid) return false;
+      const newHash = await this._hash(newPwd);
+      localStorage.setItem(this.HASH_KEY, newHash);
+      return true;
+    },
+
+    init() {
+      const loginScreen = document.querySelector('.login-screen');
+      const adminPanel = document.querySelector('.admin');
+      if (this.isLoggedIn()) {
+        loginScreen.style.display = 'none';
+        adminPanel.style.display = '';
+      } else {
+        loginScreen.style.display = '';
+        adminPanel.style.display = 'none';
+      }
+    },
+  };
+
+  /* ============================
+     Login Form Handler
+     ============================ */
+  let loginFailCount = 0;
+  let loginLockUntil = 0;
+  const LOGIN_MAX_FAILS = 5;
+  const LOGIN_LOCK_MS = 30000;
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('login-error');
+
+    // Check lockout
+    if (Date.now() < loginLockUntil) {
+      const secs = Math.ceil((loginLockUntil - Date.now()) / 1000);
+      errorEl.textContent = `尝试次数过多，请等待 ${secs} 秒`;
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const password = document.getElementById('login-password').value;
+    const remember = document.getElementById('login-remember').checked;
+
+    const valid = await AuthManager.check(password);
+    if (valid) {
+      loginFailCount = 0;
+      errorEl.style.display = 'none';
+      AuthManager.login(remember);
+      document.querySelector('.login-screen').style.display = 'none';
+      document.querySelector('.admin').style.display = '';
+    } else {
+      loginFailCount++;
+      if (loginFailCount >= LOGIN_MAX_FAILS) {
+        loginLockUntil = Date.now() + LOGIN_LOCK_MS;
+        loginFailCount = 0;
+        errorEl.textContent = `尝试次数过多，请等待 ${LOGIN_LOCK_MS / 1000} 秒`;
+      } else {
+        errorEl.textContent = '密码错误，请重试';
+      }
+      errorEl.style.display = 'block';
+      const card = document.querySelector('.login-card');
+      card.classList.remove('login-shake');
+      void card.offsetWidth;
+      card.classList.add('login-shake');
+    }
+  });
+
+  // Check login state — show login screen or admin panel
+  AuthManager.init();
+
+  /* ============================
      Constants
      ============================ */
   const KEYS = { CONFIG: 'void_config', POSTS: 'void_posts', PROJECTS: 'void_projects' };
@@ -128,6 +241,39 @@
       localStorage.removeItem(KEYS.PROJECTS);
       localStorage.removeItem('void_custom_themes');
       location.reload();
+    },
+    'logout': () => {
+      if (!confirm('确定退出登录？')) return;
+      AuthManager.logout();
+      document.querySelector('.admin').style.display = 'none';
+      document.querySelector('.login-screen').style.display = '';
+      document.getElementById('login-password').value = '';
+    },
+    'change-password': async () => {
+      const oldPwd = document.getElementById('old-password').value;
+      const newPwd = document.getElementById('new-password').value;
+      const confirmPwd = document.getElementById('confirm-password').value;
+
+      if (!oldPwd || !newPwd) { toast('请填写所有密码字段', 'error'); return; }
+      if (newPwd !== confirmPwd) { toast('两次输入的新密码不一致', 'error'); return; }
+      if (newPwd.length < 6) { toast('新密码至少 6 位', 'error'); return; }
+
+      const ok = await AuthManager.changePassword(oldPwd, newPwd);
+      if (ok) {
+        toast('密码已修改，请重新登录', 'success');
+        document.getElementById('old-password').value = '';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-password').value = '';
+        // Auto logout after password change
+        setTimeout(() => {
+          AuthManager.logout();
+          document.querySelector('.admin').style.display = 'none';
+          document.querySelector('.login-screen').style.display = '';
+          document.getElementById('login-password').value = '';
+        }, 1200);
+      } else {
+        toast('当前密码错误', 'error');
+      }
     },
   });
 

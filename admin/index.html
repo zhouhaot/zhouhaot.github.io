@@ -10,7 +10,25 @@
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-  <div class="admin">
+  <!-- Login Screen -->
+  <div class="login-screen" style="display:none">
+    <div class="login-card">
+      <div class="login-logo">VOID<span>.DEV</span></div>
+      <h2 class="login-title">管理后台</h2>
+      <form class="login-form" id="login-form">
+        <div class="login-field">
+          <input type="password" id="login-password" class="login-input" placeholder="输入密码" autocomplete="current-password" required>
+        </div>
+        <p class="login-error" id="login-error">密码错误，请重试</p>
+        <label class="login-remember">
+          <input type="checkbox" id="login-remember"> 记住本次会话
+        </label>
+        <button type="submit" class="login-btn">登 录</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin" style="display:none">
     <!-- Sidebar (desktop: left panel, mobile: bottom tab bar) -->
     <aside class="sidebar">
       <div class="sidebar__header">
@@ -27,6 +45,7 @@
       </nav>
       <div class="sidebar__footer">
         <a href="../" target="_blank" class="sidebar__preview">🔗 预览网站</a>
+        <button class="sidebar__logout" data-action="logout">🚪 退出登录</button>
       </div>
     </aside>
 
@@ -117,6 +136,28 @@
             <h3 class="card__title">社交链接</h3>
             <div id="social-editor"></div>
             <button type="button" class="btn btn--sm" data-action="add-social">+ 添加链接</button>
+          </div>
+
+          <div class="card">
+            <h3 class="card__title">账户安全</h3>
+            <p class="card__desc">修改后台登录密码。注意：纯前端登录仅防误触，无法防止有意绕过。</p>
+            <div class="form__group">
+              <label>当前密码</label>
+              <input type="password" id="old-password" placeholder="输入当前密码">
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label>新密码</label>
+                <input type="password" id="new-password" placeholder="输入新密码">
+              </div>
+              <div class="form__group">
+                <label>确认新密码</label>
+                <input type="password" id="confirm-password" placeholder="再次输入新密码">
+              </div>
+            </div>
+            <div class="form__actions" style="border:none;padding:0;margin-top:12px">
+              <button type="button" class="btn btn--primary" data-action="change-password">修改密码</button>
+            </div>
           </div>
 
           <div class="form__actions">

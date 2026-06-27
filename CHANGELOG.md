@@ -112,3 +112,39 @@ personalblog/
 ├── README.md
 └── CHANGELOG.md
 ```
+
+## 2026-06-17
+
+### 6. 后台登录系统
+
+新增 SHA-256 哈希密码认证，防误触访问后台。
+
+**AuthManager 模块（admin/admin.js）：**
+- `AuthManager._hash(password)` — 浏览器原生 `crypto.subtle.digest` SHA-256
+- `AuthManager.check(password)` — 哈希比对验证
+- `AuthManager.login(remember)` — sessionStorage（默认）或 localStorage（记住会话）
+- `AuthManager.logout()` — 清除登录状态
+- `AuthManager.changePassword(old, new)` — 修改密码并持久化哈希
+- `AuthManager.init()` — 启动时检查登录状态
+
+**安全说明：**
+- 默认密码 `admin123`，以 SHA-256 哈希存储，代码中无明文密码
+- 纯前端登录仅防误触，不能防止有意绕过（用户可直接改 localStorage）
+
+**后台账户管理：**
+- 设置 tab 新增"账户安全"卡片，支持修改密码
+- 侧边栏底部新增"退出登录"按钮
+
+### 7. 登录界面视觉
+
+暗色毛玻璃登录卡片，与后台风格统一：
+- 全屏居中毛玻璃卡片，cyan→magenta 渐变 Logo
+- 输入框 focus 发光边框 + 轻微光晕
+- 登录失败 shake 动画
+- "记住本次会话"复选框
+- 移动端自适应
+
+### 8. 登录安全加固
+
+- 暴力破解防护：连续 5 次失败后锁定 30 秒
+- 修改密码后自动退出登录，要求重新验证
