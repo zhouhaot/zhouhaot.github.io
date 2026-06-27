@@ -165,34 +165,104 @@ const Core = (() => {
   }
 
   /* ============================
+     Security Helpers
+     ============================ */
+
+  /** Escape HTML entities in text content (for template interpolation) */
+  function escapeText(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /** Escape HTML (legacy, for admin use) */
+  function escapeHTML(str) {
+    return escapeText(str);
+  }
+
+  /* ============================
      Markdown Parser (shared)
      ============================ */
 
-  function escapeHTML(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
   function parseMarkdown(md) {
-    return md
-      .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
-        `<pre><code class="language-${lang}">${escapeHTML(code.trim())}</code></pre>`)
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-      .replace(/^- (.+)$/gm, '<li>$1</li>')
-      .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-      .replace(/^(?!<)(.+)$/gm, '<p>$1</p>')
-      .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
-      .replace(/<\/ul>\s*<ul>/g, '');
+    if (!md) return '';
+    // marked + DOMPurify (loaded from vendor/)
+    if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+      const rawHtml = marked.parse(md, {
+        gfm: true,
+        breaks: false,
+        headerIds: false,
+        mangle: false,
+      });
+      return DOMPurify.sanitize(rawHtml, {
+        USE_PROFILES: { html: true },
+      });
+    }
+    // Fallback: basic escape (if vendor libs not loaded)
+    return escapeText(md).replace(/\n/g, '<br>');
   }
 
   /** Format date for display */
   function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  /* ============================
+     SEO Updates (dynamic meta)
+     ============================ */
+
+  const SITE_URL = 'https://zhouhaot.github.io';
+
+  function updateMeta(property, content) {
+    if (!content) return;
+    let el = document.querySelector(`meta[property="${property}"]`)
+      || document.querySelector(`meta[name="${property}"]`);
+    if (!el) {
+      el = document.createElement('meta');
+      if (property.startsWith('og:') || property.startsWith('twitter:')) {
+        el.setAttribute('property', property);
+      } else {
+        el.setAttribute('name', property);
+      }
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', content);
+  }
+
+  function updateSEO({ title, description, url, type, image }) {
+    if (title) {
+      document.title = title + ' — VOID.DEV';
+      updateMeta('og:title', title);
+      updateMeta('twitter:title', title);
+    }
+    if (description) {
+      updateMeta('og:description', description);
+      updateMeta('twitter:description', description);
+    }
+    if (url) {
+      updateMeta('og:url', SITE_URL + url);
+      const canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.href = SITE_URL + url;
+    }
+    if (type) updateMeta('og:type', type);
+    if (image) updateMeta('og:image', image);
+
+    // Update JSON-LD
+    const ld = document.querySelector('script[type="application/ld+json"]');
+    if (ld) {
+      try {
+        const data = JSON.parse(ld.textContent);
+        if (title) data.name = title;
+        if (description) data.description = description;
+        if (url) data.url = SITE_URL + url;
+        ld.textContent = JSON.stringify(data);
+      } catch { /* ignore parse errors */ }
+    }
   }
 
   /* ============================
@@ -211,5 +281,8 @@ const Core = (() => {
     getThemes,
     parseMarkdown,
     formatDate,
+    escapeText,
+    escapeHTML,
+    updateSEO,
   };
 })();

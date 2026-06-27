@@ -3,9 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOID.DEV</title>
   <meta name="description" content="VOID.DEV — 一个关于前端工程、创意交互与数字美学的个人博客">
   <meta name="theme-color" content="#0a0a14">
-  <title>VOID.DEV</title>
+  <meta name="robots" content="index,follow">
+
+  <!-- Security -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+
+  <!-- SEO: Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zhouhaot.github.io/">
+  <meta property="og:title" content="VOID.DEV">
+  <meta property="og:description" content="一个关于前端工程、创意交互与数字美学的个人博客">
+  <meta property="og:image" content="https://zhouhaot.github.io/og-image.png">
+  <meta property="og:site_name" content="VOID.DEV">
+
+  <!-- SEO: Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="VOID.DEV">
+  <meta name="twitter:description" content="一个关于前端工程、创意交互与数字美学的个人博客">
+  <meta name="twitter:image" content="https://zhouhaot.github.io/og-image.png">
+
+  <!-- SEO: Canonical -->
+  <link rel="canonical" href="https://zhouhaot.github.io/">
+
+  <!-- PWA & RSS -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="alternate" type="application/rss+xml" title="VOID.DEV RSS" href="rss.xml">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "VOID.DEV",
+    "url": "https://zhouhaot.github.io/",
+    "description": "一个关于前端工程、创意交互与数字美学的个人博客"
+  }
+  </script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,12 +76,16 @@
   <!-- Article View -->
   <div id="article-view" style="display:none"></div>
 
+  <!-- Vendor libraries (loaded before core) -->
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+
   <!-- Scripts: Core framework first, then modules, then app -->
-  <script src="js/core.js"></script>
-  <script src="js/particles.js"></script>
-  <script src="js/cursor.js"></script>
-  <script src="js/animations.js"></script>
-  <script src="js/router.js"></script>
-  <script src="js/app.js"></script>
+  <script defer src="js/core.js"></script>
+  <script defer src="js/particles.js"></script>
+  <script defer src="js/cursor.js"></script>
+  <script defer src="js/animations.js"></script>
+  <script defer src="js/router.js"></script>
+  <script defer src="js/app.js"></script>
 </body>
 </html>

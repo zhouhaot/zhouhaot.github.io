@@ -1,0 +1,22 @@
+{
+  "name": "void-dev",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "VOID.DEV — 个人博客框架",
+  "scripts": {
+    "lint": "eslint js/ themes/ admin/",
+    "format:check": "prettier --check \"**/*.{js,json,md,html,css}\"",
+    "format": "prettier --write \"**/*.{js,json,md,html,css}\"",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "vitest": "^3.0.0",
+    "jsdom": "^26.0.0",
+    "marked": "^15.0.0",
+    "dompurify": "^3.2.0"
+  }
+}

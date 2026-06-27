@@ -97,6 +97,12 @@
   /* ---- Render Home ---- */
   function renderHome() {
     Core.render(config, posts, projects);
+    Core.updateSEO({
+      title: config.site?.title || 'VOID.DEV',
+      description: config.site?.description || '一个关于前端工程、创意交互与数字美学的个人博客',
+      url: '/',
+      type: 'website',
+    });
     initScrollReveal();
     initSkillBars();
     init3DTilt();
@@ -116,6 +122,12 @@
     }
     if (theme && theme.renderArticle) {
       theme.renderArticle(post);
+      Core.updateSEO({
+        title: post.title,
+        description: post.excerpt || '',
+        url: '/post/' + postId,
+        type: 'article',
+      });
     }
   }
 
@@ -129,6 +141,12 @@
     }
     if (theme && theme.renderProject) {
       theme.renderProject(project);
+      Core.updateSEO({
+        title: project.title,
+        description: project.description || '',
+        url: '/project/' + projectId,
+        type: 'article',
+      });
     }
   }
 

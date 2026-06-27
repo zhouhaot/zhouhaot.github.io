@@ -319,8 +319,8 @@
     const container = document.getElementById('nav-editor');
     container.innerHTML = (config.nav || []).map((item, i) => `
       <div class="editor-row">
-        <input type="text" value="${item.label}" placeholder="标签" data-nav-field="label" data-nav-index="${i}">
-        <input type="text" value="${item.href}" placeholder="#href" data-nav-field="href" data-nav-index="${i}">
+        <input type="text" value="${escapeHTML(item.label)}" placeholder="标签" data-nav-field="label" data-nav-index="${i}">
+        <input type="text" value="${escapeHTML(item.href)}" placeholder="#href" data-nav-field="href" data-nav-index="${i}">
         <button class="btn btn--xs btn--danger" data-action="delete-nav" data-index="${i}">删除</button>
       </div>
     `).join('');
@@ -343,8 +343,8 @@
     const container = document.getElementById('social-editor');
     container.innerHTML = (config.social || []).map((item, i) => `
       <div class="editor-row">
-        <input type="text" value="${item.name}" placeholder="名称" data-social-field="name" data-social-index="${i}" style="width:80px">
-        <input type="text" value="${item.url}" placeholder="URL" data-social-field="url" data-social-index="${i}">
+        <input type="text" value="${escapeHTML(item.name)}" placeholder="名称" data-social-field="name" data-social-index="${i}" style="width:80px">
+        <input type="text" value="${escapeHTML(item.url)}" placeholder="URL" data-social-field="url" data-social-index="${i}">
         <button class="btn btn--xs btn--danger" data-action="delete-social" data-index="${i}">删除</button>
       </div>
     `).join('');
@@ -387,7 +387,7 @@
     const container = document.getElementById('bio-editor');
     container.innerHTML = (config.about?.bio || []).map((text, i) => `
       <div class="editor-row">
-        <textarea rows="2" data-bio-index="${i}">${text}</textarea>
+        <textarea rows="2" data-bio-index="${i}">${escapeHTML(text)}</textarea>
         <button class="btn btn--xs btn--danger" data-action="delete-bio" data-index="${i}">删除</button>
       </div>
     `).join('');
@@ -409,9 +409,9 @@
     const container = document.getElementById('skills-editor');
     container.innerHTML = (config.about?.skills || []).map((skill, i) => `
       <div class="editor-row" style="flex-wrap:wrap">
-        <input type="text" value="${skill.name}" placeholder="技能名" data-skill-field="name" data-skill-index="${i}" style="width:100px">
+        <input type="text" value="${escapeHTML(skill.name)}" placeholder="技能名" data-skill-field="name" data-skill-index="${i}" style="width:100px">
         <input type="number" value="${skill.level}" placeholder="%" min="0" max="100" data-skill-field="level" data-skill-index="${i}" style="width:60px">
-        <input type="text" value="${skill.items.join(', ')}" placeholder="子项（逗号分隔）" data-skill-field="items" data-skill-index="${i}" style="flex:1">
+        <input type="text" value="${escapeHTML(skill.items.join(', '))}" placeholder="子项（逗号分隔）" data-skill-field="items" data-skill-index="${i}" style="flex:1">
         <button class="btn btn--xs btn--danger" data-action="delete-skill" data-index="${i}">删除</button>
       </div>
     `).join('');
@@ -436,10 +436,10 @@
     const container = document.getElementById('experience-editor');
     container.innerHTML = (config.about?.experience || []).map((exp, i) => `
       <div class="editor-row" style="flex-wrap:wrap">
-        <input type="text" value="${exp.year}" placeholder="年份" data-exp-field="year" data-exp-index="${i}" style="width:100px">
-        <input type="text" value="${exp.role}" placeholder="职位" data-exp-field="role" data-exp-index="${i}">
-        <input type="text" value="${exp.company}" placeholder="公司" data-exp-field="company" data-exp-index="${i}" style="width:120px">
-        <input type="text" value="${exp.desc}" placeholder="描述" data-exp-field="desc" data-exp-index="${i}" style="flex:1;min-width:200px">
+        <input type="text" value="${escapeHTML(exp.year)}" placeholder="年份" data-exp-field="year" data-exp-index="${i}" style="width:100px">
+        <input type="text" value="${escapeHTML(exp.role)}" placeholder="职位" data-exp-field="role" data-exp-index="${i}">
+        <input type="text" value="${escapeHTML(exp.company)}" placeholder="公司" data-exp-field="company" data-exp-index="${i}" style="width:120px">
+        <input type="text" value="${escapeHTML(exp.desc)}" placeholder="描述" data-exp-field="desc" data-exp-index="${i}" style="flex:1;min-width:200px">
         <button class="btn btn--xs btn--danger" data-action="delete-exp" data-index="${i}">删除</button>
       </div>
     `).join('');
@@ -477,7 +477,7 @@
       <div class="item-row">
         <div class="item-row__info">
           <div class="item-row__title">${escapeHTML(p.title)}</div>
-          <div class="item-row__meta">${p.date} · ${p.readTime || ''} · ${(p.tags || []).join(', ')}</div>
+          <div class="item-row__meta">${escapeHTML(p.date)} · ${escapeHTML(p.readTime || '')} · ${escapeHTML((p.tags || []).join(', '))}</div>
         </div>
         <div class="item-row__actions">
           <button class="btn btn--xs" data-action="edit-post" data-index="${i}">编辑</button>
@@ -566,7 +566,7 @@
       <div class="item-row">
         <div class="item-row__info">
           <div class="item-row__title">${escapeHTML(p.title)}</div>
-          <div class="item-row__meta">${p.year} · ${(p.tech || []).join(', ')}</div>
+          <div class="item-row__meta">${escapeHTML(p.year)} · ${escapeHTML((p.tech || []).join(', '))}</div>
         </div>
         <div class="item-row__actions">
           <button class="btn btn--xs" data-action="edit-project" data-index="${i}">编辑</button>
@@ -667,11 +667,11 @@
     const container = document.getElementById('theme-list');
     const all = [...THEMES, ...customThemes];
     container.innerHTML = all.map(t => `
-      <div class="theme-card ${t.id === selectedTheme ? 'selected' : ''}" data-theme="${t.id}">
-        <div class="theme-card__icon">${t.icon || '🎨'}</div>
-        <div class="theme-card__name">${t.name}</div>
-        <div class="theme-card__desc">${t.desc}</div>
-        ${t.custom ? `<button class="btn btn--xs btn--danger" data-action="delete-theme" data-theme-id="${t.id}" style="margin-top:8px">删除</button>` : ''}
+      <div class="theme-card ${t.id === selectedTheme ? 'selected' : ''}" data-theme="${escapeHTML(t.id)}">
+        <div class="theme-card__icon">${escapeHTML(t.icon || '🎨')}</div>
+        <div class="theme-card__name">${escapeHTML(t.name)}</div>
+        <div class="theme-card__desc">${escapeHTML(t.desc)}</div>
+        ${t.custom ? `<button class="btn btn--xs btn--danger" data-action="delete-theme" data-theme-id="${escapeHTML(t.id)}" style="margin-top:8px">删除</button>` : ''}
       </div>
     `).join('');
 
