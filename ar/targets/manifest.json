@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "profile": "placeholder",
+  "createdAt": "2026-07-04",
+  "compiler": "MindAR official sample 1.1.4",
+  "compiledAt": "upstream sample; local compilation not performed",
+  "notes": "Placeholder assets for local M1 AR proof only. Replace before museum/content approval or public release.",
+  "targets": [
+    {
+      "id": "mindar-card-example",
+      "postcardId": "liibing",
+      "targetIndex": 0,
+      "mindFile": "targets/targets.mind",
+      "referenceImage": "targets/reference-card.png",
+      "sourceUrl": "https://github.com/hiukim/mind-ar-js/tree/v1.1.4/examples/image-tracking/assets/card-example",
+      "licenseRecord": "assets/licenses/mindar-sample.md",
+      "sha256": {
+        "mindFile": "85b6ca67a4a9b78556be69f81149abc1e5845bb548e871854e1aaea1be96ab75",
+        "referenceImage": "f4253baa29270f36cf04aeff8be58d036cefffa3032e76bfbca0c08bcc046bdd"
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "khronos-box-placeholder",
+      "postcardId": "liibing",
+      "file": "assets/models/liibing.glb",
+      "sourceUrl": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/Box",
+      "licenseRecord": "assets/licenses/khronos-box.md",
+      "sizeBytes": 1664,
+      "sha256": "ed52f7192b8311d700ac0ce80644e3852cd01537e4d62241b9acba023da3d54e"
+    }
+  ]
+}
