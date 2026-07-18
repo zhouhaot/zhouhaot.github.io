@@ -54,9 +54,19 @@ describe('portfolio schema', () => {
       'workflow/map.svg',
       'workflow/map.webp ',
       'workflow/map.mp4',
+      'javascript:asset.webp',
+      'data:asset.webp',
+      'https:asset.webp',
+      'C:asset.webp',
+      'workflow/asset.WEBP',
     ]) {
       expect(() => portfolioSchema.parse({ ...series().data, items: [{ ...image, source }] })).toThrow();
     }
+
+    expect(
+      portfolioSchema.parse({ ...series().data, items: [{ ...image, source: 'workflow-archive/asset-1.webp' }] })
+        .items[0]?.source,
+    ).toBe('workflow-archive/asset-1.webp');
 
     expect(() =>
       portfolioSchema.parse({

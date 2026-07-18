@@ -131,7 +131,9 @@ export function initPortfolioLightboxes(root: HTMLElement): () => void {
     licenseLink.hidden = !item.licenseUrl;
     evidenceLink.hidden = !item.evidenceUrl;
     if (item.licenseUrl) licenseLink.href = item.licenseUrl;
+    else licenseLink.removeAttribute('href');
     if (item.evidenceUrl) evidenceLink.href = item.evidenceUrl;
+    else evidenceLink.removeAttribute('href');
     status.textContent = `第 ${currentIndex + 1} 项，共 ${items.length} 项`;
   };
 

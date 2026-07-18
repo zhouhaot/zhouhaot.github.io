@@ -46,6 +46,13 @@ describe('portfolio lightbox', () => {
     );
     expect(dialog?.querySelector<HTMLVideoElement>('video')?.preload).toBe('none');
     dialog?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    const licenseLink = dialog?.querySelector<HTMLAnchorElement>('[data-lightbox-license-url]');
+    const evidenceLink = dialog?.querySelector<HTMLAnchorElement>('[data-lightbox-evidence-url]');
+    expect(licenseLink?.hidden).toBe(true);
+    expect(evidenceLink?.hidden).toBe(true);
+    expect(licenseLink?.hasAttribute('href')).toBe(false);
+    expect(evidenceLink?.hasAttribute('href')).toBe(false);
+    expect(dialog?.querySelector('[data-lightbox-license-url][href]:not([hidden])')).toBeNull();
     expect(dialog?.querySelector('[data-lightbox-status]')?.textContent).toContain('第 1 项，共 2 项');
     cleanup();
   });

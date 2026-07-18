@@ -31,3 +31,9 @@
 Task 7 TypeScript, CSS, and tests were formatted with Prettier. This workspace does not install `prettier-plugin-astro`, so direct Prettier invocation for `.astro` files reports that no parser can be inferred; this is recorded separately from the passing scoped ESLint/type/test/build gates and was not used to block the task.
 
 The root `npm run lint` and `npm run format:check` remain pre-existing baseline failures outside Task 7: the lint script includes a missing `e2e/` path, and the format command cannot infer an Astro parser (and reports unrelated existing formatting warnings). Scoped Task 7 ESLint passed.
+
+## Follow-up hardening
+
+- Added fail-fast path-contract coverage for protocol-shaped values, Windows drive prefixes, and uppercase media extensions. The schema now rejects every colon and preserves case-sensitive extension validation while accepting canonical nested hyphenated paths.
+- Added a licensed-to-owned lightbox regression. On media changes without attribution, both attribution links are hidden and their `href` attributes are removed, so they are not retained as stale focusable destinations.
+- RED was observed for both regressions; the focused suite then passed 9 tests. Final `npm run check`, full test suite (121 tests), production build, scoped ESLint, diff check, and temporary-output cleanup all passed.

@@ -16,6 +16,7 @@ export const localMediaPath = z.string().superRefine((value, context) => {
     value.length > 0 &&
     !value.startsWith('/') &&
     !value.startsWith('./') &&
+    !value.includes(':') &&
     !value.includes('\\') &&
     !value.includes('%') &&
     !value.includes('..') &&
@@ -27,10 +28,9 @@ export const localMediaPath = z.string().superRefine((value, context) => {
 });
 
 function localMediaPathWithExtension(extensions: readonly string[]) {
-  return localMediaPath.refine(
-    (value) => extensions.some((extension) => value.toLowerCase().endsWith(`.${extension}`)),
-    { message: `Media path must use one of: ${extensions.join(', ')}.` },
-  );
+  return localMediaPath.refine((value) => extensions.some((extension) => value.endsWith(`.${extension}`)), {
+    message: `Media path must use one of: ${extensions.join(', ')}.`,
+  });
 }
 
 const canonicalProjectId = z.string().superRefine((value, context) => {
