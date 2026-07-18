@@ -1,22 +1,39 @@
 {
-  "name": "void-dev",
-  "version": "1.0.0",
+  "name": "zhou-portfolio",
+  "version": "2.0.0",
   "type": "module",
   "private": true,
-  "description": "VOID.DEV — 个人博客框架",
+  "engines": { "node": ">=22.12.0" },
   "scripts": {
-    "lint": "eslint js/ themes/ admin/",
-    "format:check": "prettier --check \"**/*.{js,json,md,html,css}\"",
-    "format": "prettier --write \"**/*.{js,json,md,html,css}\"",
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint js/ themes/ admin/ src/ tests/ e2e/",
+    "format:check": "prettier --check \"src/**/*.{astro,ts,md,mdx,css}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
+    "format": "prettier --write \"src/**/*.{astro,ts,md,mdx,css}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "7.0.3",
+    "@astrojs/rss": "4.0.19",
+    "@astrojs/sitemap": "3.7.3",
+    "astro": "7.1.1"
   },
   "devDependencies": {
-    "eslint": "^9.0.0",
-    "prettier": "^3.0.0",
-    "vitest": "^3.0.0",
-    "jsdom": "^26.0.0",
-    "marked": "^15.0.0",
-    "dompurify": "^3.2.0"
+    "@astrojs/check": "0.9.9",
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.61.1",
+    "dompurify": "3.2.6",
+    "eslint": "9.39.2",
+    "eslint-plugin-astro": "1.6.0",
+    "jsdom": "26.1.0",
+    "marked": "15.0.12",
+    "prettier": "3.8.2",
+    "typescript-eslint": "8.64.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   }
 }
