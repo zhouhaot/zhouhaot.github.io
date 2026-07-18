@@ -1,0 +1,13 @@
+---
+const capabilities = ['Agent 与工具调用', 'RAG 与知识系统', '工作流自动化', '评估与工程交付'];
+---
+
+<section class="home-card home-capabilities" data-home-section="capability-map" aria-labelledby="capability-map-title">
+  <header class="home-section-heading">
+    <p class="home-kicker">AI 能力地图</p>
+    <h2 id="capability-map-title">面向应用落地的能力组合</h2>
+  </header>
+  <ul class="home-capability-list">
+    {capabilities.map((capability) => <li>{capability}</li>)}
+  </ul>
+</section>

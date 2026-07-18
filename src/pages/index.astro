@@ -1,14 +1,42 @@
 ---
+import CapabilityMap from '@/components/home/CapabilityMap.astro';
+import CurrentStatus from '@/components/home/CurrentStatus.astro';
+import DeliveryMethod from '@/components/home/DeliveryMethod.astro';
+import ExperimentStatus from '@/components/home/ExperimentStatus.astro';
+import FeaturedProjects from '@/components/home/FeaturedProjects.astro';
+import Hero from '@/components/home/Hero.astro';
+import LatestArticles from '@/components/home/LatestArticles.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
-import { SITE } from '@/config/site';
+import { getPublishedEntries } from '@/domain/content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import '@/styles/home.css';
+
+const [work, lab, notes] = await Promise.all([
+  getPublishedEntries('work'),
+  getPublishedEntries('lab'),
+  getPublishedEntries('notes'),
+]);
+
+const featuredWork = work.filter((entry) => entry.data.featured).slice(0, 3);
+const recentLabs = lab.slice(0, 4);
+const recentNotes = notes.slice(0, 3);
 ---
 
 <BaseLayout>
   <SiteHeader slot="header" />
-  <h1>zhou</h1>
-  <p>AI 应用开发者</p>
-  <p>探索技术边界，让 AI 真正进入业务。</p>
-  <a href={SITE.githubUrl} rel="me external">访问 GitHub</a>
-  <p>正在寻找工作，同时接受合适的 AI 应用合作。</p>
+  <div class="home-page">
+    <div class="home-grid home-grid--hero">
+      <Hero />
+      <FeaturedProjects entries={featuredWork} />
+    </div>
+    <div class="home-grid home-grid--capabilities">
+      <CapabilityMap />
+      <ExperimentStatus entries={recentLabs} />
+      <DeliveryMethod />
+    </div>
+    <div class="home-grid home-grid--footer">
+      <LatestArticles entries={recentNotes} />
+      <CurrentStatus />
+    </div>
+  </div>
 </BaseLayout>

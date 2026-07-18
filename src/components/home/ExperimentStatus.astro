@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import EmptyState from '@/components/EmptyState.astro';
+import { projectRoute } from '@/domain/routes';
+
+interface Props {
+  entries: CollectionEntry<'lab'>[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section class="home-card home-experiments" data-home-section="experiment-status" aria-labelledby="experiment-status-title">
+  <header class="home-section-heading">
+    <p class="home-kicker">实验状态</p>
+    <h2 id="experiment-status-title">正在验证的应用方向</h2>
+  </header>
+  {
+    entries.length > 0 ? (
+      <div class="home-content-list">
+        {entries.map((entry) => (
+          <article class="home-content-card" data-home-content-card data-content-collection="lab">
+            <p class="home-content-card__meta"><span class="home-status-dot" aria-hidden="true"></span>{entry.data.status}</p>
+            <h3><a href={projectRoute(entry.id)}>{entry.data.title}</a></h3>
+            <p>{entry.data.summary}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <EmptyState collection="lab" title="实验记录将在完成验证后公开" description="目前没有可公开展示的实验记录。" />
+    )
+  }
+</section>

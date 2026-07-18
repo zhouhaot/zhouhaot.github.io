@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import EmptyState from '@/components/EmptyState.astro';
+import { articleRoute } from '@/domain/routes';
+
+interface Props {
+  entries: CollectionEntry<'notes'>[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section class="home-card home-articles" data-home-section="latest-articles" aria-labelledby="latest-articles-title">
+  <header class="home-section-heading">
+    <p class="home-kicker">最新文章</p>
+    <h2 id="latest-articles-title">过程、判断与工程笔记</h2>
+  </header>
+  {
+    entries.length > 0 ? (
+      <div class="home-content-list">
+        {entries.map((entry) => (
+          <article class="home-content-card" data-home-content-card data-content-collection="notes">
+            <time datetime={entry.data.publishedAt.toISOString()}>{entry.data.publishedAt.toLocaleDateString('zh-CN')}</time>
+            <h3><a href={articleRoute(entry.id)}>{entry.data.title}</a></h3>
+            <p>{entry.data.summary}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <EmptyState collection="notes" title="文章将在发布后列出" description="目前没有已公开的文章。" />
+    )
+  }
+</section>

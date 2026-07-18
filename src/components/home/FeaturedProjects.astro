@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import EmptyState from '@/components/EmptyState.astro';
+import { projectRoute } from '@/domain/routes';
+
+interface Props {
+  entries: CollectionEntry<'work'>[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section class="home-card home-featured" data-home-section="featured-projects" aria-labelledby="featured-projects-title">
+  <header class="home-section-heading">
+    <p class="home-kicker">精选项目</p>
+    <h2 id="featured-projects-title">从问题到可验证的应用</h2>
+  </header>
+  {
+    entries.length > 0 ? (
+      <div class="home-content-list">
+        {entries.map((entry) => (
+          <article class="home-content-card" data-home-content-card data-content-collection="work">
+            <p class="home-content-card__meta">{entry.data.status}</p>
+            <h3><a href={projectRoute(entry.id)}>{entry.data.title}</a></h3>
+            <p>{entry.data.summary}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <EmptyState
+        collection="work"
+        title="精选项目将随已公开案例更新"
+        description="目前没有可公开展示的项目案例。"
+      />
+    )
+  }
+</section>

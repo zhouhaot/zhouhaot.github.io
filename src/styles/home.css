@@ -1,0 +1,234 @@
+.home-page {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-lg);
+}
+
+.home-card {
+  min-inline-size: 0;
+  padding: clamp(var(--space-lg), 3vw, var(--space-xl));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.04);
+}
+
+.home-hero {
+  grid-column: span 8;
+}
+
+.home-featured {
+  grid-column: span 4;
+}
+
+.home-capabilities {
+  grid-column: span 4;
+}
+
+.home-experiments {
+  grid-column: span 4;
+}
+
+.home-delivery {
+  grid-column: span 4;
+}
+
+.home-articles {
+  grid-column: span 8;
+}
+
+.home-current-status {
+  grid-column: span 4;
+}
+
+.home-hero h1,
+.home-section-heading h2 {
+  max-inline-size: 16ch;
+  margin: 0;
+  color: var(--color-foreground);
+  font-size: clamp(2.25rem, 1.3rem + 3.8vw, 4.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.home-section-heading h2 {
+  font-size: clamp(1.4rem, 1rem + 1.2vw, 2.1rem);
+  letter-spacing: -0.025em;
+}
+
+.home-hero__eyebrow,
+.home-kicker,
+.home-content-card__meta,
+.home-content-card time,
+.home-delivery-list span {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.home-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-block-end: var(--space-lg);
+}
+
+.home-status-dot {
+  display: inline-block;
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+}
+
+.home-hero__role {
+  margin: var(--space-lg) 0 0;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.home-hero__summary,
+.home-current-status > p {
+  max-inline-size: 58ch;
+  margin: var(--space-md) 0 0;
+  color: var(--color-muted);
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-xl);
+}
+
+.home-button,
+.home-text-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.75rem;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-foreground);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-button--primary {
+  border-color: var(--color-foreground);
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.home-section-heading {
+  margin-block-end: var(--space-lg);
+}
+
+.home-kicker {
+  margin: 0 0 var(--space-xs);
+}
+
+.home-capability-list,
+.home-delivery-list,
+.home-content-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-capability-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.home-capability-list li,
+.home-delivery-list li,
+.home-content-card,
+.empty-state {
+  min-inline-size: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+
+.home-delivery-list {
+  counter-reset: delivery;
+}
+
+.home-delivery-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.home-delivery-list span {
+  color: var(--color-accent);
+}
+
+.home-content-card h3 {
+  margin: var(--space-xs) 0 0;
+  font-size: 1rem;
+}
+
+.home-content-card h3 a,
+.home-text-link {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.home-content-card p,
+.empty-state p {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-muted);
+}
+
+.home-content-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: 0;
+}
+
+.home-text-link {
+  width: fit-content;
+  margin-block-start: var(--space-lg);
+  border: 0;
+  padding: 0;
+  color: var(--color-accent);
+}
+
+@media (max-width: 1023px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero,
+  .home-featured,
+  .home-capabilities,
+  .home-experiments,
+  .home-delivery,
+  .home-articles,
+  .home-current-status {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 479px) {
+  .home-capability-list {
+    grid-template-columns: 1fr;
+  }
+
+  .home-actions,
+  .home-button {
+    inline-size: 100%;
+  }
+}
