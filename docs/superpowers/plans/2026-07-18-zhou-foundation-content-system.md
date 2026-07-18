@@ -340,22 +340,6 @@ const socialImage = new URL(image, SITE.url);
 Create `src/styles/foundation.css`:
 
 ```css
-:root {
-  color-scheme: dark;
-  font-family: system-ui, sans-serif;
-  line-height: 1.6;
-  background: #111;
-  color: #f5f5f5;
-}
-
-body {
-  margin: 0;
-}
-
-a {
-  color: inherit;
-}
-
 a:focus-visible,
 button:focus-visible {
   outline: 3px solid currentColor;
@@ -369,12 +353,6 @@ button:focus-visible {
 
 .skip-link:focus {
   transform: translateY(0);
-}
-
-main {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 2rem 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
