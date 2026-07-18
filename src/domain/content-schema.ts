@@ -8,6 +8,16 @@ export const publicContactUrl = z.url().refine((value) => ['https:', 'mailto:'].
   message: 'Contact URL must use https: or mailto:',
 });
 
+export const localMediaPath = z
+  .string()
+  .refine(
+    (value) =>
+      value === value.trim() &&
+      /^(?:\.\/)?(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value) &&
+      !value.includes('..'),
+    { message: 'Media path must be a local relative path without traversal.' },
+  );
+
 const commonSchema = z.object({
   title: z.string().min(1).max(120),
   summary: z.string().min(1).max(240),
@@ -46,4 +56,28 @@ export const labSchema = commonSchema.extend({
 
 export const noteSchema = commonSchema.extend({
   tags: z.array(z.string().min(1)).min(1),
+});
+
+const portfolioMediaBaseSchema = z.object({
+  source: localMediaPath,
+  alt: z.string().min(1),
+  caption: z.string().min(1).optional(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  license: z.enum(['owned', 'licensed', 'cc-by', 'public-domain']),
+});
+
+const portfolioMediaSchema = z.discriminatedUnion('type', [
+  portfolioMediaBaseSchema.extend({ type: z.literal('image') }),
+  portfolioMediaBaseSchema.extend({
+    type: z.literal('video'),
+    poster: localMediaPath.optional(),
+  }),
+]);
+
+export const portfolioSchema = commonSchema.extend({
+  order: z.number().int().nonnegative(),
+  status: z.enum(['published', 'archived']),
+  relatedProject: z.string().min(1).optional(),
+  items: z.array(portfolioMediaSchema).min(1),
 });
