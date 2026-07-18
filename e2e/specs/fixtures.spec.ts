@@ -26,6 +26,31 @@ test('fixture article discovery filters, resets, and keeps its long reader bound
   await expectNoPageOverflow(page);
 });
 
+test('fixture discovery supports multi-token and multi-tag AND filtering with persisted grid view', async ({
+  page,
+}) => {
+  await page.goto(`${fixture}/articles/`);
+  await page.locator('[data-article-search]').fill('multi reader');
+  await page.locator('[data-article-tag="accessibility"]').click();
+  await page.locator('[data-article-tag="testing"]').click();
+  await expect(page.locator('[data-article-card]:not([hidden])')).toHaveCount(1);
+  await page.locator('[data-article-view="grid"]').click();
+  await expect(page.locator('[data-article-discovery]')).toHaveAttribute('data-view', 'grid');
+  await page.reload();
+  await expect(page.locator('[data-article-discovery]')).toHaveAttribute('data-view', 'grid');
+});
+
+test('layout helper reports a local scroller whose outer box leaves the viewport', async ({ page }) => {
+  await setViewport(page, 390, 844);
+  await page.goto(`${fixture}/reader/`);
+  await page.evaluate(() => {
+    const pre = document.querySelector<HTMLElement>('.article-content pre')!;
+    pre.style.setProperty('max-inline-size', 'none', 'important');
+    pre.style.setProperty('inline-size', '500px', 'important');
+  });
+  await expect(expectNoPageOverflow(page)).rejects.toThrow();
+});
+
 test('fixture lightbox opens and restores focus to its trigger', async ({ page }) => {
   await page.goto(`${fixture}/portfolio/`);
   const trigger = page.locator('[data-lightbox-trigger]');

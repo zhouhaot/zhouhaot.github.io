@@ -9,13 +9,15 @@ export async function expectNoPageOverflow(page: Page) {
     const offenders = Array.from(document.querySelectorAll<HTMLElement>('body *')).flatMap((element) => {
       const rect = element.getBoundingClientRect();
       const scrollContainer = element.closest<HTMLElement>('pre, table');
-      const localScroller = Boolean(
-        scrollContainer && /(auto|scroll)/.test(getComputedStyle(scrollContainer).overflowX),
+      const localScrollerContent = Boolean(
+        scrollContainer &&
+        scrollContainer !== element &&
+        /(auto|scroll)/.test(getComputedStyle(scrollContainer).overflowX),
       );
       const hiddenByState = Boolean(element.closest('[aria-hidden="true"], [hidden]'));
       if (
         !hiddenByState &&
-        !localScroller &&
+        !localScrollerContent &&
         (rect.left < -1 || rect.right > viewport + 1) &&
         rect.width > 0 &&
         rect.height > 0

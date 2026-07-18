@@ -14,7 +14,14 @@
 - `npm run lint` — pass
 - `npm run build` — pass; Astro check reports 0 errors and 0 warnings
 - `npm test` — 21 files / 121 tests pass
-- `npx playwright test --project=chromium --reporter=line` — 54 tests pass
+- `npx playwright test --project=chromium --reporter=line` — 95 tests pass
+
+## Review follow-up coverage
+
+- Functional automation is the 95-test Chromium suite; visual evidence remains the approved Windows snapshot set documented below.
+- Axe now covers 30 real route/theme/viewport combinations plus drawer-open, fixture zero-result, reader, and lightbox states.
+- Local pre/table scrolling is only exempted for descendants; a synthetic oversized outer pre regression must fail the layout helper.
+- The long-reader matrix covers 360, 430, 600, 820, 1024, and 1440px; touch journeys cover 360, 390, 430, and 600px.
 - `git diff --check` — pass
 
 ## Visual signoff

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectNoPageOverflow } from '../helpers/layout';
 import { setViewport } from '../helpers/viewports';
 
 test.use({ hasTouch: true });
@@ -40,3 +41,34 @@ test('touch mobile controls meet the minimum target sizes and drawer can be tapp
   await page.locator('[data-drawer-overlay]').tap({ position: { x: 4, y: 4 } });
   await expect(page.locator('[data-mobile-drawer]')).not.toHaveClass(/is-open/);
 });
+
+for (const width of [360, 430, 600, 820, 1024, 1440]) {
+  test(`long fixture reader keeps local scroll surfaces bounded at ${width}px`, async ({ page }) => {
+    await setViewport(page, width, 900);
+    await page.goto('http://127.0.0.1:4322/reader/');
+    await expectNoPageOverflow(page);
+    await expect(page.locator('.article-content pre')).toHaveCSS('overflow-x', 'auto');
+    await expect(page.locator('.article-content table')).toHaveCSS('overflow-x', 'auto');
+    if (width <= 820) {
+      await expect(page.locator('.article-reader__toc-mobile')).toBeVisible();
+    } else {
+      await expect(page.locator('.article-reader__toc-desktop')).toBeVisible();
+    }
+  });
+}
+
+for (const width of [360, 390, 430, 600]) {
+  test(`touch journey works at ${width}px`, async ({ page }) => {
+    await setViewport(page, width, 844);
+    await page.goto('http://127.0.0.1:4323/');
+    await page.locator('[data-menu-trigger]').tap();
+    await page.locator('[data-theme-button="dark"]').last().tap();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.locator('[data-drawer-overlay]').tap({ position: { x: 4, y: 4 } });
+    await page.locator('[data-mobile-navigation] a[href="/projects/"]').tap();
+    await expect(page).toHaveURL(/\/projects\/$/);
+    await page.goto('http://127.0.0.1:4322/portfolio/');
+    await page.locator('[data-lightbox-trigger]').tap();
+    await expect(page.locator('[data-portfolio-lightbox]')).toBeVisible();
+  });
+}
