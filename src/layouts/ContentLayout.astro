@@ -1,0 +1,19 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+
+interface Props { title: string; summary: string; publishedAt: Date; canonicalPath: string }
+const { title, summary, publishedAt, canonicalPath } = Astro.props;
+---
+
+<BaseLayout title={`${title} — zhou`} description={summary} canonicalPath={canonicalPath} type="article">
+  <SiteHeader slot="header" />
+  <article>
+    <header>
+      <h1>{title}</h1>
+      <p>{summary}</p>
+      <time datetime={publishedAt.toISOString()}>{publishedAt.toLocaleDateString('zh-CN')}</time>
+    </header>
+    <slot />
+  </article>
+</BaseLayout>

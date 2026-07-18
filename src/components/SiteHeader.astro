@@ -1,0 +1,13 @@
+---
+import { SITE } from '@/config/site';
+---
+
+<header>
+  <nav aria-label="主导航">
+    <a href="/" aria-label="zhou 首页">zhou</a>
+    <ul>
+      {SITE.navigation.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+    </ul>
+    <a href={SITE.githubUrl} rel="me external">GitHub</a>
+  </nav>
+</header>
