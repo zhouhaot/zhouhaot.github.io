@@ -19,16 +19,18 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   webServer: [
     {
-      command: 'npx astro dev --host 127.0.0.1 --port 4321',
+      command: 'node ./node_modules/astro/bin/astro.mjs dev --host 127.0.0.1 --port 4321',
       url: 'http://127.0.0.1:4321/',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
+      env: { ASTRO_DEV_BACKGROUND: '0' },
       timeout: 120_000,
     },
     {
-      command: 'npx astro dev --host 127.0.0.1 --port 4322',
+      command: 'node ../../node_modules/astro/bin/astro.mjs dev --host 127.0.0.1 --port 4322',
       cwd: './e2e/fixtures',
       url: 'http://127.0.0.1:4322/projects/',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
+      env: { ASTRO_DEV_BACKGROUND: '0' },
       timeout: 120_000,
     },
   ],

@@ -60,9 +60,9 @@ for (const width of [360, 430, 600, 820, 1024, 1440]) {
 for (const width of [360, 390, 430, 600]) {
   test(`touch journey works at ${width}px`, async ({ page }) => {
     await setViewport(page, width, 844);
-    await page.goto('http://127.0.0.1:4323/');
+    await page.goto('/');
     await page.locator('[data-menu-trigger]').tap();
-    await page.locator('[data-theme-button="dark"]').last().tap();
+    await page.locator('[data-mobile-drawer] [data-theme-button="dark"]').tap();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.locator('[data-drawer-overlay]').tap({ position: { x: 4, y: 4 } });
     await page.locator('[data-mobile-navigation] a[href="/projects/"]').tap();

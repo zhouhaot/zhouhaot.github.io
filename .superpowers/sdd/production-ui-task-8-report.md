@@ -22,6 +22,9 @@
 - Axe now covers 30 real route/theme/viewport combinations plus drawer-open, fixture zero-result, reader, and lightbox states.
 - Local pre/table scrolling is only exempted for descendants; a synthetic oversized outer pre regression must fail the layout helper.
 - The long-reader matrix covers 360, 430, 600, 820, 1024, and 1440px; touch journeys cover 360, 390, 430, and 600px.
+- Touch journeys now use Playwright's managed base URL on 4321, with the dark theme button scoped to the open drawer. They do not require a static preview or port 4323.
+- Astro's dev toolbar is disabled in both test apps so production-facing screenshots and ordinary touch taps are not affected by development chrome. Playwright sets `ASTRO_DEV_BACKGROUND=0` and does not reuse servers, which prevents Astro 7's agent-mode background launcher from exiting before the managed server is ready.
+- The complete 95-test suite passed twice from clean 4321/4322/4323 ports; each run shut down both managed servers.
 - `git diff --check` — pass
 
 ## Visual signoff
@@ -32,6 +35,4 @@ Human in-app-browser review approved the production routes, drawer, reader, loca
 - Home at 1440×900 in Light, Dark, and Cyber.
 - Fixture reader at 390×844 and 1440×900 in Light.
 
-The visual spec is explicitly Windows-only because these baselines were approved on the local Windows Chromium stack. Task 9 should run this spec on a `windows-latest` visual job; generic non-Windows E2E skips it rather than failing for an unapproved baseline.
-
-Reusable static preview URLs: production `http://127.0.0.1:4323/`; fixtures `http://127.0.0.1:4324/reader/`.
+The visual spec is explicitly Windows-only because these baselines were approved on the local Windows Chromium stack. Task 9 should run this spec on a `windows-latest` visual job; generic non-Windows E2E skips it rather than failing for an unapproved baseline. The refreshed baselines cover all eight approved screenshots and remove Astro development-toolbar pixels only.

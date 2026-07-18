@@ -8,5 +8,6 @@ export default defineConfig({
   outDir: './dist',
   cacheDir: './.astro',
   trailingSlash: 'always',
+  devToolbar: { enabled: false },
   vite: { resolve: { alias: { '@': rootSource } } },
 });
