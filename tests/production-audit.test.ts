@@ -96,6 +96,19 @@ describe('production output audit', () => {
     expectFailure({ 'site.css': '.hero { background-image: url(https://cdn.example/hero.png); }' }, /remote/i);
   });
 
+  it('rejects a remote stylesheet href by tag purpose', () => {
+    expectFailure({ 'index.html': '<link rel="stylesheet" href="https://cdn.example/site.css">' }, /remote/i);
+  });
+
+  it('rejects remote CSS imports in quoted and url forms', () => {
+    expectFailure({ 'site.css': '@import "https://cdn.example/site.css";' }, /remote/i);
+    expectFailure({ 'site.css': '@import url(https://cdn.example/site.css);' }, /remote/i);
+  });
+
+  it('rejects protocol-relative values before local path resolution', () => {
+    expectFailure({ 'index.html': '<img src="//cdn.example/image.png" alt="Image" width="1" height="1">' }, /unsafe/i);
+  });
+
   it('rejects forbidden markers in public XML output', () => {
     expectFailure({ 'sitemap.xml': '<urlset><url><loc>VOID.DEV</loc></url></urlset>' }, /marker/i);
   });
@@ -127,6 +140,22 @@ describe('production output audit', () => {
     });
   }
 
+  for (const metric of ['3&times;', '3&#215;', '3 conversion', '3 conversions']) {
+    it(`decodes and rejects the unsupported visible metric ${metric}`, () => {
+      expectFailure({ 'index.html': `<p>${metric}</p>` }, /metric/i);
+    });
+  }
+
+  it('does not treat metric-looking script or style text as visible content', () => {
+    expect(() =>
+      auditProductionOutput(
+        fixture({
+          'index.html': '<script>const metric = "3× conversion";</script><style>.x::after{content:"3x"}</style>',
+        }),
+      ),
+    ).not.toThrow();
+  });
+
   it('uses the real portfolio DOM attributes for media attribution', () => {
     const gallery = readFileSync('src/components/portfolio/PortfolioGallery.astro', 'utf8');
     expect(gallery).toMatch(/data-portfolio-media/);
@@ -136,20 +165,40 @@ describe('production output audit', () => {
 
   for (const [name, attrs] of [
     ['unknown license', 'data-license="unknown"'],
-    ['licensed credit', 'data-license="licensed" data-license-url="/license.html" data-evidence-url="/evidence.html"'],
-    ['licensed license URL', 'data-license="licensed" data-credit="Source" data-evidence-url="/evidence.html"'],
-    ['licensed evidence', 'data-license="licensed" data-credit="Source" data-license-url="/license.html"'],
+    ['licensed credit', 'data-license="licensed" data-license-url="https://example.com/license"'],
+    [
+      'licensed HTTPS license URL',
+      'data-license="licensed" data-credit="Source" data-license-url="http://example.com/license"',
+    ],
+    ['cc-by credit', 'data-license="cc-by" data-license-url="https://example.com/license"'],
+    ['public-domain evidence', 'data-license="public-domain"'],
   ]) {
     it(`rejects portfolio media with missing ${name}`, () => {
       expectFailure(
         {
           'index.html': `<img data-portfolio-media src="/image.png" alt="Image" width="1" height="1" ${attrs}>`,
           'image.png': '',
-          'license.html': '',
-          'evidence.html': '',
         },
         /license|attribution|evidence/i,
       );
+    });
+  }
+
+  for (const [name, attrs] of [
+    ['owned', 'data-license="owned"'],
+    ['licensed', 'data-license="licensed" data-credit="Source" data-license-url="https://example.com/license"'],
+    ['cc-by', 'data-license="cc-by" data-credit="Source" data-license-url="https://example.com/license"'],
+    ['public-domain', 'data-license="public-domain" data-evidence-url="https://example.com/evidence"'],
+  ]) {
+    it(`accepts the schema-valid ${name} portfolio attribution combination`, () => {
+      expect(() =>
+        auditProductionOutput(
+          fixture({
+            'index.html': `<img data-portfolio-media src="/image.png" alt="Image" width="1" height="1" ${attrs}>`,
+            'image.png': '',
+          }),
+        ),
+      ).not.toThrow();
     });
   }
 });

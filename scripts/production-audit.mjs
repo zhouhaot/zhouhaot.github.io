@@ -4,7 +4,7 @@ import { relative, resolve, sep } from 'node:path';
 const MARKERS =
   /LAB\.LOG|VOID\.DEV|\b(?:TODO|TBD|sample|coming soon|contact@example|resume|education|customer|testimonial)\b/i;
 const METRICS =
-  /(?:\b\d+(?:\.\d+)?\s*%\s*(?:views?|likes?|read[ -]?time|users?|conversion)?|\b\d+(?:\.\d+)?\s*[x×](?!\w)|\b\d+\s+(?:views?|likes?|users?)\b|\b(?:\d+\s*(?:min(?:ute)?s?\s*)?)?read[ -]?time\b)/i;
+  /(?:\b\d+(?:\.\d+)?\s*%\s*(?:views?|likes?|read[ -]?time|users?|conversions?)?|\b\d+(?:\.\d+)?\s*[x×](?!\w)|\b\d+\s+(?:views?|likes?|users?|conversions?)\b|\b(?:\d+\s*(?:min(?:ute)?s?\s*)?)?read[ -]?time\b)/i;
 const FIXTURES = /\[QA fixture\]|qa-fixture|\/notes\//i;
 const ATTR = /\s([\w:-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
 const MEDIA_META = /^(?:og|twitter):image(?::(?:url|secure_url))?$/i;
@@ -30,6 +30,11 @@ function visibleText(html) {
   return html
     .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/&(times|nbsp|amp|lt|gt|quot|apos);|&#(\d+);|&#x([\da-f]+);/gi, (_match, named, decimal, hexadecimal) => {
+      if (decimal) return String.fromCodePoint(Number(decimal));
+      if (hexadecimal) return String.fromCodePoint(Number.parseInt(hexadecimal, 16));
+      return { times: '×', nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }[named.toLowerCase()];
+    })
     .replace(/\s+/g, ' ');
 }
 
@@ -45,6 +50,7 @@ function splitReference(value) {
 }
 
 function outputTarget(root, value, source) {
+  if (value.startsWith('//')) throw new Error(`Unsafe protocol-relative reference ${value} in ${source}`);
   const { pathname } = splitReference(value);
   if (!pathname) return source;
   const target = pathname.startsWith('/') ? resolve(root, `.${pathname}`) : resolve(source, '..', pathname);
@@ -79,7 +85,8 @@ function assertReference(root, file, tag, attrs) {
     if (!value) continue;
     if (/^(?:javascript|data|vbscript):/i.test(value)) throw new Error(`Unsafe reference ${value} in ${file}`);
     if (/^https?:\/\//i.test(value)) {
-      if (name !== 'href' || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {
+      const stylesheet = /^<link\b/i.test(tag) && /\bstylesheet\b/i.test(attrs.rel ?? '');
+      if (name !== 'href' || stylesheet || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {
         throw new Error(`Remote media reference ${value} in ${file}`);
       }
       continue;
@@ -109,8 +116,21 @@ function assertMedia(file, tag, attrs) {
     if (!['owned', 'licensed', 'cc-by', 'public-domain'].includes(license)) {
       throw new Error(`Invalid portfolio license in ${file}`);
     }
-    if (license !== 'owned' && (!attrs['data-credit'] || !attrs['data-license-url'] || !attrs['data-evidence-url'])) {
-      throw new Error(`Portfolio attribution evidence is required in ${file}`);
+    const https = (value) => {
+      try {
+        return new URL(value).protocol === 'https:';
+      } catch {
+        return false;
+      }
+    };
+    if (
+      (license === 'licensed' || license === 'cc-by') &&
+      (!attrs['data-credit'] || !https(attrs['data-license-url']))
+    ) {
+      throw new Error(`Portfolio license attribution is required in ${file}`);
+    }
+    if (license === 'public-domain' && !https(attrs['data-evidence-url'])) {
+      throw new Error(`Portfolio evidence is required in ${file}`);
     }
   }
 }
@@ -118,6 +138,15 @@ function assertMedia(file, tag, attrs) {
 function assertCssUrls(root, file, css) {
   for (const [, doubleQuoted, singleQuoted, bare] of css.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi)) {
     const url = doubleQuoted ?? singleQuoted ?? bare;
+    if (url) assertMediaValue(root, file, url);
+  }
+}
+
+function assertCssImports(root, file, css) {
+  for (const [, doubleQuoted, singleQuoted, urlDoubleQuoted, urlSingleQuoted, urlBare] of css.matchAll(
+    /@import\s+(?:"([^"]+)"|'([^']+)'|url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\))/gi,
+  )) {
+    const url = doubleQuoted ?? singleQuoted ?? urlDoubleQuoted ?? urlSingleQuoted ?? urlBare;
     if (url) assertMediaValue(root, file, url);
   }
 }
@@ -144,7 +173,10 @@ export function auditProductionOutput(root = resolve('dist')) {
     if (FIXTURES.test(relativePath) || FIXTURES.test(content))
       throw new Error(`Production fixture leakage: ${relativePath}`);
     if (MARKERS.test(content)) throw new Error(`Forbidden production marker in ${relativePath}`);
-    if (/\.css$/i.test(file)) assertCssUrls(output, file, content);
+    if (/\.css$/i.test(file)) {
+      assertCssUrls(output, file, content);
+      assertCssImports(output, file, content);
+    }
     if (/\.(?:json|xml)$/i.test(file)) assertStructuredMedia(output, file, content);
     if (!/\.html?$/i.test(file)) continue;
 

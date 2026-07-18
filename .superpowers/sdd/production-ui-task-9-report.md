@@ -64,3 +64,25 @@ The local default npm registry is `https://registry.npmmirror.com`; its audit en
 
 - Focused: `npm run check`, the four affected test suites (31 tests), `npm run build`, and `npm run audit:production` all passed.
 - Full: format/lint/check (0 errors, 0 warnings, 0 hints), 26 test files/157 tests, build, production audit, official-registry audit (0 vulnerabilities), generic E2E (88 passed), and Windows visual baselines (8 passed) all passed.
+
+## Second review remediation: RED → GREEN evidence
+
+1. Stylesheet and protocol boundaries
+   - RED: `npm test -- tests/production-audit.test.ts tests/content-schema.test.ts` failed 10 assertions: remote stylesheet `href` was treated as a normal external link, quoted CSS `@import` was ignored, and `//cdn…` reached local-path resolution.
+   - GREEN: the same command passed 43/43. Stylesheet `href` is now treated as remote media, CSS quoted and `url()` imports are scanned, and protocol-relative URLs are rejected before resolution.
+2. License policy/schema parity
+   - RED: the same audit run showed valid schema combinations for licensed, CC-BY, and public-domain media were incorrectly rejected because evidence was required for every non-owned item.
+   - GREEN: owned is accepted; licensed/CC-BY require credit plus HTTPS license URL; public-domain requires HTTPS evidence URL. The production audit fixtures and `portfolioSchema` combinations are both covered by passing tests.
+3. Entity-normalized visible metrics
+   - RED: the same audit run showed `3&times;`, `3&#215;`, `3 conversion`, and `3 conversions` escaped the visible metric check.
+   - GREEN: visible HTML text is entity-decoded before metric matching; a dedicated test confirms script/style metric-shaped strings remain excluded.
+
+## Second review focused verification
+
+- `npm run format`, `npm run format:check`, `npm run lint`, `npm run check`, `npm run build`, and `npm run audit:production` all passed.
+- Focused production-audit/schema tests passed 43/43.
+
+## Second review final verification
+
+- Full: format/lint/check (0 errors, 0 warnings, 0 hints), 26 test files/171 tests, build, production audit, generic E2E (88 passed), and Windows visual baselines (8 passed) all passed.
+- The first official-registry audit request in the combined run had a transient TLS disconnect. An immediate standalone retry of `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org` completed with `found 0 vulnerabilities`.

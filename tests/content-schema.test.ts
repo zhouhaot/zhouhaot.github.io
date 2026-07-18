@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { labSchema, noteSchema, publicContactUrl, workSchema } from '../src/domain/content-schema';
+import { labSchema, noteSchema, portfolioSchema, publicContactUrl, workSchema } from '../src/domain/content-schema';
 
 const baseWork = {
   title: '企业知识助手',
@@ -53,5 +53,26 @@ describe('content schemas', () => {
   it('allows https and mailto public contact URLs only', () => {
     expect(publicContactUrl.parse('mailto:public@example.com')).toBe('mailto:public@example.com');
     expect(() => publicContactUrl.parse('tel:+8613800000000')).toThrow();
+  });
+
+  it('accepts the portfolio attribution combinations enforced by production audit', () => {
+    const media = { type: 'image', source: 'image.webp', alt: 'Image', caption: 'Caption', width: 1, height: 1 };
+    for (const item of [
+      { ...media, license: 'owned' },
+      { ...media, license: 'licensed', credit: 'Source', licenseUrl: 'https://example.com/license' },
+      { ...media, license: 'cc-by', credit: 'Source', licenseUrl: 'https://example.com/license' },
+      { ...media, license: 'public-domain', evidenceUrl: 'https://example.com/evidence' },
+    ]) {
+      expect(
+        portfolioSchema.parse({
+          title: 'Portfolio',
+          summary: 'Summary',
+          publishedAt: '2026-07-18',
+          order: 0,
+          status: 'published',
+          items: [item],
+        }),
+      ).toMatchObject({ items: [expect.objectContaining({ license: item.license })] });
+    }
   });
 });
