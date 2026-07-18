@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -72,4 +72,84 @@ describe('production output audit', () => {
     );
     expectFailure({ 'index.html': '<p>[QA fixture] /notes/ qa-fixture.svg</p>' }, /fixture/i);
   });
+
+  it('rejects forbidden markers in JSON-LD public data', () => {
+    expectFailure({ 'index.html': '<script type="application/ld+json">{"name":"VOID.DEV"}</script>' }, /marker/i);
+  });
+
+  it('rejects remote Open Graph media in metadata content', () => {
+    expectFailure({ 'index.html': '<meta property="og:image" content="https://cdn.example/og.png">' }, /remote/i);
+  });
+
+  it('rejects remote media in srcset candidates', () => {
+    expectFailure(
+      {
+        'index.html':
+          '<img src="/image.png" srcset="https://cdn.example/image.png 2x" alt="Image" width="1" height="1">',
+        'image.png': '',
+      },
+      /remote/i,
+    );
+  });
+
+  it('rejects remote media referenced by public CSS', () => {
+    expectFailure({ 'site.css': '.hero { background-image: url(https://cdn.example/hero.png); }' }, /remote/i);
+  });
+
+  it('rejects forbidden markers in public XML output', () => {
+    expectFailure({ 'sitemap.xml': '<urlset><url><loc>VOID.DEV</loc></url></urlset>' }, /marker/i);
+  });
+
+  it('rejects remote JSON-LD and XML media values', () => {
+    expectFailure(
+      { 'index.html': '<script type="application/ld+json">{"image":"https://cdn.example/image.png"}</script>' },
+      /remote/i,
+    );
+    expectFailure({ 'feed.xml': '<rss><image><url>https://cdn.example/image.png</url></image></rss>' }, /remote/i);
+  });
+
+  it('requires a directory link to resolve to index.html', () => {
+    const root = fixture({ 'index.html': '<a href="/empty/">Empty</a>' });
+    mkdirSync(join(root, 'empty'));
+    expect(() => auditProductionOutput(root)).toThrow(/missing/i);
+  });
+
+  it('checks cross-page fragments in the target document', () => {
+    expectFailure(
+      { 'index.html': '<a href="/about/#missing">About</a>', 'about/index.html': '<h1 id="about">About</h1>' },
+      /fragment/i,
+    );
+  });
+
+  for (const metric of ['3x', '3×', '4 min read-time', '8% conversion']) {
+    it(`rejects the unsupported visible metric ${metric}`, () => {
+      expectFailure({ 'index.html': `<p>${metric}</p>` }, /metric/i);
+    });
+  }
+
+  it('uses the real portfolio DOM attributes for media attribution', () => {
+    const gallery = readFileSync('src/components/portfolio/PortfolioGallery.astro', 'utf8');
+    expect(gallery).toMatch(/data-portfolio-media/);
+    expect(gallery).toMatch(/data-license-url/);
+    expect(gallery).toMatch(/data-evidence-url/);
+  });
+
+  for (const [name, attrs] of [
+    ['unknown license', 'data-license="unknown"'],
+    ['licensed credit', 'data-license="licensed" data-license-url="/license.html" data-evidence-url="/evidence.html"'],
+    ['licensed license URL', 'data-license="licensed" data-credit="Source" data-evidence-url="/evidence.html"'],
+    ['licensed evidence', 'data-license="licensed" data-credit="Source" data-license-url="/license.html"'],
+  ]) {
+    it(`rejects portfolio media with missing ${name}`, () => {
+      expectFailure(
+        {
+          'index.html': `<img data-portfolio-media src="/image.png" alt="Image" width="1" height="1" ${attrs}>`,
+          'image.png': '',
+          'license.html': '',
+          'evidence.html': '',
+        },
+        /license|attribution|evidence/i,
+      );
+    });
+  }
 });

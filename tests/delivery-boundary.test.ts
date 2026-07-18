@@ -77,4 +77,15 @@ describe('production delivery boundary', () => {
     expect(deploy).toMatch(/path:\s*['"]?dist['"]?/);
     expect(deploy).not.toMatch(/path:\s*['"]?\.["']?/);
   });
+
+  it('separates verification from deploy with job-scoped least permissions and a dist artifact', () => {
+    const deploy = readFileSync(resolve('.github/workflows/deploy.yml'), 'utf8');
+    expect(deploy).toMatch(/verify:[\s\S]*permissions:\s*[\s\S]*contents:\s*read/);
+    expect(deploy).toMatch(/verify:[\s\S]*actions\/upload-artifact@[\s\S]*path:\s*dist/);
+    expect(deploy).toMatch(/deploy:\s*[\s\S]*needs:\s*verify/);
+    expect(deploy).toMatch(/deploy:[\s\S]*permissions:\s*[\s\S]*pages:\s*write[\s\S]*id-token:\s*write/);
+    expect(deploy).not.toMatch(/deploy:[\s\S]*permissions:\s*[\s\S]*contents:\s*read/);
+    expect(deploy).toMatch(/deploy:[\s\S]*actions\/download-artifact@[\s\S]*path:\s*dist/);
+    expect(deploy).toMatch(/actions\/upload-pages-artifact@[\s\S]*path:\s*dist/);
+  });
 });

@@ -5,13 +5,14 @@ export type SeoPageKind = 'home' | 'list' | 'article' | 'project' | 'portfolio' 
 export type StructuredData = Record<string, unknown>;
 
 export function canonicalUrl(path: string): URL {
+  const decodedSegments = typeof path === 'string' ? path.split('/').map((segment) => decodeURIComponent(segment)) : [];
   if (
     typeof path !== 'string' ||
     !path.startsWith('/') ||
     path.startsWith('//') ||
     path.includes('#') ||
     path.includes('?') ||
-    path.split('/').includes('..')
+    decodedSegments.some((segment) => segment === '.' || segment === '..' || /[\\/]/.test(segment))
   ) {
     throw new Error(`Canonical path must be a safe absolute path: ${path}`);
   }
