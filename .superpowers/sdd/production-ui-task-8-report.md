@@ -19,6 +19,12 @@
 
 ## Visual signoff
 
-No visual snapshot was generated or updated. Human in-app-browser review remains required before approving the eight visual baselines.
+Human in-app-browser review approved the production routes, drawer, reader, local scrolling surfaces, and portfolio lightbox before snapshot creation. Eight viewport-only screenshots are stored under `e2e/specs/visual.spec.ts-snapshots/`, all suffixed `-chromium-win32.png`:
+
+- Home at 390×844 in Light, Dark, and Cyber.
+- Home at 1440×900 in Light, Dark, and Cyber.
+- Fixture reader at 390×844 and 1440×900 in Light.
+
+The visual spec is explicitly Windows-only because these baselines were approved on the local Windows Chromium stack. Task 9 should run this spec on a `windows-latest` visual job; generic non-Windows E2E skips it rather than failing for an unapproved baseline.
 
 Reusable static preview URLs: production `http://127.0.0.1:4323/`; fixtures `http://127.0.0.1:4324/reader/`.
