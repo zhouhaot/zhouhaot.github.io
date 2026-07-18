@@ -129,6 +129,35 @@ describe('responsive navigation interactions', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
     expect(document.activeElement).toBe(last);
   });
+
+  it('replaces stale navigation listeners on remount and cleans up the active listeners', () => {
+    initNavigation(document);
+    const cleanup = initNavigation(document);
+    const trigger = document.querySelector<HTMLButtonElement>('[data-menu-trigger]')!;
+    const drawer = document.querySelector<HTMLElement>('[data-mobile-drawer]')!;
+    const closeButton = document.querySelector<HTMLButtonElement>('[data-drawer-close]')!;
+    const focusDrawer = vi.spyOn(closeButton, 'focus');
+
+    trigger.click();
+    expect(drawer.getAttribute('aria-hidden')).toBe('false');
+    expect(focusDrawer).toHaveBeenCalledTimes(1);
+
+    const focusTrigger = vi.spyOn(trigger, 'focus');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(drawer.getAttribute('aria-hidden')).toBe('true');
+    expect(focusTrigger).toHaveBeenCalledTimes(1);
+
+    trigger.click();
+    expect(drawer.getAttribute('aria-hidden')).toBe('false');
+
+    expect(cleanup).toBeTypeOf('function');
+    cleanup();
+    expect(drawer.getAttribute('aria-hidden')).toBe('true');
+    expect(drawer.hasAttribute('inert')).toBe(true);
+    trigger.click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(drawer.getAttribute('aria-hidden')).toBe('true');
+  });
 });
 
 describe('theme controls', () => {
@@ -178,5 +207,20 @@ describe('theme controls', () => {
     document.querySelector<HTMLButtonElement>('[data-theme-button="dark"]')!.click();
 
     expect(localStorage.getItem('zhou-theme')).toBe('dark');
+  });
+
+  it('replaces stale theme listeners on remount and cleans up the active listeners', () => {
+    const setItem = vi.fn();
+    initThemeControls(document, { getItem: () => null, setItem });
+    const cleanup = initThemeControls(document, { getItem: () => null, setItem });
+    const cyber = document.querySelector<HTMLButtonElement>('[data-theme-button="cyber"]')!;
+
+    cyber.click();
+    expect(setItem).toHaveBeenCalledTimes(1);
+
+    expect(cleanup).toBeTypeOf('function');
+    cleanup();
+    cyber.click();
+    expect(setItem).toHaveBeenCalledTimes(1);
   });
 });

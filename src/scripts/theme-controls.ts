@@ -6,6 +6,10 @@ type ThemeStorage = {
   setItem(key: string, value: string): void;
 };
 
+type Cleanup = () => void;
+
+const themeControlCleanups = new WeakMap<ParentNode, Cleanup>();
+
 function savedTheme(storage?: ThemeStorage): Theme | undefined {
   try {
     const value = storage?.getItem(THEME_STORAGE_KEY);
@@ -44,7 +48,9 @@ export function setTheme(root: HTMLElement, controlsRoot: ParentNode, theme: The
   syncPressedState(controlsRoot, theme);
 }
 
-export function initThemeControls(controlsRoot: ParentNode = document, storage?: ThemeStorage) {
+export function initThemeControls(controlsRoot: ParentNode = document, storage?: ThemeStorage): Cleanup {
+  themeControlCleanups.get(controlsRoot)?.();
+
   const root = document.documentElement;
   const activeStorage = storage ?? browserStorage();
   const initialTheme = isTheme(root.dataset.theme) ? root.dataset.theme : (savedTheme(activeStorage) ?? 'light');
@@ -53,12 +59,28 @@ export function initThemeControls(controlsRoot: ParentNode = document, storage?:
   root.style.colorScheme = colorSchemeFor(initialTheme);
   syncPressedState(controlsRoot, initialTheme);
 
-  controlsRoot.querySelectorAll<HTMLButtonElement>('[data-theme-button]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const theme = button.dataset.themeButton;
-      if (isTheme(theme)) {
-        setTheme(root, controlsRoot, theme, activeStorage);
-      }
-    });
-  });
+  const buttons = Array.from(controlsRoot.querySelectorAll<HTMLButtonElement>('[data-theme-button]'));
+  const onThemeClick = (event: Event) => {
+    const button = event.currentTarget;
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    const theme = button.dataset.themeButton;
+    if (isTheme(theme)) {
+      setTheme(root, controlsRoot, theme, activeStorage);
+    }
+  };
+
+  buttons.forEach((button) => button.addEventListener('click', onThemeClick));
+
+  const cleanup = () => {
+    buttons.forEach((button) => button.removeEventListener('click', onThemeClick));
+    if (themeControlCleanups.get(controlsRoot) === cleanup) {
+      themeControlCleanups.delete(controlsRoot);
+    }
+  };
+
+  themeControlCleanups.set(controlsRoot, cleanup);
+  return cleanup;
 }
