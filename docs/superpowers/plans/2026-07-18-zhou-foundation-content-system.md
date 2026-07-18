@@ -423,9 +423,9 @@ git commit -m "feat: establish Astro portfolio foundation"
 Replace `vitest.config.js` so the migration suite discovers both legacy JavaScript and new TypeScript tests:
 
 ```js
-import { defineConfig } from 'vitest/config';
+import { getViteConfig } from 'astro/config';
 
-export default defineConfig({
+export default getViteConfig({
   test: {
     environment: 'jsdom',
     include: ['tests/**/*.test.{js,ts}'],
@@ -614,6 +614,7 @@ git commit -m "feat: define typed portfolio content contracts"
 
 - Create: `src/domain/content.ts`
 - Create: `tests/content-domain.test.ts`
+- Modify: `vitest.config.js`
 
 **Interfaces:**
 
@@ -621,6 +622,19 @@ git commit -m "feat: define typed portfolio content contracts"
 - Consumes: collection names `work | lab | notes` and schemas from Task 2.
 
 - [ ] **Step 1: Write failing domain tests**
+
+Update `vitest.config.js` to load Astro's Vite plugins so `astro:content` resolves during unit tests:
+
+```js
+import { getViteConfig } from 'astro/config';
+
+export default getViteConfig({
+  test: {
+    environment: 'jsdom',
+    include: ['tests/**/*.test.{js,ts}'],
+  },
+});
+```
 
 Create `tests/content-domain.test.ts`:
 
@@ -691,7 +705,7 @@ Expected: 2 tests pass and Astro check exits 0.
 - [ ] **Step 5: Commit**
 
 ```powershell
-git add src/domain/content.ts tests/content-domain.test.ts
+git add src/domain/content.ts tests/content-domain.test.ts vitest.config.js
 git commit -m "feat: add deterministic public content queries"
 ```
 
