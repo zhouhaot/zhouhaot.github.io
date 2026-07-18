@@ -1,0 +1,12 @@
+---
+import type { PublicArticle } from '@/domain/articles';
+interface Props { article: PublicArticle }
+const { article } = Astro.props;
+---
+
+<article class="article-card" data-article-card data-article-search-text={article.searchText} data-article-tags={JSON.stringify(article.tags.map((tag) => tag.key))}>
+  <time datetime={article.publishedAt.toISOString()}>{article.publishedAt.toLocaleDateString('zh-CN')}</time>
+  <h2><a href={article.href}>{article.title}</a></h2>
+  <p>{article.summary}</p>
+  <ul aria-label="Tags">{article.tags.map((tag) => <li>{tag.label}</li>)}</ul>
+</article>

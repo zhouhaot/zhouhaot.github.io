@@ -1,0 +1,27 @@
+---
+import { getEntry, render } from 'astro:content';
+import ArticleReader from '@/components/articles/ArticleReader.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import { articleNeighbours, buildArticleToc, type PublicArticle } from '@/domain/articles';
+import { getPublishedArticles } from '@/domain/articles.server';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import '@/styles/articles.css';
+
+export async function getStaticPaths() {
+  const articles = await getPublishedArticles();
+  return articles.map((article) => ({ params: { id: article.id }, props: { article, articles } }));
+}
+interface Props { article: PublicArticle; articles: PublicArticle[] }
+const { article, articles } = Astro.props;
+const entry = await getEntry('notes', article.id);
+if (!entry) throw new Error(`Article entry not found: ${article.id}`);
+const { Content, headings } = await render(entry);
+const toc = buildArticleToc(headings);
+const { previous, next } = articleNeighbours(articles, article.id);
+---
+
+<BaseLayout title={`${article.title} | zhou`} description={article.summary} canonicalPath={article.href} type="article">
+  <SiteHeader slot="header" />
+  <ArticleReader article={article} toc={toc} previous={previous} next={next}><Content /></ArticleReader>
+  <script>import { initArticleReader } from '@/scripts/articles'; initArticleReader();</script>
+</BaseLayout>

@@ -1,0 +1,26 @@
+---
+import type { ArticleTag, PublicArticle } from '@/domain/articles';
+import ArticleCard from './ArticleCard.astro';
+interface Props { articles: PublicArticle[]; tags: ArticleTag[] }
+const { articles, tags } = Astro.props;
+---
+
+<section class="article-discovery" data-article-discovery data-view="list" aria-label="文章发现">
+  <div class="article-discovery__controls">
+    <label for="article-search">搜索文章</label>
+    <input id="article-search" type="search" data-article-search />
+    <div class="article-discovery__tags" aria-label="按标签筛选">
+      {tags.map((tag) => <button type="button" data-article-tag={tag.key} aria-pressed="false">{tag.label}</button>)}
+    </div>
+    <div class="article-discovery__views" aria-label="文章布局">
+      <button type="button" data-article-view="list" aria-pressed="true">列表</button>
+      <button type="button" data-article-view="grid" aria-pressed="false">网格</button>
+    </div>
+  </div>
+  <p data-article-result-count aria-live="polite"></p>
+  <div data-article-no-results hidden>
+    <p>没有匹配这些条件的文章。</p>
+    <button type="button" data-article-reset>重置筛选</button>
+  </div>
+  <ul class="article-discovery__items">{articles.map((article) => <li><ArticleCard article={article} /></li>)}</ul>
+</section>

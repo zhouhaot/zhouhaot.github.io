@@ -1,0 +1,23 @@
+---
+import type { ArticleTocItem, PublicArticle } from '@/domain/articles';
+interface Props { article: PublicArticle; toc: ArticleTocItem[]; previous?: PublicArticle | undefined; next?: PublicArticle | undefined }
+const { article, toc, previous, next } = Astro.props;
+---
+
+<article class="article-reader" data-article-reader>
+  <a class="article-reader__back" href="/articles/">返回文章列表</a>
+  <header class="article-reader__header">
+    <h1>{article.title}</h1>
+    <p>{article.summary}</p>
+    <p class="article-reader__dates"><time datetime={article.publishedAt.toISOString()}>{article.publishedAt.toLocaleDateString('zh-CN')}</time>{article.updatedAt && <> · <time datetime={article.updatedAt.toISOString()}>{article.updatedAt.toLocaleDateString('zh-CN')}</time></>}</p>
+    <ul aria-label="Tags">{article.tags.map((tag) => <li>{tag.label}</li>)}</ul>
+  </header>
+  <progress class="article-reader__progress" data-article-progress max="100" value="0" aria-label="阅读进度"></progress>
+  {toc.length > 0 && <details class="article-reader__toc-mobile"><summary>本文目录</summary><nav aria-label="本文目录"><ol>{toc.map((item) => <li class={`toc-depth-${item.depth}`}><a href={item.href}>{item.text}</a></li>)}</ol></nav></details>}
+  <div class="article-reader__layout">
+    <div class="article-content"><slot /></div>
+    {toc.length > 0 && <nav class="article-reader__toc-desktop" aria-label="本文目录"><ol>{toc.map((item) => <li class={`toc-depth-${item.depth}`}><a href={item.href}>{item.text}</a></li>)}</ol></nav>}
+  </div>
+  <p data-article-copy-status aria-live="polite"></p>
+  {(previous || next) && <nav class="article-reader__pager" aria-label="文章导航">{previous && <a href={previous.href}>上一篇：{previous.title}</a>}{next && <a href={next.href}>下一篇：{next.title}</a>}</nav>}
+</article>
