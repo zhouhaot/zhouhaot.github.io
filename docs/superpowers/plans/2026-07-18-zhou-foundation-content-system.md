@@ -113,7 +113,7 @@ Set `package.json` to:
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.61.1",
     "dompurify": "3.2.6",
-    "eslint": "9.39.2",
+    "eslint": "10.7.0",
     "eslint-plugin-astro": "3.0.1",
     "jsdom": "26.1.0",
     "marked": "15.0.12",
