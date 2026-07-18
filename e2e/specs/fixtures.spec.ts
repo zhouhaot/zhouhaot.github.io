@@ -35,3 +35,59 @@ test('fixture lightbox opens and restores focus to its trigger', async ({ page }
   await expect(page.locator('[data-portfolio-lightbox]')).toBeHidden();
   await expect(trigger).toBeFocused();
 });
+
+test('fixture lightbox has a distinct modal surface and separated touch controls at 390px', async ({ page }) => {
+  await setViewport(page, 390, 844);
+  await page.goto(`${fixture}/portfolio/`);
+  await page.locator('[data-lightbox-trigger]').click();
+
+  const presentation = await page.locator('[data-portfolio-lightbox]').evaluate((dialog) => {
+    const element = dialog as HTMLDialogElement;
+    const rect = element.getBoundingClientRect();
+    const styles = getComputedStyle(element);
+    const backdrop = getComputedStyle(element, '::backdrop');
+    const controls = Array.from(
+      element.querySelectorAll<HTMLElement>('[data-lightbox-close], [data-lightbox-previous], [data-lightbox-next]'),
+    ).map((control) => {
+      const controlRect = control.getBoundingClientRect();
+      return {
+        left: controlRect.left,
+        right: controlRect.right,
+        top: controlRect.top,
+        bottom: controlRect.bottom,
+        width: controlRect.width,
+        height: controlRect.height,
+      };
+    });
+    return {
+      modal: element.matches(':modal'),
+      rect,
+      padding: styles.padding,
+      gap: styles.gap,
+      backdrop: backdrop.backgroundColor,
+      controls,
+    };
+  });
+
+  expect(presentation.modal).toBe(true);
+  expect(presentation.rect.left).toBeGreaterThanOrEqual(12);
+  expect(presentation.rect.right).toBeLessThanOrEqual(378);
+  expect(Number.parseFloat(presentation.padding)).toBeGreaterThan(0);
+  expect(Number.parseFloat(presentation.gap)).toBeGreaterThan(0);
+  expect(presentation.backdrop).not.toBe('rgba(0, 0, 0, 0)');
+  expect(presentation.controls).toHaveLength(3);
+  for (const control of presentation.controls) {
+    expect(control.width).toBeGreaterThanOrEqual(44);
+    expect(control.height).toBeGreaterThanOrEqual(44);
+  }
+  for (const [index, control] of presentation.controls.entries()) {
+    for (const other of presentation.controls.slice(index + 1)) {
+      expect(
+        control.right <= other.left ||
+          other.right <= control.left ||
+          control.bottom <= other.top ||
+          other.bottom <= control.top,
+      ).toBe(true);
+    }
+  }
+});
