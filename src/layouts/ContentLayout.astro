@@ -11,7 +11,13 @@ interface Props {
 const { title, summary, publishedAt, canonicalPath } = Astro.props;
 ---
 
-<BaseLayout title={`${title} — zhou`} description={summary} canonicalPath={canonicalPath} type="article">
+<BaseLayout
+  title={`${title} — zhou`}
+  description={summary}
+  canonicalPath={canonicalPath}
+  type="article"
+  seoKind="article"
+>
   <SiteHeader slot="header" />
   <article>
     <header>

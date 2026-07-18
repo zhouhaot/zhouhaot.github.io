@@ -1,0 +1,16 @@
+---
+import SiteHeader from '@/components/SiteHeader.astro';
+import { SITE } from '@/config/site';
+import { PUBLIC_ROUTES } from '@/domain/routes';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="页面不存在 | zhou" description="请求的页面不存在。" canonicalPath="/404/" seoKind="list" noindex>
+  <SiteHeader slot="header" />
+  <section class="empty-state" aria-labelledby="missing-page-heading">
+    <h1 id="missing-page-heading">页面不存在</h1>
+    <p>这个地址没有对应的公开页面。</p>
+    <p><a data-not-found-primary href={SITE.githubUrl} rel="me external">访问 GitHub</a></p>
+    <p><a data-not-found-secondary href={PUBLIC_ROUTES.home}>返回首页</a></p>
+  </section>
+</BaseLayout>

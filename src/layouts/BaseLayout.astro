@@ -1,5 +1,6 @@
 ---
 import { SITE } from '@/config/site';
+import { canonicalUrl, jsonLdScript, pageStructuredData, type SeoPageKind } from '@/domain/seo';
 import { themeInitializationScript } from '@/scripts/theme-init';
 import '@/styles/tokens.css';
 import '@/styles/base.css';
@@ -9,19 +10,21 @@ interface Props {
   title?: string;
   description?: string;
   canonicalPath?: string;
-  image?: string;
   type?: 'website' | 'article';
+  seoKind?: SeoPageKind;
+  noindex?: boolean;
 }
 
 const {
   title = SITE.title,
   description = SITE.description,
   canonicalPath = Astro.url.pathname,
-  image = '/og-default.png',
   type = 'website',
+  seoKind = 'home',
+  noindex = false,
 } = Astro.props;
-const canonical = new URL(canonicalPath, SITE.url);
-const socialImage = new URL(image, SITE.url);
+const canonical = canonicalUrl(canonicalPath);
+const structuredData = pageStructuredData({ kind: seoKind, title, description, path: canonicalPath });
 ---
 
 <!doctype html>
@@ -36,9 +39,16 @@ const socialImage = new URL(image, SITE.url);
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={socialImage} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} RSS`} href="/rss.xml" />
+    <meta name="theme-color" content="#f7f8fa" />
+    <meta name="color-scheme" content="light dark" />
+    {noindex && <meta name="robots" content="noindex,follow" />}
     <title>{title}</title>
+    <script is:inline type="application/ld+json" set:html={jsonLdScript(structuredData)} />
     <script is:inline set:html={themeInitializationScript} />
   </head>
   <body>

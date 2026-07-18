@@ -10,7 +10,7 @@ import '@/styles/articles.css';
 const articles = await getPublishedArticles();
 ---
 
-<BaseLayout title="文章 | zhou" description="公开技术笔记和文章。" canonicalPath="/articles/">
+<BaseLayout title="文章 | zhou" description="公开技术笔记和文章。" canonicalPath="/articles/" seoKind="list">
   <SiteHeader slot="header" />
   <section class="articles-page" aria-labelledby="articles-heading">
     <header><h1 id="articles-heading">文章</h1><p>公开技术笔记和文章。</p></header>

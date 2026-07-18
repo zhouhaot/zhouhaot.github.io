@@ -16,7 +16,8 @@
     "format": "prettier --write \"src/**/*.{astro,ts,md,mdx,css}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "audit:production": "node scripts/production-audit.mjs dist"
   },
   "dependencies": {
     "@astrojs/mdx": "7.0.3",

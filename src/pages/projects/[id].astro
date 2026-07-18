@@ -16,7 +16,12 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<BaseLayout title={`${project.title} | zhou`} description={project.summary} canonicalPath={project.href}>
+<BaseLayout
+  title={`${project.title} | zhou`}
+  description={project.summary}
+  canonicalPath={project.href}
+  seoKind="project"
+>
   <SiteHeader slot="header" />
   <ProjectDetail project={project} />
 </BaseLayout>

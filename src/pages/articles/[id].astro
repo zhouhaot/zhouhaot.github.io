@@ -23,7 +23,13 @@ const toc = buildArticleToc(headings);
 const { previous, next } = articleNeighbours(articles, article.id);
 ---
 
-<BaseLayout title={`${article.title} | zhou`} description={article.summary} canonicalPath={article.href} type="article">
+<BaseLayout
+  title={`${article.title} | zhou`}
+  description={article.summary}
+  canonicalPath={article.href}
+  type="article"
+  seoKind="article"
+>
   <SiteHeader slot="header" />
   <ArticleReader article={article} toc={toc} previous={previous} next={next}><Content /></ArticleReader>
   <script>
