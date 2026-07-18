@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const loadTheme = () => import('../src/domain/theme').catch(() => undefined);
+const loadThemeInitializer = () => import('../src/scripts/theme-init').catch(() => undefined);
 
 const source = (path: string) => {
   try {
@@ -12,6 +13,13 @@ const source = (path: string) => {
   } catch {
     return '';
   }
+};
+
+const builtCss = () => {
+  const html = source('dist/index.html');
+  const stylesheet = html.match(/<link rel="stylesheet" href="([^"]+\.css)">/)?.[1];
+
+  return stylesheet ? source(`dist${stylesheet}`) : '';
 };
 
 describe('semantic theme foundation', () => {
@@ -40,17 +48,12 @@ describe('semantic theme foundation', () => {
     expect(theme?.resolveTheme(undefined, false)).not.toBe('cyber');
   });
 
-  it('initializes the root theme before normal page scripts without assuming storage is available', () => {
+  it('loads an inline pre-paint initializer without a deferred module dependency', () => {
     const layout = source('src/layouts/BaseLayout.astro');
-    const initializer = layout.indexOf('THEME_STORAGE_KEY');
-    const moduleScripts = layout.indexOf('type="module"');
 
-    expect(initializer).toBeGreaterThan(-1);
-    expect(initializer).toBeLessThan(moduleScripts === -1 ? Infinity : moduleScripts);
-    expect(layout).toContain('document.documentElement.dataset.theme');
-    expect(layout).toContain('try');
-    expect(layout).toContain('localStorage.getItem');
-    expect(layout).toContain('THEME_STORAGE_KEY');
+    expect(layout).toContain("@/scripts/theme-init");
+    expect(layout).toContain('is:inline');
+    expect(layout).not.toContain('type="module"');
   });
 
   it('defines semantic color and status tokens for every supported theme', () => {
@@ -108,5 +111,102 @@ describe('semantic theme foundation', () => {
     expect(layout).toContain('class="site-main"');
     expect(header).toContain('class="site-header"');
     expect(header).toContain('class="site-wordmark"');
+  });
+
+  it('does not let an inline root style override theme color-scheme rules', () => {
+    const layout = source('src/layouts/BaseLayout.astro');
+
+    expect(layout).not.toMatch(/<html[^>]*style=[^>]*color-scheme/);
+  });
+
+  it('falls back to light when both storage and matchMedia are unavailable', async () => {
+    const initializer = await loadThemeInitializer();
+    const root = { dataset: {} as Record<string, string>, style: { colorScheme: '' } };
+
+    expect(initializer).toBeDefined();
+    expect(
+      initializer?.initializeTheme({
+        root,
+        storage: {
+          getItem: () => {
+            throw new Error('storage unavailable');
+          },
+        },
+        matchMedia: () => {
+          throw new Error('media unavailable');
+        },
+      }),
+    ).toBe('light');
+    expect(root).toEqual({ dataset: { theme: 'light' }, style: { colorScheme: 'light' } });
+  });
+
+  it('sets dark native controls for an explicitly saved cyber theme', async () => {
+    const initializer = await loadThemeInitializer();
+    const root = { dataset: {} as Record<string, string>, style: { colorScheme: '' } };
+
+    expect(initializer).toBeDefined();
+    expect(
+      initializer?.initializeTheme({
+        root,
+        storage: { getItem: () => 'cyber' },
+        matchMedia: () => ({ matches: false }),
+      }),
+    ).toBe('cyber');
+    expect(root).toEqual({ dataset: { theme: 'cyber' }, style: { colorScheme: 'dark' } });
+  });
+
+  it('emits and executes the pre-paint initializer before built CSS', async () => {
+    const initializer = await loadThemeInitializer();
+    const documentElement = { dataset: {} as Record<string, string>, style: { colorScheme: '' } };
+    const html = source('dist/index.html');
+    const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+
+    expect(initializer?.themeInitializationScript).toBeDefined();
+    expect(script).toBeDefined();
+    expect(html.indexOf('<script>')).toBeLessThan(html.indexOf('<link rel="stylesheet"'));
+    expect(() =>
+      new Function('document', 'localStorage', 'matchMedia', script ?? '')(
+        { documentElement },
+        { getItem: () => 'cyber' },
+        () => ({ matches: false }),
+      ),
+    ).not.toThrow();
+    expect(documentElement).toEqual({ dataset: { theme: 'cyber' }, style: { colorScheme: 'dark' } });
+  });
+
+  it('keeps hex fallbacks and OKLCH enhancements in the built CSS', () => {
+    const css = builtCss();
+
+    expect(css).toContain('--color-background:#f8fafb');
+    expect(css).toContain('@supports (color:oklch(50% 0 0))');
+    expect(css).toContain('--color-background:oklch(98% .004 240)');
+  });
+
+  it('defines the complete Direction C rhythm, shape, and motion tokens used by components', () => {
+    const tokens = source('src/styles/tokens.css');
+    const components = source('src/styles/components.css');
+
+    for (const token of [
+      '--space-xs: 6px',
+      '--space-sm: 10px',
+      '--space-md: 16px',
+      '--space-lg: 24px',
+      '--space-xl: 40px',
+      '--space-2xl: 72px',
+      '--radius-xs: 4px',
+      '--radius-md: 8px',
+      '--radius-lg: 14px',
+      '--radius-xl: 20px',
+      '--duration-fast: 150ms',
+      '--duration-normal: 260ms',
+      '--duration-enter: 320ms',
+      '--ease-standard: cubic-bezier(0.22, 1, 0.36, 1)',
+    ]) {
+      expect(tokens).toContain(token);
+    }
+
+    expect(components).toContain('var(--space-lg)');
+    expect(components).toContain('var(--duration-fast)');
+    expect(components).toContain('var(--ease-standard)');
   });
 });

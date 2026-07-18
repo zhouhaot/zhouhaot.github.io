@@ -6,7 +6,7 @@
   inline-size: min(100%, var(--layout-shell));
   min-block-size: 1px;
   margin-inline: auto;
-  padding: var(--space-8) var(--layout-gutter);
+  padding: var(--space-xl) var(--layout-gutter);
 }
 
 .site-header {
@@ -19,7 +19,7 @@
   inline-size: min(100%, var(--layout-shell));
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-md);
   min-block-size: 3.5rem;
   margin-inline: auto;
   padding-inline: var(--layout-gutter);
@@ -30,6 +30,7 @@
   font-family: var(--font-mono);
   font-weight: 600;
   text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .site-wordmark::before {
@@ -40,7 +41,7 @@
 .site-header__links {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-lg);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -50,6 +51,7 @@
 .site-header__github {
   color: var(--color-muted);
   text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .site-header__links a:hover,

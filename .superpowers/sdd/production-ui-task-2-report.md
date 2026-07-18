@@ -40,3 +40,22 @@ Result: 1 test file passed, 8 tests passed.
 | `git diff --check` | Passed. |
 
 `npm run format:check` remains unavailable as a repository baseline: Prettier has no Astro parser configured and its configured `e2e/**/*.ts` glob has no matching files. This does not affect the required Task 2 verification commands above.
+
+## Review hardening patch
+
+The follow-up review found three root causes: the root inline `color-scheme` declaration overrode the theme selector rules, a storage exception could fall through to an unguarded `matchMedia` call, and CSS optimization removed repeated fallback declarations in favor of OKLCH.
+
+### Additional RED evidence
+
+Six new focused assertions failed before the patch. They demonstrated the inline cascade conflict; absent executable initializer behavior; storage and `matchMedia` double-failure; cyber native control mode; stripped built-CSS fallbacks; and the incomplete Direction C rhythm, radius, and motion token set.
+
+### Follow-up implementation
+
+- Added `src/scripts/theme-init.ts`, with an executable dependency-injected initializer and an inline pre-paint script generated from the same theme contract.
+- The initializer always assigns both `data-theme` and `style.colorScheme`; storage and media access are independently guarded, so dual failure resolves to light.
+- Replaced duplicate custom-property fallbacks with hex baseline theme blocks plus `@supports (color: oklch(...))` overrides, which survive built-CSS optimization.
+- Added all required 6/10/16/24/40/72px spacing, 4/8/14/20px radius, 150/260/320ms duration, and standard easing tokens; components now consume the semantic rhythm and motion tokens.
+
+Focused follow-up GREEN result: 14 tests passed, including execution of the built pre-paint script and inspection of the emitted stylesheet asset.
+
+Follow-up verification: `npm run check` completed with 0 errors, 0 warnings, and 0 hints; `npm test` completed with 5 files and 50 tests passed; `npm run build` completed successfully; and the focused theme suite passed 14/14 after the fresh build.

@@ -5,10 +5,10 @@
 }
 
 html {
-  color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
 }
 
+:root,
 html[data-theme='light'] {
   color-scheme: light;
 }
@@ -46,6 +46,7 @@ select {
 :focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
+  border-radius: var(--radius-xs);
 }
 
 .skip-link {
@@ -53,13 +54,14 @@ select {
   z-index: 100;
   left: var(--layout-gutter);
   transform: translateY(-200%);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-xs) var(--space-sm);
   background: var(--color-foreground);
   color: var(--color-background);
+  border-radius: var(--radius-md);
 }
 
 .skip-link:focus {
-  transform: translateY(var(--space-3));
+  transform: translateY(var(--space-sm));
 }
 
 @media (prefers-reduced-motion: reduce) {
