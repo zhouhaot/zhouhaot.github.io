@@ -66,6 +66,7 @@ playwright.config.ts             built-site E2E configuration
 - Modify: `package.json`
 - Modify: `package-lock.json`
 - Modify: `eslint.config.js`
+- Modify: `.gitignore`
 - Create: `astro.config.mjs`
 - Create: `tsconfig.json`
 - Create: `src/env.d.ts`
@@ -113,8 +114,8 @@ Set `package.json` to:
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.61.1",
     "dompurify": "3.2.6",
-    "eslint": "10.7.0",
-    "eslint-plugin-astro": "3.0.1",
+    "eslint": "9.39.2",
+    "eslint-plugin-astro": "1.6.0",
     "jsdom": "26.1.0",
     "marked": "15.0.12",
     "prettier": "3.8.2",
@@ -136,6 +137,18 @@ npm install
 Expected: exit 0 and an updated `package-lock.json` with `astro@7.1.1`.
 
 - [ ] **Step 3: Add Astro and TypeScript configuration**
+
+Replace `.gitignore` with:
+
+```gitignore
+node_modules/
+.worktrees/
+.superpowers/
+.astro/
+dist/
+playwright-report/
+test-results/
+```
 
 Create `astro.config.mjs`:
 
