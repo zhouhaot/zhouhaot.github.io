@@ -59,3 +59,7 @@ Six new focused assertions failed before the patch. They demonstrated the inline
 Focused follow-up GREEN result: 14 tests passed, including execution of the built pre-paint script and inspection of the emitted stylesheet asset.
 
 Follow-up verification: `npm run check` completed with 0 errors, 0 warnings, and 0 hints; `npm test` completed with 5 files and 50 tests passed; `npm run build` completed successfully; and the focused theme suite passed 14/14 after the fresh build.
+
+## Hermetic verification patch
+
+Added the missing Direction C `--radius-full: 999px` token after a focused RED assertion failed. The theme test suite now creates its build artifact once in `beforeAll` using `execFileSync`; on Windows it invokes `cmd.exe /c "npm run build"` directly, avoiding `.cmd` spawn failures and recursive test execution. After moving `dist` aside, a direct focused run rebuilt the artifact and passed 14/14.

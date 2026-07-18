@@ -1,8 +1,9 @@
 // @vitest-environment node
 
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 const loadTheme = () => import('../src/domain/theme').catch(() => undefined);
 const loadThemeInitializer = () => import('../src/scripts/theme-init').catch(() => undefined);
@@ -22,7 +23,22 @@ const builtCss = () => {
   return stylesheet ? source(`dist${stylesheet}`) : '';
 };
 
+const buildCommand =
+  process.platform === 'win32'
+    ? { command: process.env.ComSpec ?? 'cmd.exe', args: ['/d', '/s', '/c', 'npm run build'] }
+    : { command: 'npm', args: ['run', 'build'] };
+
 describe('semantic theme foundation', () => {
+  beforeAll(
+    () => {
+      execFileSync(buildCommand.command, buildCommand.args, {
+        cwd: resolve('.'),
+        stdio: 'pipe',
+      });
+    },
+    120_000,
+  );
+
   it('limits themes to light, dark, and cyber', async () => {
     const theme = await loadTheme();
 
@@ -197,6 +213,7 @@ describe('semantic theme foundation', () => {
       '--radius-md: 8px',
       '--radius-lg: 14px',
       '--radius-xl: 20px',
+      '--radius-full: 999px',
       '--duration-fast: 150ms',
       '--duration-normal: 260ms',
       '--duration-enter: 320ms',

@@ -114,6 +114,7 @@ html[data-theme='cyber'] {
   --radius-md: 8px;
   --radius-lg: 14px;
   --radius-xl: 20px;
+  --radius-full: 999px;
   --duration-fast: 150ms;
   --duration-normal: 260ms;
   --duration-enter: 320ms;
