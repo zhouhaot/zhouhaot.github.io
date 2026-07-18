@@ -117,8 +117,10 @@ function assertUniqueSafeIds(entries: readonly ProjectSource[]): void {
   const seen = new Set<string>();
 
   for (const entry of entries) {
-    projectRoute(entry.id);
-    const normalized = entry.id.normalize('NFC').trim().toLowerCase();
+    const canonicalId = entry.id.normalize('NFC').trim();
+    projectRoute(canonicalId);
+    if (entry.id !== canonicalId) throw new Error(`Project id must be canonical: ${entry.id}`);
+    const normalized = canonicalId.toLowerCase();
     if (seen.has(normalized)) throw new Error(`Duplicate project id: ${entry.id}`);
     seen.add(normalized);
   }
@@ -157,6 +159,10 @@ export function buildProjects(entries: readonly ProjectSource[], production = im
   const published = entries.filter((entry) => isPublicEntry(entry.data, production));
   assertUniqueSafeIds(published);
   return [...published].sort(newestFirst).map(toPublicProject);
+}
+
+export function projectStaticPaths(projects: readonly PublicProject[]) {
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
 }
 
 export async function getPublishedProjects(): Promise<PublicProject[]> {

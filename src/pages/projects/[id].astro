@@ -1,13 +1,12 @@
 ---
 import ProjectDetail from '@/components/projects/ProjectDetail.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
-import { getPublishedProjects, type PublicProject } from '@/domain/projects';
+import { getPublishedProjects, projectStaticPaths, type PublicProject } from '@/domain/projects';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import '@/styles/projects.css';
 
 export async function getStaticPaths() {
-  const projects = await getPublishedProjects();
-  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+  return projectStaticPaths(await getPublishedProjects());
 }
 
 interface Props {

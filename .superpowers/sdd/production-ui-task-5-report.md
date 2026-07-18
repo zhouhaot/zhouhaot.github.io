@@ -40,3 +40,9 @@ For comparison, an isolated `855c9be` worktree ran the same homepage suite with 
 Independent review found that duplicate project IDs were compared without the route builder's whitespace behavior or Unicode normalization. New RED tests failed for `alpha` versus ` alpha ` and composed versus decomposed `café`. The route builder and duplicate key now both normalize NFC and trim; duplicate detection then case-folds the canonical segment, after validating the route segment first.
 
 The output contracts were also hardened: raw generated source is scanned for legacy, placeholder, and private-contact markers; the percentage-metric scan applies only after style/script markup is removed. The empty-project build now recursively verifies that the `projects` output directory contains only `index.html`, not merely the absence of one guessed detail route. Focused hardening verification passed 18/18 and cleaned `dist-projects-test` through `afterAll`.
+
+## Second-review canonical boundary
+
+The domain now rejects a source ID unless it is already trimmed and NFC-normalized. This prevents a single ` alpha ` entry from producing a static params value that differs from its canonical href. The detail page delegates static path creation to `projectStaticPaths`, which the domain tests verify against the public project ID and href.
+
+Raw-source prohibited-marker coverage now includes `简历` and `客户`, including explicit script/style fixtures. The raw scan remains independent from the metric scan, so CSS `100%` is ignored only after style/script nodes are removed. RED evidence covered both the previously accepted non-canonical ID and the missing raw Chinese marker; focused GREEN verification passed 19/19 with no temporary output directory remaining.

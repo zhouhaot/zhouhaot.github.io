@@ -14,7 +14,7 @@ let builtHtml = '';
 let builtSource = '';
 let builtPublicContent = '';
 let builtCss = '';
-const rawForbiddenMarkers = /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com/i;
+const rawForbiddenMarkers = /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|\u7b80\u5386|\u5ba2\u6237/i;
 const unverifiedMetric = /\d+%/;
 const homeCss = readFileSync(resolve('src/styles/home.css'), 'utf8');
 
@@ -94,7 +94,9 @@ describe('built production homepage', () => {
 
   it('keeps raw-source marker scanning separate from visible-content metrics', () => {
     expect('<script>TODO</script>').toMatch(rawForbiddenMarkers);
+    expect('<script>\u7b80\u5386</script>').toMatch(rawForbiddenMarkers);
     expect('<style>.card { width: 100%; }</style>').not.toMatch(rawForbiddenMarkers);
+    expect('<style>\u5ba2\u6237</style>').toMatch(rawForbiddenMarkers);
     const styleOnlyDocument = document.implementation.createHTMLDocument();
     styleOnlyDocument.documentElement.innerHTML = '<style>.card { width: 100%; }</style>';
     styleOnlyDocument.querySelector('style')?.remove();

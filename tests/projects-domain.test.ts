@@ -1,7 +1,13 @@
 // @vitest-environment node
 
 import { describe, expect, it } from 'vitest';
-import { buildProjects, projectSectionId, type LabProjectSource, type WorkProjectSource } from '../src/domain/projects';
+import {
+  buildProjects,
+  projectSectionId,
+  projectStaticPaths,
+  type LabProjectSource,
+  type WorkProjectSource,
+} from '../src/domain/projects';
 
 const work = (overrides: Partial<WorkProjectSource> = {}): WorkProjectSource => ({
   id: 'workflow-assistant',
@@ -68,14 +74,23 @@ describe('project domain', () => {
     expect(() => buildProjects([work({ id: 'Same-id' }), lab({ id: 'same-ID' })], true)).toThrow(/duplicate/i);
   });
 
-  it('rejects duplicate ids using the same trimmed, case-folded route identity', () => {
-    expect(() => buildProjects([work({ id: 'alpha' }), lab({ id: ' alpha ' })], true)).toThrow(/duplicate/i);
+  it('rejects non-canonical whitespace ids and case-folded duplicates', () => {
+    expect(() => buildProjects([work({ id: 'alpha' }), lab({ id: ' alpha ' })], true)).toThrow(/canonical/i);
     expect(() => buildProjects([work({ id: 'ALPHA' }), lab({ id: 'alpha' })], true)).toThrow(/duplicate/i);
   });
 
-  it('normalizes Unicode-equivalent route ids before duplicate detection and rejects unsafe ids first', () => {
-    expect(() => buildProjects([work({ id: 'caf\u00e9' }), lab({ id: 'cafe\u0301' })], true)).toThrow(/duplicate/i);
+  it('rejects non-NFC ids and rejects unsafe ids first', () => {
+    expect(() => buildProjects([work({ id: 'caf\u00e9' }), lab({ id: 'cafe\u0301' })], true)).toThrow(/canonical/i);
     expect(() => buildProjects([work({ id: ' unsafe/id ' }), lab({ id: 'unsafe/id' })], true)).toThrow(/safe/i);
+  });
+
+  it('rejects non-canonical ids before static params can diverge from project hrefs', () => {
+    expect(() => buildProjects([work({ id: ' alpha ' })], true)).toThrow(/canonical/i);
+
+    const [project] = buildProjects([work({ id: 'alpha' })], true);
+    const [path] = projectStaticPaths(project ? [project] : []);
+    expect(path?.params.id).toBe(project?.id);
+    expect(path?.props.project.href).toBe('/projects/alpha/');
   });
 
   it('rejects ids that cannot create safe project routes', () => {
