@@ -8,5 +8,5 @@ const { article } = Astro.props;
   <time datetime={article.publishedAt.toISOString()}>{article.publishedAt.toLocaleDateString('zh-CN')}</time>
   <h2><a href={article.href}>{article.title}</a></h2>
   <p>{article.summary}</p>
-  <ul aria-label="Tags">{article.tags.map((tag) => <li>{tag.label}</li>)}</ul>
+  <ul aria-label="标签">{article.tags.map((tag) => <li>{tag.label}</li>)}</ul>
 </article>

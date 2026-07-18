@@ -24,6 +24,24 @@ describe('article reader', () => {
     expect(writeText).toHaveBeenCalledWith('const answer = 42;'); expect(document.querySelector('[data-article-copy-status]')?.textContent).toMatch(/已复制/);
   });
 
+  it('creates copy controls in an isolated reader document and removes them across remount cleanup', () => {
+    const isolated = document.implementation.createHTMLDocument('article reader');
+    isolated.body.innerHTML = markup;
+    const code = isolated.querySelector<HTMLElement>('.article-content code')!;
+    const createElement = vi.spyOn(isolated, 'createElement');
+    const options = { clipboard: { writeText: vi.fn().mockResolvedValue(undefined) }, requestFrame: vi.fn(() => 1), cancelFrame: vi.fn() };
+    const first = initArticleReader(isolated, options);
+    const second = initArticleReader(isolated, options);
+    const button = isolated.querySelector<HTMLButtonElement>('[data-article-copy]')!;
+
+    expect(button.ownerDocument).toBe(code.ownerDocument);
+    expect(createElement).toHaveBeenCalledWith('button');
+    expect(isolated.querySelectorAll('[data-article-copy]')).toHaveLength(1);
+    first();
+    second();
+    expect(isolated.querySelector('[data-article-copy]')).toBeNull();
+  });
+
   it('announces copy failure and is a no-op without code', async () => {
     document.body.innerHTML = markup.replace('<pre><code>const answer = 42;</code></pre>', ''); const fail = vi.fn().mockRejectedValue(new Error('no'));
     initArticleReader(document, { clipboard: { writeText: fail } }); expect(document.querySelector('[data-article-copy]')).toBeNull();

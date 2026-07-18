@@ -25,7 +25,7 @@ describe('article discovery', () => {
     search.value = 'ＡＩ   assistant'; search.dispatchEvent(new Event('input'));
     document.querySelector<HTMLButtonElement>('[data-article-tag="ts"]')!.click();
     expect(document.querySelectorAll<HTMLElement>('[data-article-card][hidden]')).toHaveLength(1);
-    expect(document.querySelector<HTMLElement>('[data-article-result-count]')?.textContent).toContain('1');
+    expect(document.querySelector<HTMLElement>('[data-article-result-count]')?.textContent).toBe('共 1 篇文章');
   });
 
   it('matches canonical tag keys that contain spaces without splitting them into unrelated tags', () => {

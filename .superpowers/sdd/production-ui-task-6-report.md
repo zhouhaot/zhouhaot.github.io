@@ -22,14 +22,19 @@ Implemented static article discovery and reading for the `notes` collection. The
 
 | Command | Result |
 | --- | --- |
-| Focused articles tests | 5 files, 18 tests passed |
+| Focused article-reader/discovery/structure tests | 3 files, 12 tests passed |
 | `npm run check` | 0 errors, 0 warnings |
-| `npm test` | 17 files, 105 tests passed |
+| `npm test` | 17 files, 106 tests passed |
 | `npm run build` | passed; static output includes only `dist/articles/index.html` for articles |
 | `npx eslint src/ tests/` | passed |
 | `git diff --check` | passed |
 
 The isolated output-test directory is removed by `afterAll`; no `dist-articles-test` or inspection output directory remains.
+
+## Review follow-up
+
+- Added an isolated-document reader test that verifies generated copy controls are created by the code element's owner document and are removed safely across remount cleanup.
+- Made all discovery and reader user-facing and accessible text Chinese-only, including the live count and tag labels.
 
 ## Deferred
 

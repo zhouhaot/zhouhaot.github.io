@@ -51,7 +51,7 @@ export function initArticleDiscovery(root: ParentNode = document): Cleanup {
       const matches = tokens.every((token) => text.includes(token)) && [...selected].every((tag) => cardTags.has(tag));
       card.hidden = !matches; if (matches) visible += 1;
     }
-    if (count) count.textContent = `${visible} articles`;
+    if (count) count.textContent = `共 ${visible} 篇文章`;
     if (empty) empty.hidden = visible !== 0;
   };
   const onSearch = () => render();
@@ -108,7 +108,7 @@ export function initArticleReader(root: ParentNode = document, options: ReaderOp
   };
   const handlers = new Map<HTMLButtonElement, () => void>();
   for (const code of Array.from(reader.querySelectorAll<HTMLElement>('.article-content pre > code'))) {
-    const button = document.createElement('button'); button.type = 'button'; button.dataset.articleCopy = ''; button.textContent = '复制代码';
+    const button = code.ownerDocument.createElement('button'); button.type = 'button'; button.dataset.articleCopy = ''; button.textContent = '复制代码';
     const handler = () => { void copy(code); }; button.addEventListener('click', handler); code.parentElement?.append(button); generated.push(button); handlers.set(button, handler);
   }
   window.addEventListener('scroll', schedule, { passive: true }); window.addEventListener('resize', schedule); schedule();

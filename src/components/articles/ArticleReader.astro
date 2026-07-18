@@ -10,7 +10,7 @@ const { article, toc, previous, next } = Astro.props;
     <h1>{article.title}</h1>
     <p>{article.summary}</p>
     <p class="article-reader__dates"><time datetime={article.publishedAt.toISOString()}>{article.publishedAt.toLocaleDateString('zh-CN')}</time>{article.updatedAt && <> · <time datetime={article.updatedAt.toISOString()}>{article.updatedAt.toLocaleDateString('zh-CN')}</time></>}</p>
-    <ul aria-label="Tags">{article.tags.map((tag) => <li>{tag.label}</li>)}</ul>
+    <ul aria-label="标签">{article.tags.map((tag) => <li>{tag.label}</li>)}</ul>
   </header>
   <progress class="article-reader__progress" data-article-progress max="100" value="0" aria-label="阅读进度"></progress>
   {toc.length > 0 && <details class="article-reader__toc-mobile"><summary>本文目录</summary><nav aria-label="本文目录"><ol>{toc.map((item) => <li class={`toc-depth-${item.depth}`}><a href={item.href}>{item.text}</a></li>)}</ol></nav></details>}
