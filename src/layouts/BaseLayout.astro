@@ -1,6 +1,9 @@
 ---
 import { SITE } from '@/config/site';
-import '@/styles/foundation.css';
+import { THEME_STORAGE_KEY } from '@/domain/theme';
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+import '@/styles/components.css';
 
 interface Props {
   title?: string;
@@ -22,7 +25,7 @@ const socialImage = new URL(image, SITE.url);
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" style="color-scheme: light dark;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -36,10 +39,28 @@ const socialImage = new URL(image, SITE.url);
     <meta property="og:image" content={socialImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
+    <script is:inline define:vars={{ themeStorageKey: THEME_STORAGE_KEY }}>
+      try {
+        const savedTheme = localStorage.getItem(themeStorageKey);
+        const theme =
+          savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'cyber'
+            ? savedTheme
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        document.documentElement.dataset.theme = theme;
+      } catch {
+        document.documentElement.dataset.theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+      }
+    </script>
   </head>
   <body>
-    <a class="skip-link" href="#main-content">跳到主要内容</a>
-    <slot name="header" />
-    <main id="main-content" tabindex="-1"><slot /></main>
+    <div class="site-shell">
+      <a class="skip-link" href="#main-content">跳到主要内容</a>
+      <slot name="header" />
+      <main id="main-content" class="site-main" tabindex="-1"><slot /></main>
+    </div>
   </body>
 </html>

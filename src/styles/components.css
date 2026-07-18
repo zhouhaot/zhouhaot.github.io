@@ -1,0 +1,58 @@
+.site-shell {
+  min-block-size: 100vh;
+}
+
+.site-main {
+  inline-size: min(100%, var(--layout-shell));
+  min-block-size: 1px;
+  margin-inline: auto;
+  padding: var(--space-8) var(--layout-gutter);
+}
+
+.site-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.site-header__inner {
+  display: flex;
+  inline-size: min(100%, var(--layout-shell));
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-block-size: 3.5rem;
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter);
+}
+
+.site-wordmark {
+  color: var(--color-foreground);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-wordmark::before {
+  color: var(--color-accent);
+  content: '// ';
+}
+
+.site-header__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header__links a,
+.site-header__github {
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.site-header__links a:hover,
+.site-header__github:hover {
+  color: var(--color-foreground);
+}

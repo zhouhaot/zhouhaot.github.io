@@ -2,12 +2,12 @@
 import { SITE } from '@/config/site';
 ---
 
-<header>
-  <nav aria-label="主导航">
-    <a href="/" aria-label="zhou 首页">zhou</a>
-    <ul>
+<header class="site-header">
+  <nav class="site-header__inner" aria-label="主导航">
+    <a class="site-wordmark" href="/" aria-label="zhou 首页">zhou</a>
+    <ul class="site-header__links">
       {SITE.navigation.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
     </ul>
-    <a href={SITE.githubUrl} rel="me external">GitHub</a>
+    <a class="site-header__github" href={SITE.githubUrl} rel="me external">GitHub</a>
   </nav>
 </header>
