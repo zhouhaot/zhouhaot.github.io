@@ -639,6 +639,8 @@ export default getViteConfig({
 Create `tests/content-domain.test.ts`:
 
 ```ts
+// @vitest-environment node
+
 import { describe, expect, it } from 'vitest';
 import { isPublicEntry, sortNewestFirst } from '../src/domain/content';
 
