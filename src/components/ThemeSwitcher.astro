@@ -1,0 +1,13 @@
+---
+const themes = [
+  { value: 'light', label: '浅色' },
+  { value: 'dark', label: '深色' },
+  { value: 'cyber', label: '赛博' },
+] as const;
+---
+
+<div class="theme-switcher" data-theme-switcher role="group" aria-label="主题">
+  {themes.map((theme) => (
+    <button type="button" data-theme-button={theme.value} aria-pressed="false">{theme.label}</button>
+  ))}
+</div>

@@ -1,13 +1,46 @@
 ---
 import { SITE } from '@/config/site';
+import MobileDrawer from './MobileDrawer.astro';
+import MobileNavigation from './MobileNavigation.astro';
+import ThemeSwitcher from './ThemeSwitcher.astro';
+import { isCurrentNavigationRoute } from '@/scripts/navigation';
+
+const currentPath = Astro.url.pathname;
 ---
 
 <header class="site-header">
-  <nav class="site-header__inner" aria-label="主导航">
+  <div class="site-header__inner">
     <a class="site-wordmark" href="/" aria-label="zhou 首页">zhou</a>
-    <ul class="site-header__links">
-      {SITE.navigation.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
-    </ul>
-    <a class="site-header__github" href={SITE.githubUrl} rel="me external">GitHub</a>
-  </nav>
+    <nav class="site-header__links" data-desktop-navigation aria-label="主导航">
+      <ul>
+        {SITE.navigation.map((item) => (
+          <li><a href={item.href} aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <div class="site-header__actions">
+      <ThemeSwitcher />
+      <a class="site-header__github" href={SITE.githubUrl} rel="me external">GitHub</a>
+      <button
+        type="button"
+        class="site-header__menu-trigger"
+        data-menu-trigger
+        aria-label="打开菜单"
+        aria-controls="mobile-drawer"
+        aria-expanded="false"
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+    </div>
+  </div>
 </header>
+<MobileDrawer currentPath={currentPath} />
+<MobileNavigation currentPath={currentPath} />
+
+<script>
+  import { initNavigation } from '@/scripts/navigation';
+  import { initThemeControls } from '@/scripts/theme-controls';
+
+  initNavigation();
+  initThemeControls();
+</script>

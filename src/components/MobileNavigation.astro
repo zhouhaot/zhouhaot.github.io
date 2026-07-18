@@ -1,0 +1,16 @@
+---
+import { SITE } from '@/config/site';
+import { isCurrentNavigationRoute } from '@/scripts/navigation';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+---
+
+<nav class="mobile-navigation" data-mobile-navigation aria-label="移动端主导航">
+  {SITE.navigation.map((item) => (
+    <a href={item.href} aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>{item.label}</a>
+  ))}
+</nav>
