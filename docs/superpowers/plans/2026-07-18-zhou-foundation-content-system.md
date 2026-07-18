@@ -411,6 +411,7 @@ git commit -m "feat: establish Astro portfolio foundation"
 - Create: `src/content/lab/.gitkeep`
 - Create: `src/content/notes/.gitkeep`
 - Create: `tests/content-schema.test.ts`
+- Modify: `vitest.config.js`
 
 **Interfaces:**
 
@@ -418,6 +419,19 @@ git commit -m "feat: establish Astro portfolio foundation"
 - Consumes: Astro Content Collections from Task 1.
 
 - [ ] **Step 1: Write failing schema tests**
+
+Replace `vitest.config.js` so the migration suite discovers both legacy JavaScript and new TypeScript tests:
+
+```js
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    include: ['tests/**/*.test.{js,ts}'],
+  },
+});
+```
 
 Create `tests/content-schema.test.ts`:
 
@@ -590,7 +604,7 @@ Expected: 5 tests pass and Astro check exits 0.
 - [ ] **Step 6: Commit**
 
 ```powershell
-git add src/content.config.ts src/content src/domain/content-schema.ts tests/content-schema.test.ts
+git add src/content.config.ts src/content src/domain/content-schema.ts tests/content-schema.test.ts vitest.config.js
 git commit -m "feat: define typed portfolio content contracts"
 ```
 
