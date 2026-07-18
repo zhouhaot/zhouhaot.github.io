@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -38,7 +38,7 @@ describe('built projects route', () => {
 
   it('does not fabricate project details or ship private, placeholder, or sample content', () => {
     expect(existsSync(resolve(outputDirectory, 'projects/index.html'))).toBe(true);
-    expect(existsSync(resolve(outputDirectory, 'projects/workflow-assistant/index.html'))).toBe(false);
+    expect(readdirSync(resolve(outputDirectory, 'projects'))).toEqual(['index.html']);
     expect(html).not.toMatch(/placeholder|TODO|TBD|sample|contact@example\.com|简历|邮箱/i);
     expect(html).not.toMatch(/<img|<video|<picture|<source/i);
   });

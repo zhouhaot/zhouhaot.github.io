@@ -68,6 +68,16 @@ describe('project domain', () => {
     expect(() => buildProjects([work({ id: 'Same-id' }), lab({ id: 'same-ID' })], true)).toThrow(/duplicate/i);
   });
 
+  it('rejects duplicate ids using the same trimmed, case-folded route identity', () => {
+    expect(() => buildProjects([work({ id: 'alpha' }), lab({ id: ' alpha ' })], true)).toThrow(/duplicate/i);
+    expect(() => buildProjects([work({ id: 'ALPHA' }), lab({ id: 'alpha' })], true)).toThrow(/duplicate/i);
+  });
+
+  it('normalizes Unicode-equivalent route ids before duplicate detection and rejects unsafe ids first', () => {
+    expect(() => buildProjects([work({ id: 'caf\u00e9' }), lab({ id: 'cafe\u0301' })], true)).toThrow(/duplicate/i);
+    expect(() => buildProjects([work({ id: ' unsafe/id ' }), lab({ id: 'unsafe/id' })], true)).toThrow(/safe/i);
+  });
+
   it('rejects ids that cannot create safe project routes', () => {
     expect(() => buildProjects([work({ id: 'nested/project' })], true)).toThrow(/safe/i);
   });

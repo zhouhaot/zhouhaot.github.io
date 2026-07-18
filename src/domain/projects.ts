@@ -117,9 +117,9 @@ function assertUniqueSafeIds(entries: readonly ProjectSource[]): void {
   const seen = new Set<string>();
 
   for (const entry of entries) {
-    const normalized = entry.id.toLocaleLowerCase();
-    if (seen.has(normalized)) throw new Error(`Duplicate project id: ${entry.id}`);
     projectRoute(entry.id);
+    const normalized = entry.id.normalize('NFC').trim().toLowerCase();
+    if (seen.has(normalized)) throw new Error(`Duplicate project id: ${entry.id}`);
     seen.add(normalized);
   }
 }

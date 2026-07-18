@@ -34,3 +34,9 @@ Adding a second page changed Astro's CSS placement for the homepage: page CSS is
 3. `uses complete Direction C grid rows and a high-contrast semantic primary CTA` expected the primary CTA selector in `builtCss`; it was likewise in the inline page CSS.
 
 For comparison, an isolated `855c9be` worktree ran the same homepage suite with 6/6 passing. The correction now reads both linked and inline CSS, retains the raw generated source for framework-marker scanning, and clones the DOM before removing only `style` and `script` elements for the public-content scan. That scan still covers rendered head/body markup and attributes, including metadata, URLs, and `data-*` values. The corrected current homepage suite passes 6/6, and the final full suite passes 83/83.
+
+## Follow-up route hardening
+
+Independent review found that duplicate project IDs were compared without the route builder's whitespace behavior or Unicode normalization. New RED tests failed for `alpha` versus ` alpha ` and composed versus decomposed `café`. The route builder and duplicate key now both normalize NFC and trim; duplicate detection then case-folds the canonical segment, after validating the route segment first.
+
+The output contracts were also hardened: raw generated source is scanned for legacy, placeholder, and private-contact markers; the percentage-metric scan applies only after style/script markup is removed. The empty-project build now recursively verifies that the `projects` output directory contains only `index.html`, not merely the absence of one guessed detail route. Focused hardening verification passed 18/18 and cleaned `dist-projects-test` through `afterAll`.

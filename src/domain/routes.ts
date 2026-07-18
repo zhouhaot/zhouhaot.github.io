@@ -9,7 +9,7 @@ export const PUBLIC_ROUTES = {
 export type PublicRoute = (typeof PUBLIC_ROUTES)[keyof typeof PUBLIC_ROUTES];
 
 function detailRoute(base: string, id: string): string {
-  const segment = id.trim();
+  const segment = id.normalize('NFC').trim();
 
   if (!segment || segment === '.' || segment === '..' || /[\\/]/.test(segment)) {
     throw new Error('Detail route id must be a safe single path segment.');

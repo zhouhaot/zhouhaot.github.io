@@ -14,6 +14,8 @@ let builtHtml = '';
 let builtSource = '';
 let builtPublicContent = '';
 let builtCss = '';
+const rawForbiddenMarkers = /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com/i;
+const unverifiedMetric = /\d+%/;
 const homeCss = readFileSync(resolve('src/styles/home.css'), 'utf8');
 
 beforeAll(() => {
@@ -84,9 +86,20 @@ describe('built production homepage', () => {
   });
 
   it('does not ship prohibited legacy, placeholder, private-contact, or unverified-result content', () => {
+    expect(builtSource).not.toMatch(rawForbiddenMarkers);
     expect(builtPublicContent).not.toMatch(
       /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|简历|客户|\d+%/i,
     );
+  });
+
+  it('keeps raw-source marker scanning separate from visible-content metrics', () => {
+    expect('<script>TODO</script>').toMatch(rawForbiddenMarkers);
+    expect('<style>.card { width: 100%; }</style>').not.toMatch(rawForbiddenMarkers);
+    const styleOnlyDocument = document.implementation.createHTMLDocument();
+    styleOnlyDocument.documentElement.innerHTML = '<style>.card { width: 100%; }</style>';
+    styleOnlyDocument.querySelector('style')?.remove();
+    expect(styleOnlyDocument.documentElement.outerHTML).not.toMatch(unverifiedMetric);
+    expect('<p>95%</p>').toMatch(unverifiedMetric);
   });
 
   it('ships a token-based bento layout that stacks before 1024px without remote assets or framework runtime', () => {
