@@ -1,5 +1,7 @@
 ---
-const capabilities = ['Agent 与工具调用', 'RAG 与知识系统', '工作流自动化', '评估与工程交付'];
+import { PUBLIC_PROFILE } from '@/domain/public-profile';
+
+const capabilities = PUBLIC_PROFILE.capabilities;
 ---
 
 <section class="home-card home-capabilities" data-home-section="capability-map" aria-labelledby="capability-map-title">

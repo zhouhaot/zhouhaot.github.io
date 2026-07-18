@@ -20,6 +20,7 @@ const portfolioEntry = {
       type: 'image',
       source: 'workflow-map.webp',
       alt: 'A workflow map showing the approved process.',
+      caption: 'An approved visual record of the workflow.',
       width: 1600,
       height: 900,
       license: 'owned',
