@@ -23,17 +23,19 @@ const projects = await getPublishedProjects();
         <>
           <ProjectFilters projects={projects}>
             <div class="projects-grid">
-              {projects.map((project) => <ProjectCard project={project} />)}
+              {projects.map((project) => (
+                <ProjectCard project={project} />
+              ))}
             </div>
           </ProjectFilters>
-          <script>
-            import { initProjectFilters } from '@/scripts/project-filters';
-
-            initProjectFilters();
-          </script>
+          <script>import {initProjectFilters} from '@/scripts/project-filters'; initProjectFilters();</script>
         </>
       ) : (
-        <EmptyState collection="projects" title="项目正在整理中" description="确认可公开的项目或实验后，会在这里呈现。" />
+        <EmptyState
+          collection="projects"
+          title="项目正在整理中"
+          description="确认可公开的项目或实验后，会在这里呈现。"
+        />
       )
     }
   </section>

@@ -234,7 +234,7 @@
   padding-inline-start: 1.25rem;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 919px) {
   .projects-grid {
     grid-template-columns: 1fr;
   }

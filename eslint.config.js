@@ -58,7 +58,17 @@ const legacyGlobals = {
 };
 
 export default [
-  { ignores: ['vendor/**', 'node_modules/**', 'dist/**', 'data/**', '*.min.js'] },
+  {
+    ignores: [
+      'vendor/**',
+      'node_modules/**',
+      'dist/**',
+      'data/**',
+      'e2e/fixtures/.astro/**',
+      'e2e/fixtures/dist/**',
+      '*.min.js',
+    ],
+  },
   {
     files: ['js/**/*.js', 'themes/**/*.js', 'admin/**/*.js'],
     languageOptions: { ecmaVersion: 2022, sourceType: 'script', globals: legacyGlobals },
@@ -71,6 +81,14 @@ export default [
       'no-implied-eval': 'error',
     },
   },
+  {
+    files: ['js/**/*.js', 'themes/**/*.js', 'admin/**/*.js'],
+    rules: { '@typescript-eslint/no-unused-vars': 'off' },
+  },
   ...tseslint.configs.recommended,
   ...eslintPluginAstro.configs.recommended,
+  {
+    files: ['js/**/*.js', 'themes/**/*.js', 'admin/**/*.js'],
+    rules: { '@typescript-eslint/no-unused-vars': 'off' },
+  },
 ];

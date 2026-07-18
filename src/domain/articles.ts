@@ -63,7 +63,9 @@ function toPublicArticle(source: ArticleSource): PublicArticle {
     publishedAt: source.data.publishedAt,
     updatedAt: source.data.updatedAt,
     tags,
-    searchText: normalizeArticleText([source.data.title, source.data.summary, ...tags.map((tag) => tag.label)].join(' ')),
+    searchText: normalizeArticleText(
+      [source.data.title, source.data.summary, ...tags.map((tag) => tag.label)].join(' '),
+    ),
     href: articleRoute(source.id),
   };
 }
@@ -80,7 +82,10 @@ export function articleTagsFor(articles: readonly PublicArticle[]): ArticleTag[]
   return [...tags.values()].sort((left, right) => left.key.localeCompare(right.key, 'en'));
 }
 
-export function articleNeighbours(articles: readonly PublicArticle[], id: string): { previous?: PublicArticle | undefined; next?: PublicArticle | undefined } {
+export function articleNeighbours(
+  articles: readonly PublicArticle[],
+  id: string,
+): { previous?: PublicArticle | undefined; next?: PublicArticle | undefined } {
   const index = articles.findIndex((article) => article.id === id);
   return index < 0 ? {} : { previous: articles[index + 1], next: articles[index - 1] };
 }

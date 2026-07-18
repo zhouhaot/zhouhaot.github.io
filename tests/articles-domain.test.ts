@@ -43,7 +43,16 @@ describe('article domain', () => {
 
   it('normalizes search and tags while keeping public search text free of body or private fields', () => {
     const [article] = buildArticles(
-      [source({ data: { ...source().data, title: 'ＡＩ  Notes', summary: '  Useful\nsummary ', tags: [' TypeScript ', 'ＡＩ'] } })],
+      [
+        source({
+          data: {
+            ...source().data,
+            title: 'ＡＩ  Notes',
+            summary: '  Useful\nsummary ',
+            tags: [' TypeScript ', 'ＡＩ'],
+          },
+        }),
+      ],
       true,
     );
     expect(normalizeArticleText(' ＡＩ\n Tools ')).toBe('ai tools');
@@ -53,7 +62,9 @@ describe('article domain', () => {
     ]);
     expect(article?.searchText).toBe('ai notes useful summary ai typescript');
     expect(JSON.stringify(article)).not.toMatch(/body|private/i);
-    expect(() => buildArticles([source({ data: { ...source().data, tags: ['AI', ' ai '] } })], true)).toThrow(/duplicate tag/i);
+    expect(() => buildArticles([source({ data: { ...source().data, tags: ['AI', ' ai '] } })], true)).toThrow(
+      /duplicate tag/i,
+    );
   });
 
   it('returns non-circular previous older and next newer neighbours', () => {
@@ -67,7 +78,12 @@ describe('article domain', () => {
   });
 
   it('builds h2/h3 toc entries in order and rejects invalid heading contracts', () => {
-    expect(buildArticleToc([{ depth: 2, slug: 'one', text: 'One' }, { depth: 3, slug: 'two', text: 'Two' }])).toEqual([
+    expect(
+      buildArticleToc([
+        { depth: 2, slug: 'one', text: 'One' },
+        { depth: 3, slug: 'two', text: 'Two' },
+      ]),
+    ).toEqual([
       { depth: 2, slug: 'one', text: 'One', href: '#one' },
       { depth: 3, slug: 'two', text: 'Two', href: '#two' },
     ]);
@@ -75,8 +91,18 @@ describe('article domain', () => {
     expect(() => buildArticleToc([{ depth: 2, slug: ' ', text: 'Blank' }])).toThrow(/slug/i);
     expect(() => buildArticleToc([{ depth: 2, slug: 'bad slug', text: 'Unsafe' }])).toThrow(/slug/i);
     expect(() => buildArticleToc([{ depth: 4, slug: 'bad#slug', text: 'Unsafe' }])).toThrow(/slug/i);
-    expect(() => buildArticleToc([{ depth: 2, slug: 'same', text: 'One' }, { depth: 4, slug: 'same', text: 'Two' }])).toThrow(/duplicate/i);
+    expect(() =>
+      buildArticleToc([
+        { depth: 2, slug: 'same', text: 'One' },
+        { depth: 4, slug: 'same', text: 'Two' },
+      ]),
+    ).toThrow(/duplicate/i);
     expect(() => buildArticleToc([{ depth: 3, slug: 'bad?slug', text: 'Unsafe' }])).toThrow(/slug/i);
-    expect(() => buildArticleToc([{ depth: 2, slug: 'same', text: 'One' }, { depth: 3, slug: 'same', text: 'Two' }])).toThrow(/duplicate/i);
+    expect(() =>
+      buildArticleToc([
+        { depth: 2, slug: 'same', text: 'One' },
+        { depth: 3, slug: 'same', text: 'Two' },
+      ]),
+    ).toThrow(/duplicate/i);
   });
 });

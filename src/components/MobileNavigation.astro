@@ -10,7 +10,11 @@ const { currentPath } = Astro.props;
 ---
 
 <nav class="mobile-navigation" data-mobile-navigation aria-label="移动端主导航">
-  {SITE.navigation.map((item) => (
-    <a href={item.href} aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>{item.label}</a>
-  ))}
+  {
+    SITE.navigation.map((item) => (
+      <a href={item.href} aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>
+        {item.label}
+      </a>
+    ))
+  }
 </nav>

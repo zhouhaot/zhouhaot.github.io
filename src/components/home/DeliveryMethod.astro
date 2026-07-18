@@ -10,6 +10,13 @@ const steps = PUBLIC_PROFILE.method;
     <h2 id="delivery-method-title">以可运行的原型推进决策</h2>
   </header>
   <ol class="home-delivery-list">
-    {steps.map((step, index) => <li><span aria-hidden="true">0{index + 1}</span>{step}</li>)}
+    {
+      steps.map((step, index) => (
+        <li>
+          <span aria-hidden="true">0{index + 1}</span>
+          {step}
+        </li>
+      ))
+    }
   </ol>
 </section>

@@ -1,19 +1,29 @@
 ---
-interface Entry { id: string; data: { title: string; summary: string; publishedAt: Date } }
-interface Props { entries: Entry[]; basePath: '/work' | '/lab' | '/notes' }
+interface Entry {
+  id: string;
+  data: { title: string; summary: string; publishedAt: Date };
+}
+interface Props {
+  entries: Entry[];
+  basePath: '/work' | '/lab' | '/notes';
+}
 const { entries, basePath } = Astro.props;
 ---
 
 <ul>
-  {entries.map((entry) => (
-    <li>
-      <article>
-        <h2><a href={`${basePath}/${entry.id}/`}>{entry.data.title}</a></h2>
-        <p>{entry.data.summary}</p>
-        <time datetime={entry.data.publishedAt.toISOString()}>
-          {entry.data.publishedAt.toLocaleDateString('zh-CN')}
-        </time>
-      </article>
-    </li>
-  ))}
+  {
+    entries.map((entry) => (
+      <li>
+        <article>
+          <h2>
+            <a href={`${basePath}/${entry.id}/`}>{entry.data.title}</a>
+          </h2>
+          <p>{entry.data.summary}</p>
+          <time datetime={entry.data.publishedAt.toISOString()}>
+            {entry.data.publishedAt.toLocaleDateString('zh-CN')}
+          </time>
+        </article>
+      </li>
+    ))
+  }
 </ul>

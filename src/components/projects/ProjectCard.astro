@@ -22,7 +22,14 @@ const { project } = Astro.props;
   </div>
   <h2><a href={project.href}>{project.title}</a></h2>
   <p>{project.summary}</p>
-  {project.kind === 'work' && <p class="project-card__role"><strong>职责：</strong>{project.role}</p>}
+  {
+    project.kind === 'work' && (
+      <p class="project-card__role">
+        <strong>职责：</strong>
+        {project.role}
+      </p>
+    )
+  }
   <ul class="project-card__tools" aria-label="使用的工具">
     {project.tools.map((tool) => <li>{tool}</li>)}
   </ul>

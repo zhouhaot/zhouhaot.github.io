@@ -15,13 +15,30 @@ import '@/styles/about.css';
       <h1 id="about-heading">关于</h1>
       <p>{PUBLIC_PROFILE.positioning}</p>
     </header>
-    <section data-about-section="capabilities" aria-labelledby="about-capabilities"><h2 id="about-capabilities">能力范围</h2><ul>{PUBLIC_PROFILE.capabilities.map((capability) => <li>{capability}</li>)}</ul></section>
-    <section data-about-section="method" aria-labelledby="about-method"><h2 id="about-method">工作方法</h2><ol>{PUBLIC_PROFILE.method.map((step) => <li>{step}</li>)}</ol></section>
-    <section data-about-section="principles" aria-labelledby="about-principles"><h2 id="about-principles">原则</h2><ul>{PUBLIC_PROFILE.principles.map((principle) => <li>{principle}</li>)}</ul></section>
-    <section data-about-section="current-status" aria-labelledby="about-current-status"><h2 id="about-current-status">当前状态</h2><p>{PUBLIC_PROFILE.currentStatus}</p></section>
-    <section data-about-section="trust-boundary" aria-labelledby="about-trust-boundary"><h2 id="about-trust-boundary">公开边界</h2><p>{PUBLIC_PROFILE.trustBoundary}</p></section>
+    <section data-about-section="capabilities" aria-labelledby="about-capabilities">
+      <h2 id="about-capabilities">能力范围</h2><ul>
+        {PUBLIC_PROFILE.capabilities.map((capability) => <li>{capability}</li>)}
+      </ul>
+    </section>
+    <section data-about-section="method" aria-labelledby="about-method">
+      <h2 id="about-method">工作方法</h2><ol>{PUBLIC_PROFILE.method.map((step) => <li>{step}</li>)}</ol>
+    </section>
+    <section data-about-section="principles" aria-labelledby="about-principles">
+      <h2 id="about-principles">原则</h2><ul>{PUBLIC_PROFILE.principles.map((principle) => <li>{principle}</li>)}</ul>
+    </section>
+    <section data-about-section="current-status" aria-labelledby="about-current-status">
+      <h2 id="about-current-status">当前状态</h2><p>{PUBLIC_PROFILE.currentStatus}</p>
+    </section>
+    <section data-about-section="trust-boundary" aria-labelledby="about-trust-boundary">
+      <h2 id="about-trust-boundary">公开边界</h2><p>{PUBLIC_PROFILE.trustBoundary}</p>
+    </section>
     <nav class="about-page__actions" aria-label="关于页面操作">
-      <a class="about-page__button about-page__button--primary" data-about-primary-cta href={SITE.githubUrl} rel="me external">访问 GitHub</a>
+      <a
+        class="about-page__button about-page__button--primary"
+        data-about-primary-cta
+        href={SITE.githubUrl}
+        rel="me external">访问 GitHub</a
+      >
       <a class="about-page__button" data-about-secondary-cta href={PUBLIC_ROUTES.projects}>查看项目</a>
     </nav>
   </article>

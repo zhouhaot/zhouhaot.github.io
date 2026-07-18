@@ -55,7 +55,9 @@ describe('built portfolio and anonymous about routes', () => {
     expect(
       portfolio.querySelectorAll('article, figure, img, picture, source, video, [data-portfolio-gallery], dialog'),
     ).toHaveLength(0);
-    expect(portfolioHtml).not.toMatch(/data-portfolio-gallery|data-lightbox-items|initPortfolioLightboxes|coming soon/i);
+    expect(portfolioHtml).not.toMatch(
+      /data-portfolio-gallery|data-lightbox-items|initPortfolioLightboxes|coming soon/i,
+    );
     expect(portfolio.querySelector('[data-portfolio-primary-cta]')?.getAttribute('href')).toBe(SITE.githubUrl);
     expect(portfolio.querySelector('[data-portfolio-secondary-cta]')?.getAttribute('href')).toBe('/projects/');
   });

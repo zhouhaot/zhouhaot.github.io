@@ -2,7 +2,12 @@
 import BaseLayout from './BaseLayout.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
 
-interface Props { title: string; summary: string; publishedAt: Date; canonicalPath: string }
+interface Props {
+  title: string;
+  summary: string;
+  publishedAt: Date;
+  canonicalPath: string;
+}
 const { title, summary, publishedAt, canonicalPath } = Astro.props;
 ---
 

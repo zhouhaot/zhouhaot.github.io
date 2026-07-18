@@ -10,7 +10,11 @@ interface Props {
 const { entries } = Astro.props;
 ---
 
-<section class="home-card home-experiments" data-home-section="experiment-status" aria-labelledby="experiment-status-title">
+<section
+  class="home-card home-experiments"
+  data-home-section="experiment-status"
+  aria-labelledby="experiment-status-title"
+>
   <header class="home-section-heading">
     <p class="home-kicker">实验状态</p>
     <h2 id="experiment-status-title">正在验证的应用方向</h2>
@@ -20,8 +24,13 @@ const { entries } = Astro.props;
       <div class="home-content-list">
         {entries.map((entry) => (
           <article class="home-content-card" data-home-content-card data-content-collection="lab">
-            <p class="home-content-card__meta"><span class="home-status-dot" aria-hidden="true"></span>{entry.data.status}</p>
-            <h3><a href={projectRoute(entry.id)}>{entry.data.title}</a></h3>
+            <p class="home-content-card__meta">
+              <span class="home-status-dot" aria-hidden="true" />
+              {entry.data.status}
+            </p>
+            <h3>
+              <a href={projectRoute(entry.id)}>{entry.data.title}</a>
+            </h3>
             <p>{entry.data.summary}</p>
           </article>
         ))}

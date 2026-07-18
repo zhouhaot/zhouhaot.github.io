@@ -26,9 +26,17 @@ const { currentPath } = Astro.props;
     <button type="button" class="mobile-drawer__close" data-drawer-close aria-label="关闭菜单">×</button>
   </div>
   <nav class="mobile-drawer__navigation" aria-label="主导航">
-    {SITE.navigation.map((item) => (
-      <a href={item.href} data-drawer-link aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>{item.label}</a>
-    ))}
+    {
+      SITE.navigation.map((item) => (
+        <a
+          href={item.href}
+          data-drawer-link
+          aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))
+    }
   </nav>
   <ThemeSwitcher />
   <a class="mobile-drawer__github" href={SITE.githubUrl} rel="me external" data-drawer-link>GitHub</a>

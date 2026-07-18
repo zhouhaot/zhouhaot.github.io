@@ -20,8 +20,12 @@ const { entries } = Astro.props;
       <div class="home-content-list">
         {entries.map((entry) => (
           <article class="home-content-card" data-home-content-card data-content-collection="notes">
-            <time datetime={entry.data.publishedAt.toISOString()}>{entry.data.publishedAt.toLocaleDateString('zh-CN')}</time>
-            <h3><a href={articleRoute(entry.id)}>{entry.data.title}</a></h3>
+            <time datetime={entry.data.publishedAt.toISOString()}>
+              {entry.data.publishedAt.toLocaleDateString('zh-CN')}
+            </time>
+            <h3>
+              <a href={articleRoute(entry.id)}>{entry.data.title}</a>
+            </h3>
             <p>{entry.data.summary}</p>
           </article>
         ))}

@@ -33,6 +33,8 @@ const years = [...new Set(projects.map((project) => project.year))].sort((left, 
   </label>
   <button class="project-filters__reset" type="button" data-project-reset>重置</button>
   <p class="project-filters__count" data-project-result-count aria-live="polite"></p>
-  <p class="project-filters__empty" data-project-no-results aria-live="polite" hidden>没有匹配的项目，请调整筛选条件。</p>
+  <p class="project-filters__empty" data-project-no-results aria-live="polite" hidden>
+    没有匹配的项目，请调整筛选条件。
+  </p>
   <slot />
 </section>

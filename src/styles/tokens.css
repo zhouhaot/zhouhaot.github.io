@@ -6,7 +6,7 @@ html[data-theme='light'] {
   --color-foreground: #282f35;
   --color-muted: #747c82;
   --color-border: #e1e4e6;
-  --color-accent: #168c92;
+  --color-accent: #007579;
   --color-success: #258a58;
   --color-info: #247db4;
   --color-warning: #b5771d;
@@ -56,7 +56,7 @@ html[data-theme='cyber'] {
     --color-foreground: oklch(19% 0.014 240);
     --color-muted: oklch(52% 0.012 240);
     --color-border: oklch(89% 0.007 240);
-    --color-accent: oklch(56% 0.12 195);
+    --color-accent: oklch(47% 0.1 195);
     --color-success: oklch(58% 0.13 150);
     --color-info: oklch(55% 0.15 250);
     --color-warning: oklch(70% 0.14 75);

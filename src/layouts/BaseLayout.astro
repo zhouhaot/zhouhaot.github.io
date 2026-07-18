@@ -39,7 +39,7 @@ const socialImage = new URL(image, SITE.url);
     <meta property="og:image" content={socialImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
-    <script is:inline set:html={themeInitializationScript}></script>
+    <script is:inline set:html={themeInitializationScript} />
   </head>
   <body>
     <div class="site-shell">

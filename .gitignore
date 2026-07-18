@@ -5,3 +5,5 @@ node_modules/
 dist/
 playwright-report/
 test-results/
+e2e/fixtures/.astro/
+e2e/fixtures/dist/

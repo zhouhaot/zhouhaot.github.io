@@ -19,10 +19,25 @@ const series = await getPublishedPortfolio();
       <h1 id="portfolio-heading">作品</h1>
       <p>这里仅呈现已确认授权、可公开验证的视觉与媒体记录。</p>
       <div class="portfolio-page__actions" aria-label="作品页面操作">
-        <a class="portfolio-page__button portfolio-page__button--primary" data-portfolio-primary-cta href={SITE.githubUrl} rel="me external">访问 GitHub</a>
+        <a
+          class="portfolio-page__button portfolio-page__button--primary"
+          data-portfolio-primary-cta
+          href={SITE.githubUrl}
+          rel="me external">访问 GitHub</a
+        >
         <a class="portfolio-page__button" data-portfolio-secondary-cta href={PUBLIC_ROUTES.projects}>查看项目</a>
       </div>
     </header>
-    {series.length ? <PortfolioGallery series={series} /> : <EmptyState collection="portfolio" title="暂无可公开的作品媒体" description="确认授权与公开范围后，才会在这里呈现。" />}
+    {
+      series.length ? (
+        <PortfolioGallery series={series} />
+      ) : (
+        <EmptyState
+          collection="portfolio"
+          title="暂无可公开的作品媒体"
+          description="确认授权与公开范围后，才会在这里呈现。"
+        />
+      )
+    }
   </section>
 </BaseLayout>

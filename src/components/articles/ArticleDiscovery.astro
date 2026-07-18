@@ -1,7 +1,10 @@
 ---
 import type { ArticleTag, PublicArticle } from '@/domain/articles';
 import ArticleCard from './ArticleCard.astro';
-interface Props { articles: PublicArticle[]; tags: ArticleTag[] }
+interface Props {
+  articles: PublicArticle[];
+  tags: ArticleTag[];
+}
 const { articles, tags } = Astro.props;
 ---
 
@@ -10,7 +13,13 @@ const { articles, tags } = Astro.props;
     <label for="article-search">搜索文章</label>
     <input id="article-search" type="search" data-article-search />
     <div class="article-discovery__tags" aria-label="按标签筛选">
-      {tags.map((tag) => <button type="button" data-article-tag={tag.key} aria-pressed="false">{tag.label}</button>)}
+      {
+        tags.map((tag) => (
+          <button type="button" data-article-tag={tag.key} aria-pressed="false">
+            {tag.label}
+          </button>
+        ))
+      }
     </div>
     <div class="article-discovery__views" aria-label="文章布局">
       <button type="button" data-article-view="list" aria-pressed="true">列表</button>
@@ -22,5 +31,13 @@ const { articles, tags } = Astro.props;
     <p>没有匹配这些条件的文章。</p>
     <button type="button" data-article-reset>重置筛选</button>
   </div>
-  <ul class="article-discovery__items">{articles.map((article) => <li><ArticleCard article={article} /></li>)}</ul>
+  <ul class="article-discovery__items">
+    {
+      articles.map((article) => (
+        <li>
+          <ArticleCard article={article} />
+        </li>
+      ))
+    }
+  </ul>
 </section>

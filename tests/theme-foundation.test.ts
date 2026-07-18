@@ -29,15 +29,12 @@ const buildCommand =
     : { command: 'npm', args: ['run', 'build'] };
 
 describe('semantic theme foundation', () => {
-  beforeAll(
-    () => {
-      execFileSync(buildCommand.command, buildCommand.args, {
-        cwd: resolve('.'),
-        stdio: 'pipe',
-      });
-    },
-    120_000,
-  );
+  beforeAll(() => {
+    execFileSync(buildCommand.command, buildCommand.args, {
+      cwd: resolve('.'),
+      stdio: 'pipe',
+    });
+  }, 120_000);
 
   it('limits themes to light, dark, and cyber', async () => {
     const theme = await loadTheme();
@@ -67,7 +64,7 @@ describe('semantic theme foundation', () => {
   it('loads an inline pre-paint initializer without a deferred module dependency', () => {
     const layout = source('src/layouts/BaseLayout.astro');
 
-    expect(layout).toContain("@/scripts/theme-init");
+    expect(layout).toContain('@/scripts/theme-init');
     expect(layout).toContain('is:inline');
     expect(layout).not.toContain('type="module"');
   });

@@ -7,7 +7,11 @@ const themes = [
 ---
 
 <div class="theme-switcher" data-theme-switcher role="group" aria-label="主题">
-  {themes.map((theme) => (
-    <button type="button" data-theme-button={theme.value} aria-pressed="false">{theme.label}</button>
-  ))}
+  {
+    themes.map((theme) => (
+      <button type="button" data-theme-button={theme.value} aria-pressed="false">
+        {theme.label}
+      </button>
+    ))
+  }
 </div>

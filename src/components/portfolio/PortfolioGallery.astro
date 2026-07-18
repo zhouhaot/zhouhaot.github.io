@@ -23,9 +23,23 @@ const galleryItems = series.flatMap((entry) => entry.items);
           {entry.items.map((item) => (
             <figure>
               {item.type === 'image' ? (
-                <img src={item.asset.src} alt={item.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
+                <img
+                  src={item.asset.src}
+                  alt={item.alt}
+                  width={item.width}
+                  height={item.height}
+                  loading="lazy"
+                  decoding="async"
+                />
               ) : (
-                <video src={item.asset.src} poster={item.posterAsset?.src} width={item.width} height={item.height} controls preload="none" />
+                <video
+                  src={item.asset.src}
+                  poster={item.posterAsset?.src}
+                  width={item.width}
+                  height={item.height}
+                  controls
+                  preload="none"
+                />
               )}
               <figcaption>
                 <p>{item.caption}</p>
@@ -34,7 +48,12 @@ const galleryItems = series.flatMap((entry) => entry.items);
                 {item.evidenceUrl && <a href={item.evidenceUrl}>来源说明</a>}
                 <p>许可：{item.license}</p>
               </figcaption>
-              <button type="button" data-lightbox-trigger data-lightbox-index={galleryItems.indexOf(item)} aria-label={`查看${item.alt || item.caption}`}>
+              <button
+                type="button"
+                data-lightbox-trigger
+                data-lightbox-index={galleryItems.indexOf(item)}
+                aria-label={`查看${item.alt || item.caption}`}
+              >
                 查看媒体
               </button>
             </figure>

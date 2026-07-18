@@ -13,9 +13,15 @@ const currentPath = Astro.url.pathname;
     <a class="site-wordmark" href="/" aria-label="zhou 首页">zhou</a>
     <nav class="site-header__links" data-desktop-navigation aria-label="主导航">
       <ul>
-        {SITE.navigation.map((item) => (
-          <li><a href={item.href} aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>{item.label}</a></li>
-        ))}
+        {
+          SITE.navigation.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrentNavigationRoute(item.href, currentPath) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
     <div class="site-header__actions">

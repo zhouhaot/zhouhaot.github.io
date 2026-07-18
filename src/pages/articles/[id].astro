@@ -11,7 +11,10 @@ export async function getStaticPaths() {
   const articles = await getPublishedArticles();
   return articles.map((article) => ({ params: { id: article.id }, props: { article, articles } }));
 }
-interface Props { article: PublicArticle; articles: PublicArticle[] }
+interface Props {
+  article: PublicArticle;
+  articles: PublicArticle[];
+}
 const { article, articles } = Astro.props;
 const entry = await getEntry('notes', article.id);
 if (!entry) throw new Error(`Article entry not found: ${article.id}`);
@@ -23,5 +26,8 @@ const { previous, next } = articleNeighbours(articles, article.id);
 <BaseLayout title={`${article.title} | zhou`} description={article.summary} canonicalPath={article.href} type="article">
   <SiteHeader slot="header" />
   <ArticleReader article={article} toc={toc} previous={previous} next={next}><Content /></ArticleReader>
-  <script>import { initArticleReader } from '@/scripts/articles'; initArticleReader();</script>
+  <script>
+    import { initArticleReader } from '@/scripts/articles';
+    initArticleReader();
+  </script>
 </BaseLayout>
