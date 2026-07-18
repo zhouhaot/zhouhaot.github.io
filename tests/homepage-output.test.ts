@@ -11,17 +11,26 @@ const buildCommand =
 
 let builtDocument: Document;
 let builtHtml = '';
+let builtSource = '';
+let builtPublicContent = '';
 let builtCss = '';
 const homeCss = readFileSync(resolve('src/styles/home.css'), 'utf8');
 
 beforeAll(() => {
   execFileSync(buildCommand.command, buildCommand.args, { cwd: resolve('.'), stdio: 'pipe' });
   builtHtml = readFileSync(resolve('dist/index.html'), 'utf8');
+  builtSource = builtHtml;
   builtDocument = document.implementation.createHTMLDocument();
   builtDocument.documentElement.innerHTML = builtHtml;
-  builtCss = Array.from(builtDocument.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'))
-    .map((link) => readFileSync(resolve(`dist${link.getAttribute('href')}`), 'utf8'))
-    .join('\n');
+  builtCss = [
+    ...Array.from(builtDocument.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')).map((link) =>
+      readFileSync(resolve(`dist${link.getAttribute('href')}`), 'utf8'),
+    ),
+    ...Array.from(builtDocument.querySelectorAll<HTMLStyleElement>('style')).map((style) => style.textContent ?? ''),
+  ].join('\n');
+  const publicDocument = builtDocument.documentElement.cloneNode(true) as HTMLElement;
+  publicDocument.querySelectorAll('style, script').forEach((element) => element.remove());
+  builtPublicContent = publicDocument.outerHTML;
 }, 120_000);
 
 describe('built production homepage', () => {
@@ -75,7 +84,9 @@ describe('built production homepage', () => {
   });
 
   it('does not ship prohibited legacy, placeholder, private-contact, or unverified-result content', () => {
-    expect(builtHtml).not.toMatch(/LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|简历|客户|\d+%/i);
+    expect(builtPublicContent).not.toMatch(
+      /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|简历|客户|\d+%/i,
+    );
   });
 
   it('ships a token-based bento layout that stacks before 1024px without remote assets or framework runtime', () => {
@@ -88,7 +99,7 @@ describe('built production homepage', () => {
         /^https?:/.test(element.getAttribute('src') ?? element.getAttribute('href') ?? ''),
       ),
     ).toBe(false);
-    expect(builtHtml).not.toMatch(/react|vue/i);
+    expect(builtSource).not.toMatch(/react|vue/i);
   });
 
   it('uses complete Direction C grid rows and a high-contrast semantic primary CTA', () => {

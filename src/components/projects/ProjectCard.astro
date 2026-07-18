@@ -1,0 +1,30 @@
+---
+import type { PublicProject } from '@/domain/projects';
+
+interface Props {
+  project: PublicProject;
+}
+
+const { project } = Astro.props;
+---
+
+<article
+  class="project-card"
+  data-project-card
+  data-project-kind={project.kind}
+  data-project-status={project.status}
+  data-project-year={project.year}
+>
+  <div class="project-card__meta" aria-label="项目元数据">
+    <span class="project-card__kind">{project.kindLabel}</span>
+    <span class="project-card__status">{project.statusLabel}</span>
+    <time datetime={project.publishedAt.toISOString()}>{project.year}</time>
+  </div>
+  <h2><a href={project.href}>{project.title}</a></h2>
+  <p>{project.summary}</p>
+  {project.kind === 'work' && <p class="project-card__role"><strong>职责：</strong>{project.role}</p>}
+  <ul class="project-card__tools" aria-label="使用的工具">
+    {project.tools.map((tool) => <li>{tool}</li>)}
+  </ul>
+  <a class="project-card__link" href={project.href}>查看详情</a>
+</article>

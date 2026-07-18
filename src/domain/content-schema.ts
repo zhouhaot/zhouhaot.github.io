@@ -38,6 +38,7 @@ export const workSchema = commonSchema.extend({
   demoUrl: httpsUrl.optional(),
   architecture: z.string().optional(),
   screenshots: z.array(z.string().min(1)).default([]),
+  constraints: z.array(z.string().min(1)).optional(),
   outcomes: z.array(z.string().min(1)).default([]),
   limitations: z.array(z.string().min(1)).default([]),
   nextSteps: z.array(z.string().min(1)).default([]),

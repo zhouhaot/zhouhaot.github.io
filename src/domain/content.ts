@@ -2,7 +2,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 type DatedEntry = { data: { publishedAt: Date } };
 
-export function isPublicEntry(data: { draft?: boolean }, production = import.meta.env.PROD): boolean {
+export function isPublicEntry(data: { draft?: boolean | undefined }, production = import.meta.env.PROD): boolean {
   return production ? data.draft !== true : true;
 }
 
