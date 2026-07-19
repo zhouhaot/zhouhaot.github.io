@@ -29,7 +29,7 @@
 - New entries default to `draft: true`. A non-draft entry must have `authenticityConfirmed: true`, `rightsConfirmed: true`, and a valid `reviewedAt`; evidence URLs, when present, use HTTPS.
 - Publication checks support review; they do not claim automated proof of authenticity. History and rollback remain Git commits and pull requests.
 - References resolve before publication. Removing an entry or asset while another current item references it fails. Unreferenced assets are reported deterministically and never removed automatically.
-- Existing format, lint, Astro check, unit, build, production audit, dependency audit, functional E2E, Windows visual baseline, and `dist`-only deployment gates remain mandatory.
+- Existing format, lint, Astro check, unit, build, production audit, production-only dependency audit, functional E2E, Windows visual baseline, and `dist`-only deployment gates remain mandatory. Because Phase 0 adds security-critical development dependencies, every CI/deploy verification path also runs a full `npm audit --audit-level=high` without `--omit=dev`.
 
 ## Dependency Decisions and Platform Contract
 
@@ -45,10 +45,10 @@ Add only these pinned development dependencies in Task 5/6. They are build-time 
 | `unist-util-visit` |  `5.1.0` | Traverses image, definition, HTML, and MDX JSX nodes without a home-grown recursive walker.                                                               | A custom walker is easy to make incomplete as mdast node variants evolve.                                                                                                                                                  | Pure ESM on Node 22.12+ and OS-neutral.                                                                                                                                           |
 | `@types/mdast`     |  `4.0.4` | Keeps the validator's node narrowing and image-reference resolution type-safe under the strictest TypeScript config.                                      | Local structural casts would hide unsupported node shapes from `astro check`.                                                                                                                                              | Type-only package; no runtime or platform effect.                                                                                                                                 |
 | `file-type`        | `22.0.1` | Detects magic-byte MIME and catches renamed executables, extension/MIME mismatch, and double-extension tricks.                                            | Extension-only checking does not satisfy the approved upload/security boundary.                                                                                                                                            | Pure ESM supporting Node 22+; fixtures use small deterministic headers and the same API on Linux/Windows.                                                                         |
-| `sharp`            | `0.35.3` | Re-probes AVIF/JPEG/PNG/WebP dimensions. It is already used transitively by Astro, but Phase 0 pins it directly because the audit imports its public API. | Trusting Astro's generated metadata misses files not rendered by a route; importing a transitive dependency is not a stable contract.                                                                                      | Use the package's supported Linux and Windows prebuilds; the minimum-engine CI and Windows visual job both run the focused probe test.                                            |
+| `sharp`            | `0.35.3` | Re-probes AVIF/JPEG/PNG/WebP dimensions. It is already used transitively by Astro, but Phase 0 pins it directly because the audit imports its public API. | Trusting Astro's generated metadata misses files not rendered by a route; importing a transitive dependency is not a stable contract.                                                                                      | Use the package's supported Linux and Windows prebuilds; the Node/OS content-audit matrix runs the focused probe test in all four cells.                                          |
 | `ffprobe-static`   |  `3.1.0` | Supplies a pinned ffprobe executable for MP4/WebM width/height checks without assuming host packages.                                                     | Declared dimensions are untrusted; `sharp` does not inspect video, and relying on a machine-global `ffprobe` makes local/CI behavior diverge.                                                                              | Resolve the exported executable path and call `execFile`, never a shell. Run the video fixture test on Linux CI and Windows CI; paths containing spaces are included in the test. |
 
-If any pinned package fails `npm audit --omit=dev --audit-level=high`, Node 22.12 minimum-engine CI, or the Windows focused audit, stop that task and choose a reviewed replacement in a plan amendment; do not silently weaken validation.
+Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --audit-level=high`. If any pinned package fails the full audit or any Node 22.12/24 × Linux/Windows content-audit matrix cell, stop that task and choose a reviewed replacement in a plan amendment; do not silently weaken validation.
 
 ## File and Interface Map
 
@@ -464,7 +464,7 @@ git commit -m "refactor: load public profile through typed adapters"
 
 **Interfaces:**
 
-- Produces: `CONTENT_COLLECTIONS`, `ContentCollectionName`, `canonicalSlugSchema`, `attestationSchema`, `CommonPublicationData`, `assertEntrySlug(collection, id, slug): void`, and `assertPublishable(data): void`.
+- Produces: `CONTENT_COLLECTIONS`, `ContentCollectionName`, `canonicalSlugSchema`, `attestationSchema`, `CommonPublicationData`, `assertEntrySlug(collection, id, slug): void`, and `assertPublishable(data, now?): void`.
 - Slug grammar: lowercase ASCII kebab case, 1–80 characters: `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
 - Non-draft invariant: both confirmations are true and `reviewedAt` is a real date not later than the current validation time. Evidence may be empty; any supplied evidence URL is HTTPS.
 
@@ -474,6 +474,7 @@ Create the following cases in `tests/content-domain.test.ts`:
 
 ```ts
 import { assertEntrySlug, assertPublishable, canonicalSlugSchema } from '../src/domain/publication';
+import { attestationSchema } from '../src/domain/content-schema';
 
 it('uses one canonical slug grammar and enforces filename equality', () => {
   expect(canonicalSlugSchema.parse('agent-eval-2')).toBe('agent-eval-2');
@@ -484,34 +485,60 @@ it('uses one canonical slug grammar and enforces filename equality', () => {
 });
 
 it('allows drafts but gates every non-draft attestation', () => {
+  const now = new Date('2026-07-20T00:00:00.000Z');
   expect(() =>
-    assertPublishable({
-      draft: true,
-      attestation: { authenticityConfirmed: false, rightsConfirmed: false, evidenceUrls: [] },
-    }),
+    assertPublishable(
+      {
+        draft: true,
+        attestation: { authenticityConfirmed: false, rightsConfirmed: false, evidenceUrls: [] },
+      },
+      now,
+    ),
   ).not.toThrow();
   expect(() =>
-    assertPublishable({
-      draft: false,
-      attestation: {
-        authenticityConfirmed: true,
-        rightsConfirmed: false,
-        reviewedAt: new Date('2026-07-19'),
-        evidenceUrls: [],
+    assertPublishable(
+      {
+        draft: false,
+        attestation: {
+          authenticityConfirmed: true,
+          rightsConfirmed: false,
+          reviewedAt: new Date('2026-07-19T00:00:00.000Z'),
+          evidenceUrls: [],
+        },
       },
-    }),
+      now,
+    ),
   ).toThrow(/rights/i);
   expect(() =>
-    assertPublishable({
-      draft: false,
-      attestation: {
-        authenticityConfirmed: true,
-        rightsConfirmed: true,
-        reviewedAt: new Date('2999-01-01'),
-        evidenceUrls: [],
+    assertPublishable(
+      {
+        draft: false,
+        attestation: {
+          authenticityConfirmed: true,
+          rightsConfirmed: true,
+          reviewedAt: new Date('2026-07-20T00:00:00.001Z'),
+          evidenceUrls: [],
+        },
       },
-    }),
+      now,
+    ),
   ).toThrow(/future/i);
+});
+
+it('keeps structural date parsing deterministic and delegates clock policy', () => {
+  expect(() =>
+    attestationSchema.parse({ authenticityConfirmed: true, rightsConfirmed: true, reviewedAt: 'not-a-date' }),
+  ).toThrow();
+  const parsed = attestationSchema.parse({
+    authenticityConfirmed: true,
+    rightsConfirmed: true,
+    reviewedAt: '2026-07-21',
+    evidenceUrls: [],
+  });
+  expect(parsed.reviewedAt).toBeInstanceOf(Date);
+  expect(() => assertPublishable({ draft: false, attestation: parsed }, new Date('2026-07-20T00:00:00.000Z'))).toThrow(
+    /future/i,
+  );
 });
 ```
 
@@ -544,7 +571,7 @@ const draft = noteSchema.parse({
 expect(draft.draft).toBe(true);
 ```
 
-Add negative cases for HTTP evidence, missing `reviewedAt`, either false confirmation, and filename/slug mismatch in project/article/portfolio builders.
+Add negative domain cases for HTTP evidence, missing `reviewedAt`, either false confirmation, and filename/slug mismatch in project/article/portfolio builders. The Zod tests reject invalid date syntax but do not consult the system clock; every time-relative assertion passes the fixed `now` above to `assertPublishable`.
 
 - [ ] **Step 2: Run the tests and verify RED**
 
@@ -577,19 +604,31 @@ export type PublicationAttestation = {
   reviewedAt?: Date | undefined;
   evidenceUrls: string[];
 };
-export type CommonPublicationData = { slug: string; draft: boolean; attestation: PublicationAttestation };
+export type CommonPublicationData = {
+  slug: string;
+  draft: boolean;
+  attestation: PublicationAttestation;
+  result?: string | undefined;
+  evaluation?: string | undefined;
+};
 
 export function assertEntrySlug(collection: ContentCollectionName, id: string, slug: string): void {
   const parsed = canonicalSlugSchema.parse(slug);
   if (id !== parsed) throw new Error(`${collection} filename id must match slug: ${id} !== ${parsed}`);
 }
 
-export function assertPublishable(data: Pick<CommonPublicationData, 'draft' | 'attestation'>, now = new Date()): void {
+export function assertPublishable(
+  data: Pick<CommonPublicationData, 'draft' | 'attestation' | 'result' | 'evaluation'>,
+  now = new Date(),
+): void {
   if (data.draft) return;
   if (!data.attestation.authenticityConfirmed) throw new Error('Published content requires authenticity confirmation.');
   if (!data.attestation.rightsConfirmed) throw new Error('Published content requires rights confirmation.');
   if (!data.attestation.reviewedAt) throw new Error('Published content requires reviewedAt.');
   if (data.attestation.reviewedAt.valueOf() > now.valueOf()) throw new Error('reviewedAt cannot be in the future.');
+  if (data.result !== undefined && !data.result.trim()) throw new Error('Published lab content requires a result.');
+  if (data.evaluation !== undefined && !data.evaluation.trim())
+    throw new Error('Published lab content requires an evaluation.');
 }
 ```
 
@@ -618,37 +657,11 @@ const commonPublicationFields = {
 } as const;
 
 function publicationSchema<T extends z.ZodRawShape>(fields: T) {
-  return z.object({ ...commonPublicationFields, ...fields }).superRefine((entry, context) => {
-    if (entry.draft) return;
-    if (!entry.attestation.authenticityConfirmed)
-      context.addIssue({
-        code: 'custom',
-        path: ['attestation', 'authenticityConfirmed'],
-        message: 'Published content requires authenticity confirmation.',
-      });
-    if (!entry.attestation.rightsConfirmed)
-      context.addIssue({
-        code: 'custom',
-        path: ['attestation', 'rightsConfirmed'],
-        message: 'Published content requires rights confirmation.',
-      });
-    if (!entry.attestation.reviewedAt)
-      context.addIssue({
-        code: 'custom',
-        path: ['attestation', 'reviewedAt'],
-        message: 'Published content requires reviewedAt.',
-      });
-    if (entry.attestation.reviewedAt && entry.attestation.reviewedAt.valueOf() > Date.now())
-      context.addIssue({
-        code: 'custom',
-        path: ['attestation', 'reviewedAt'],
-        message: 'reviewedAt cannot be in the future.',
-      });
-  });
+  return z.object({ ...commonPublicationFields, ...fields });
 }
 ```
 
-Define `workSchema`, `labSchema`, `noteSchema`, and `portfolioSchema` through `publicationSchema({...})`. Keep all current domain-specific fields and enums. Change lab `result` and `evaluation` to `z.string().trim().default('')`, then add publish-only issues when either is empty so draft experiments may be saved without claiming a result.
+Define `workSchema`, `labSchema`, `noteSchema`, and `portfolioSchema` through `publicationSchema({...})`. Keep all current domain-specific fields and enums. Change lab `result` and `evaluation` to `z.string().trim().default('')`; `assertPublishable` owns their non-draft non-empty rule together with the complete attestation and future-time policy. Zod owns only types, valid/coercible dates, URL protocols, defaults, and structure, so schema parsing never reads `Date.now()`.
 
 - [ ] **Step 5: Make domain builders enforce ID equality before filtering**
 
@@ -708,7 +721,7 @@ git commit -m "feat: enforce publication metadata"
 
 **Interfaces:**
 
-- Produces: `MEDIA_LICENSES`, `IMAGE_EXTENSIONS`, `VIDEO_EXTENSIONS`, `MediaReference`, `mediaSchema`, `assertMediaOwnership(collection, slug, media): void`, and `mediaReferencesFor(collection, slug, data): readonly MediaReference[]`.
+- Produces: `MEDIA_LICENSES`, `IMAGE_EXTENSIONS`, `VIDEO_EXTENSIONS`, `ContentMediaPath`, `parseContentMediaPath(value): ContentMediaPath | undefined`, `assertCanonicalContentMediaPath(value): ContentMediaPath`, `MediaReference`, `mediaSchema`, `assertMediaOwnership(collection, slug, media): void`, and `mediaReferencesFor(collection, slug, data): readonly MediaReference[]`.
 - Field mapping: `work.media`, `lab.media`, and `notes.media` are arrays defaulting to `[]`; `portfolio.items` remains a non-empty array but uses the identical item schema.
 - Replaces: loose `work.screenshots: string[]`. Do not retain a second media field in the work schema.
 
@@ -774,6 +787,7 @@ it('uses one media shape in all four collection schemas', () => {
 it('rejects bad namespaces, double extensions, blank alt, and incomplete video metadata', () => {
   expect(() => mediaSchema.parse({ ...ownedImage, source: 'portfolio/qa-work-overview.webp' })).not.toThrow();
   expect(() => mediaSchema.parse({ ...ownedImage, source: 'work/qa-work-overview.png.exe' })).toThrow();
+  expect(() => mediaSchema.parse({ ...ownedImage, source: 'work/qa-work-overview.exe.png' })).toThrow();
   expect(() => mediaSchema.parse({ ...ownedImage, alt: '  ' })).toThrow();
   expect(() => mediaSchema.parse({ ...ownedImage, type: 'video', source: 'work/qa-work-demo.webm' })).toThrow(
     /poster/i,
@@ -809,6 +823,33 @@ import type { ContentCollectionName } from './publication';
 export const MEDIA_LICENSES = ['owned', 'licensed', 'cc-by', 'public-domain'] as const;
 export const IMAGE_EXTENSIONS = ['avif', 'jpeg', 'jpg', 'png', 'webp'] as const;
 export const VIDEO_EXTENSIONS = ['mp4', 'webm'] as const;
+const CONTENT_MEDIA_EXTENSIONS = [...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS] as const;
+
+export type ContentMediaPath = {
+  collection: ContentCollectionName;
+  filename: string;
+  extension: (typeof CONTENT_MEDIA_EXTENSIONS)[number];
+};
+
+export function parseContentMediaPath(value: string): ContentMediaPath | undefined {
+  if (value !== value.normalize('NFC') || value !== value.trim() || /[\\%:]/.test(value) || value.includes('..'))
+    return;
+  const match = /^(work|lab|notes|portfolio)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.([a-z0-9]+)$/.exec(value);
+  if (!match) return;
+  const [, collection, filename, extension] = match;
+  if (!CONTENT_MEDIA_EXTENSIONS.includes(extension as (typeof CONTENT_MEDIA_EXTENSIONS)[number])) return;
+  return {
+    collection: collection as ContentCollectionName,
+    filename: filename!,
+    extension: extension as ContentMediaPath['extension'],
+  };
+}
+
+export function assertCanonicalContentMediaPath(value: string): ContentMediaPath {
+  const parsed = parseContentMediaPath(value);
+  if (!parsed) throw new Error(`Media path must be canonical under src/assets/content: ${value}`);
+  return parsed;
+}
 
 type MediaBase = {
   source: string;
@@ -831,6 +872,7 @@ export function assertMediaOwnership(
   const namespace = `${collection}/`;
   const prefix = `${namespace}${slug}-`;
   for (const path of [media.source, media.poster].filter((value): value is string => Boolean(value))) {
+    assertCanonicalContentMediaPath(path);
     if (!path.startsWith(namespace)) throw new Error(`Media namespace must be ${namespace}: ${path}`);
     if (!path.startsWith(prefix)) throw new Error(`Media filename must use entry slug prefix ${slug}-: ${path}`);
   }
@@ -853,18 +895,10 @@ export function mediaReferencesFor(
 In `src/domain/content-schema.ts`, make local paths exactly one namespace and one safe filename, then export the union:
 
 ```ts
-import { IMAGE_EXTENSIONS, MEDIA_LICENSES, VIDEO_EXTENSIONS } from './media';
+import { IMAGE_EXTENSIONS, MEDIA_LICENSES, VIDEO_EXTENSIONS, parseContentMediaPath } from './media';
 
-export const localMediaPath = z.string().superRefine((value, context) => {
-  const valid =
-    value === value.normalize('NFC') &&
-    value === value.trim() &&
-    /^(?:work|lab|notes|portfolio)\/[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+$/.test(value) &&
-    !value.includes('..') &&
-    !value.includes('\\') &&
-    !value.includes('%') &&
-    !value.includes(':');
-  if (!valid) context.addIssue({ code: 'custom', message: 'Media path must be canonical under src/assets/content.' });
+export const localMediaPath = z.string().refine((value) => parseContentMediaPath(value) !== undefined, {
+  message: 'Media path must be canonical under src/assets/content.',
 });
 
 const mediaBaseSchema = z.object({
@@ -954,7 +988,7 @@ git commit -m "feat: unify structured content media"
 
 **Interfaces:**
 
-- Produces: `ContentAsset`, `ContentAssetRegistry`, `createContentAssetRegistry(modules)`, `inspectSourceAsset(file, relativePath, probeVideo?)`, `auditContentAssets(root, inspect?): Promise<ContentAssetRegistry>`, and the singleton `contentAssetRegistry` used by all server adapters.
+- Produces: `ContentAsset`, `ContentAssetRegistry`, `createContentAssetRegistry(modules)`, `inspectSourceAsset(file, relativePath, probeVideo?)`, `assertRealPathInside(rootRealPath, candidateRealPath): void`, `assertRegularAssetEntry(stat, source): void`, `discoverContentAssetFiles(root): Promise<string[]>`, `auditContentAssets(root, inspect?): Promise<ContentAssetRegistry>`, and the singleton `contentAssetRegistry` used by all server adapters.
 - Asset key: the stored path relative to `src/assets/content`, such as `notes/qa-note-diagram.webp`.
 - Audit result includes `source`, `src`, `bytes`, `mime`, `width`, and `height`; runtime Vite records may omit byte/MIME fields but use the same key and dimension contract.
 
@@ -975,13 +1009,19 @@ Create `tests/content-assets.test.ts`:
 ```ts
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import ffprobePath from 'ffprobe-static';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createContentAssetRegistry } from '../src/domain/media';
-import { inspectSourceAsset } from '../src/domain/content-assets';
+import {
+  auditContentAssets,
+  assertRealPathInside,
+  assertRegularAssetEntry,
+  inspectSourceAsset,
+  probeVideoDimensions,
+} from '../src/domain/content-assets';
 
 const roots: string[] = [];
 afterEach(() => {
@@ -1010,6 +1050,10 @@ describe('content asset registry', () => {
   it('parses injected video dimensions and ships an executable ffprobe on both CI hosts', async () => {
     expect(existsSync(ffprobePath)).toBe(true);
     expect(execFileSync(ffprobePath, ['-version'], { encoding: 'utf8' })).toMatch(/ffprobe version/i);
+    const spacedRoot = mkdtempSync(join(tmpdir(), 'zhou content assets-'));
+    roots.push(spacedRoot);
+    const spacedMissingVideo = join(spacedRoot, 'folder with spaces', 'missing.webm');
+    await expect(probeVideoDimensions(spacedMissingVideo)).rejects.toThrow();
     const probe = async () => ({ width: 1920, height: 1080 });
     // A valid media header fixture is supplied to file-type; only ffprobe is injected.
     await expect(probe()).resolves.toEqual({ width: 1920, height: 1080 });
@@ -1028,7 +1072,7 @@ const mp4Header = Buffer.from('000000186674797069736f6d0000020069736f6d69736f32'
 const sized = (header: Buffer, bytes: number) => Buffer.concat([header, Buffer.alloc(bytes - header.byteLength)]);
 
 it('enforces the exact image and video byte ceilings', async () => {
-  const root = mkdtempSync(join(tmpdir(), 'zhou-content-assets-'));
+  const root = mkdtempSync(join(tmpdir(), 'zhou content assets-'));
   roots.push(root);
   const image = join(root, 'work', 'qa-work-image.png');
   const video = join(root, 'work', 'qa-work-video.mp4');
@@ -1047,6 +1091,29 @@ it('enforces the exact image and video byte ceilings', async () => {
   ).rejects.toThrow(/size/i);
   await expect(inspectSourceAsset(image, 'work/qa-work-image.PNG')).rejects.toThrow(/type/i);
   await expect(inspectSourceAsset(image, 'work/qa-work-image.png.exe')).rejects.toThrow(/type/i);
+});
+
+it('rejects canonical-looking content with a hidden double extension', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'zhou content assets-'));
+  roots.push(root);
+  const file = join(root, 'work', 'qa-work-foo.exe.png');
+  mkdirSync(join(root, 'work'), { recursive: true });
+  writeFileSync(file, onePixelPng);
+  await expect(auditContentAssets(root)).rejects.toThrow(/canonical/i);
+});
+
+it('rejects symlinks, non-regular entries, and resolved paths outside the asset root', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'zhou content assets-'));
+  roots.push(root);
+  const outside = mkdtempSync(join(tmpdir(), 'zhou outside assets-'));
+  roots.push(outside);
+  mkdirSync(join(root, 'work'), { recursive: true });
+  symlinkSync(outside, join(root, 'work', 'qa-work-link'), process.platform === 'win32' ? 'junction' : 'dir');
+  await expect(auditContentAssets(root)).rejects.toThrow(/symbolic link/i);
+  expect(() => assertRealPathInside(root, outside)).toThrow(/outside/i);
+  expect(() =>
+    assertRegularAssetEntry({ isSymbolicLink: () => false, isFile: () => false }, 'work/qa-work-device.png'),
+  ).toThrow(/regular file/i);
 });
 ```
 
@@ -1119,13 +1186,20 @@ Create `src/domain/content-assets.ts` with an injected video probe for unit isol
 
 ```ts
 import { execFile } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
-import { extname, join, relative, sep } from 'node:path';
+import type { Stats } from 'node:fs';
+import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
+import { extname, isAbsolute, join, relative, sep } from 'node:path';
 import { promisify } from 'node:util';
 import { fileTypeFromBuffer } from 'file-type';
 import ffprobePath from 'ffprobe-static';
 import sharp from 'sharp';
-import { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS, type ContentAssetRegistry, type ContentAsset } from './media';
+import {
+  assertCanonicalContentMediaPath,
+  IMAGE_EXTENSIONS,
+  VIDEO_EXTENSIONS,
+  type ContentAssetRegistry,
+  type ContentAsset,
+} from './media';
 
 const execFileAsync = promisify(execFile);
 const IMAGE_LIMIT = 5 * 1024 * 1024;
@@ -1171,15 +1245,41 @@ export async function inspectSourceAsset(
   return { source, src: file, bytes: bytes.byteLength, mime, width: dimensions.width, height: dimensions.height };
 }
 
-async function walk(root: string, directory = root): Promise<string[]> {
+export function assertRealPathInside(rootRealPath: string, candidateRealPath: string): void {
+  const path = relative(rootRealPath, candidateRealPath);
+  if (path === '..' || path.startsWith(`..${sep}`) || isAbsolute(path)) {
+    throw new Error(`Resolved content asset path is outside its root: ${candidateRealPath}`);
+  }
+}
+
+export function assertRegularAssetEntry(stat: Pick<Stats, 'isSymbolicLink' | 'isFile'>, source: string): void {
+  if (stat.isSymbolicLink()) throw new Error(`Content assets must not be symbolic links: ${source}`);
+  if (!stat.isFile()) throw new Error(`Content assets must be regular files: ${source}`);
+}
+
+async function walk(rootRealPath: string, directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
-  return (
-    await Promise.all(
-      entries.map((entry) =>
-        entry.isDirectory() ? walk(root, join(directory, entry.name)) : [join(directory, entry.name)],
-      ),
-    )
-  ).flat();
+  const files: string[] = [];
+  for (const entry of entries) {
+    const file = join(directory, entry.name);
+    const stat = await lstat(file);
+    if (stat.isSymbolicLink()) throw new Error(`Content assets must not be symbolic links: ${file}`);
+    const resolved = await realpath(file);
+    assertRealPathInside(rootRealPath, resolved);
+    if (stat.isDirectory()) files.push(...(await walk(rootRealPath, file)));
+    else {
+      assertRegularAssetEntry(stat, file);
+      files.push(file);
+    }
+  }
+  return files;
+}
+
+export async function discoverContentAssetFiles(root: string): Promise<string[]> {
+  const rootStat = await lstat(root);
+  if (rootStat.isSymbolicLink()) throw new Error(`Content asset root must not be a symbolic link: ${root}`);
+  const rootRealPath = await realpath(root);
+  return walk(rootRealPath, root);
 }
 
 export async function auditContentAssets(
@@ -1187,9 +1287,12 @@ export async function auditContentAssets(
   inspect: (file: string, source: string) => Promise<ContentAsset> = inspectSourceAsset,
 ): Promise<ContentAssetRegistry> {
   const registry = new Map<string, ContentAsset>();
-  for (const file of await walk(root)) {
+  const rootRealPath = await realpath(root);
+  for (const file of await discoverContentAssetFiles(root)) {
+    assertRealPathInside(rootRealPath, await realpath(file));
     const source = relative(root, file).split(sep).join('/');
     if (source.endsWith('/.gitkeep')) continue;
+    assertCanonicalContentMediaPath(source);
     const asset = await inspect(file, source);
     if (registry.has(source)) throw new Error(`Duplicate content asset: ${source}`);
     registry.set(source, asset);
@@ -1198,15 +1301,34 @@ export async function auditContentAssets(
 }
 ```
 
+The `.gitkeep` files are the only path-validation exception and are still required to be ordinary, in-root, non-symlink files. Every other discovered file is validated by `assertCanonicalContentMediaPath` before MIME inspection, even when no content record references it; therefore a malformed orphan cannot hide behind orphan-report-only behavior.
+
 - [ ] **Step 6: Add namespace directories and cross-platform focused checks**
 
-Create only `.gitkeep` files under the four `src/assets/content/<collection>/` directories. In the Linux `quality` job and Windows `windows-visual` job, add after `npm ci`:
+Create only `.gitkeep` files under the four `src/assets/content/<collection>/` directories. Add a dedicated `content-audit-matrix` job to `.github/workflows/ci.yml`; do not rely on the Windows visual job as a substitute:
 
 ```yaml
-- run: npm test -- tests/content-assets.test.ts
+content-audit-matrix:
+  strategy:
+    fail-fast: false
+    matrix:
+      os: [ubuntu-latest, windows-latest]
+      node: [22.12.0, 24]
+  runs-on: ${{ matrix.os }}
+  timeout-minutes: 30
+  permissions:
+    contents: read
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node }}
+        cache: npm
+    - run: npm ci
+    - run: npm test -- tests/content-assets.test.ts
 ```
 
-This step validates Node 24 on both OSes; the existing `minimum-engine` job must also include the same focused test to validate Node 22.12.0.
+All four cells are required: Node 22.12.0 and Node 24 on both Linux and Windows. At this independently reviewable task boundary, `tests/content-assets.test.ts` exercises ffprobe resolution, a path containing spaces, symlink/non-regular/realpath boundaries, canonical orphan paths, magic bytes, sizes, and dimensions. Task 9 extends this same matrix with the composed `audit:content` command after that command exists.
 
 - [ ] **Step 7: Verify GREEN and dependency safety**
 
@@ -1217,6 +1339,7 @@ npm test -- tests/content-assets.test.ts tests/portfolio-domain.test.ts
 npm run check
 npm run lint
 npm audit --omit=dev --audit-level=high
+npm audit --audit-level=high
 ```
 
 Expected: all commands PASS; ffprobe version executes without shell quoting; the asset registry root is `/src/assets/content/`; `src/assets/portfolio/.gitkeep` still exists.
@@ -1956,7 +2079,7 @@ const deletePath = (value: unknown, path: string): void => {
 };
 ```
 
-For every contract fixture, mutate a clone and assert: fields marked `required: 'always'` with no default fail when removed; each enum fails with `invalid-contract-value`; each defaulted field yields the declared default when removed; and `draft: false` fails without every publish-required field. This executes the matrix rather than merely snapshotting it.
+For every contract fixture, mutate a clone and assert: fields marked `required: 'always'` with no default fail structural Zod parsing when removed; each enum fails with `invalid-contract-value`; and each defaulted field yields the declared default when removed. For folder fixtures, parse first, then call `assertPublishable(parsed, new Date('2026-07-20T00:00:00.000Z'))`; `draft: false` without every publish-required field must fail that domain assertion rather than time-dependent Zod parsing. This executes the matrix rather than merely snapshotting it.
 
 - [ ] **Step 5: Verify GREEN and production isolation**
 
@@ -1996,7 +2119,7 @@ git commit -m "test: establish content schema contract"
 
 **Interfaces:**
 
-- Produces: `ContentAuditOptions`, `ContentAuditReport`, `auditContentRepository(options): Promise<ContentAuditReport>`, `auditMediaGitChanges(changes, currentSizes): void`, and CLI `npm run audit:content -- [--base-ref <git-ref>]`.
+- Produces: `ContentAuditOptions`, `ContentAuditReport`, `GitMediaChange`, `GitMediaDelta`, `parseGitMediaChanges(output): readonly GitMediaChange[]`, `auditContentRepository(options): Promise<ContentAuditReport>`, `auditMediaGitChanges(changes, currentSizes): GitMediaDelta`, and CLI `npm run audit:content -- [--base-ref <git-ref>]`.
 - Audit order: singleton/schema → slug/attestation → media ownership → Markdown/MDX AST → byte/MIME/size/dimensions → reference resolution → orphan report → optional Git media-diff policy.
 - Git media policy: additions in one PR total at most 50 MiB; modifying/overwriting an existing content asset fails; renames are explicit delete-and-add and remain subject to references and size.
 
@@ -2010,7 +2133,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { auditContentRepository, auditMediaGitChanges } from '../src/domain/content-audit';
+import { auditContentRepository, auditMediaGitChanges, parseGitMediaChanges } from '../src/domain/content-audit';
 
 const roots: string[] = [];
 const approvedProfileFixture = readFileSync(resolve('tests/fixtures/content-contract/site-profile.md'), 'utf8');
@@ -2035,6 +2158,44 @@ describe('repository content audit', () => {
         ]),
       ),
     ).toThrow(/50 MiB/i);
+  });
+
+  it('fails closed when an added or renamed asset has no current stat', () => {
+    expect(() =>
+      auditMediaGitChanges([{ status: 'A', path: 'src/assets/content/work/qa-work-new.webp' }], new Map()),
+    ).toThrow(/size|stat/i);
+    expect(() =>
+      auditMediaGitChanges(
+        [
+          {
+            status: 'R',
+            similarity: 100,
+            oldPath: 'src/assets/content/work/qa-work-old.webp',
+            newPath: 'src/assets/content/work/qa-work-new.webp',
+          },
+        ],
+        new Map(),
+      ),
+    ).toThrow(/size|stat/i);
+  });
+
+  it('parses R100 old/new paths and returns add/delete sides separately', () => {
+    const changes = parseGitMediaChanges(
+      'R100\tsrc/assets/content/work/qa-work-old.webp\tsrc/assets/content/work/qa-work-new.webp\n',
+    );
+    expect(changes).toEqual([
+      {
+        status: 'R',
+        similarity: 100,
+        oldPath: 'src/assets/content/work/qa-work-old.webp',
+        newPath: 'src/assets/content/work/qa-work-new.webp',
+      },
+    ]);
+    expect(auditMediaGitChanges(changes, new Map([['src/assets/content/work/qa-work-new.webp', 1024]]))).toEqual({
+      addedPaths: ['src/assets/content/work/qa-work-new.webp'],
+      deletedPaths: ['src/assets/content/work/qa-work-old.webp'],
+      addedBytes: 1024,
+    });
   });
 
   it('returns deterministic orphan reporting for an otherwise valid empty publication repository', async () => {
@@ -2088,13 +2249,17 @@ export type ContentAuditOptions = {
   root: string;
   now?: Date;
   inspectAsset?: (file: string, source: string) => Promise<ContentAsset>;
+  deletedAssetSources?: readonly string[];
 };
 export type ContentAuditReport = {
   entryCounts: Record<'work' | 'lab' | 'notes' | 'portfolio', number>;
   assetCount: number;
   orphanAssets: readonly string[];
 };
-export type GitMediaChange = { status: 'A' | 'M' | 'D' | 'R' | 'C'; path: string };
+export type GitMediaChange =
+  | { status: 'A' | 'M' | 'D'; path: string }
+  | { status: 'R' | 'C'; similarity: number; oldPath: string; newPath: string };
+export type GitMediaDelta = { addedPaths: readonly string[]; deletedPaths: readonly string[]; addedBytes: number };
 ```
 
 Use `gray-matter` to read UTF-8 `.md`/`.mdx` files. Derive `id` from the filename without extension, reject nested paths, parse through the corresponding schema, then call the exact Task 3–7 interfaces:
@@ -2117,29 +2282,60 @@ records.push({
 });
 ```
 
-Build the asset registry with `auditContentAssets`, then for every media source and poster assert registry presence and exact width/height. Build the graph, call `assertReferenceSafe`, and return `reportOrphanAssets(graph)`. Parse `src/content/site/profile.md` separately with `siteProfileSchema` and fail if any second file exists in `src/content/site`.
+Build the asset registry with `auditContentAssets`, then for every media source and poster assert registry presence and exact width/height. Build the graph; before returning, reject any `options.deletedAssetSources` still present in `graph.referencedAssets`, call `assertReferenceSafe`, and return `reportOrphanAssets(graph)`. Thus the old side of a rename is treated as a deletion by the same reference policy, while the new side is a byte-counted addition. Parse `src/content/site/profile.md` separately with `siteProfileSchema` and fail if any second file exists in `src/content/site`.
 
 Implement the Git policy without filesystem mutation:
 
 ```ts
 const PR_MEDIA_LIMIT = 50 * 1024 * 1024;
+export function parseGitMediaChanges(output: string): readonly GitMediaChange[] {
+  return output
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => {
+      const [rawStatus, firstPath, secondPath] = line.split('\t');
+      const rename = /^([RC])(\d{1,3})$/.exec(rawStatus ?? '');
+      if (rename) {
+        if (!firstPath || !secondPath) throw new Error(`Malformed Git media rename/copy row: ${line}`);
+        return {
+          status: rename[1] as 'R' | 'C',
+          similarity: Number(rename[2]),
+          oldPath: firstPath,
+          newPath: secondPath,
+        };
+      }
+      if (!/^[AMD]$/.test(rawStatus ?? '') || !firstPath || secondPath)
+        throw new Error(`Malformed Git media change row: ${line}`);
+      return { status: rawStatus as 'A' | 'M' | 'D', path: firstPath };
+    });
+}
+
 export function auditMediaGitChanges(
   changes: readonly GitMediaChange[],
   currentSizes: ReadonlyMap<string, number>,
-): void {
+): GitMediaDelta {
   const overwrite = changes.find((change) => change.status === 'M' || change.status === 'C');
-  if (overwrite)
-    throw new Error(`Content media overwrite is forbidden; create a collision-safe new name: ${overwrite.path}`);
-  const addedBytes = changes
-    .filter((change) => change.status === 'A' || change.status === 'R')
-    .reduce((total, change) => total + (currentSizes.get(change.path) ?? 0), 0);
+  if (overwrite) throw new Error('Content media overwrite/copy is forbidden; create a collision-safe new name.');
+  const addedPaths = changes.flatMap((change) =>
+    change.status === 'A' ? [change.path] : change.status === 'R' ? [change.newPath] : [],
+  );
+  const deletedPaths = changes.flatMap((change) =>
+    change.status === 'D' ? [change.path] : change.status === 'R' ? [change.oldPath] : [],
+  );
+  let addedBytes = 0;
+  for (const path of addedPaths) {
+    const size = currentSizes.get(path);
+    if (size === undefined) throw new Error(`Current stat/size is required for added content media: ${path}`);
+    addedBytes += size;
+  }
   if (addedBytes > PR_MEDIA_LIMIT) throw new Error(`Content media increase exceeds 50 MiB: ${addedBytes} bytes.`);
+  return { addedPaths, deletedPaths, addedBytes };
 }
 ```
 
 - [ ] **Step 4: Add the thin CLI and orphan output**
 
-Create `scripts/content-audit.ts`. Resolve the repository root from `process.cwd()`, call `auditContentRepository`, print only counts and sorted orphan paths, and set `process.exitCode = 1` with the thrown non-sensitive message on failure. If `--base-ref <ref>` is present, use `execFile('git', ['diff', '--name-status', '--find-renames', `${ref}...HEAD`, '--', 'src/assets/content'])`, parse statuses, collect current file sizes, and call `auditMediaGitChanges`. Do not invoke a shell and do not print content bodies.
+Create `scripts/content-audit.ts`. Resolve the repository root from `process.cwd()`, print only counts and sorted orphan paths, and set `process.exitCode = 1` with the thrown non-sensitive message on failure. If `--base-ref <ref>` is present, use `execFile('git', ['diff', '--name-status', '--find-renames', `${ref}...HEAD`, '--', 'src/assets/content'])`, parse the output only through `parseGitMediaChanges`, stat every A/new-R path, and call `auditMediaGitChanges`. Missing stats fail closed. Convert returned `deletedPaths` from `src/assets/content/<source>` to stored sources and pass them as `deletedAssetSources` to `auditContentRepository`; `R100 old new` therefore counts `newPath` as the addition and checks `oldPath` as a deletion. Do not invoke a shell and do not print content bodies.
 
 Required success output:
 
@@ -2163,7 +2359,16 @@ Update `package.json`:
 }
 ```
 
-In `.github/workflows/ci.yml`, set `fetch-depth: 0` on checkout and run `npm run audit:content -- --base-ref origin/main` after `npm run check` and before `npm test` in `quality`. Run plain `npm run audit:content` in `minimum-engine`. In `.github/workflows/deploy.yml`, run plain `npm run audit:content` after `npm run check` and before tests; production deployment still uploads only `dist`.
+In `.github/workflows/ci.yml`, set `fetch-depth: 0` on checkout and run `npm run audit:content -- --base-ref origin/main` after `npm run check` and before `npm test` in `quality`. Run plain `npm run audit:content` in `minimum-engine`. Extend Task 5's `content-audit-matrix` so every Node 22.12.0/24 × Ubuntu/Windows cell runs both `npm run audit:content` and `npm test -- tests/content-assets.test.ts tests/content-audit.test.ts`. In `.github/workflows/deploy.yml`, run plain `npm run audit:content` after `npm run check` and before tests; production deployment still uploads only `dist`.
+
+After `npm ci`, every dependency-installing CI job (`minimum-engine`, `quality`, `content-audit-matrix`, and `windows-visual`) and deploy `verify` runs both commands, in this order:
+
+```yaml
+- run: npm audit --omit=dev --audit-level=high
+- run: npm audit --audit-level=high
+```
+
+The first preserves the production-only release gate. The second includes the Phase 0 devDependencies that execute schema, AST, MIME, image, video, and CLI security checks.
 
 Update tooling/delivery tests to require the exact ordering:
 
@@ -2171,6 +2376,7 @@ Update tooling/delivery tests to require the exact ordering:
 expect(workflow).toMatch(
   /npm run check[\s\S]*npm run audit:content[\s\S]*npm test[\s\S]*npm run build[\s\S]*npm run audit:production/,
 );
+expect(workflow).toMatch(/npm audit --omit=dev --audit-level=high[\s\S]*npm audit --audit-level=high/);
 expect(packageJson.scripts['format:check']).toContain('scripts/**/*.{js,mjs,ts}');
 ```
 
@@ -2188,6 +2394,7 @@ npm test
 npm run build
 npm run audit:production
 npm audit --omit=dev --audit-level=high
+npm audit --audit-level=high
 npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"
 git diff --check
 ```
@@ -2217,6 +2424,7 @@ git commit -m "chore: gate publication content"
 
 - [ ] All nine task commits exist and each task passed its focused RED/GREEN cycle before the next task began.
 - [ ] The final verification sequence in Task 9 has fresh output from the implementation commit, not cached output copied from an earlier task.
+- [ ] Production-only and full dependency audits pass; the full audit covers every Phase 0 devDependency used by the security gates.
 - [ ] `src/content/site/profile.md` is the only non-`.gitkeep` content file added; the four public folder collections remain genuinely empty.
 - [ ] `src/config/site.ts` contains no editable contact URL; home/About render the approved copy from the typed singleton.
 - [ ] No admin, Decap, OAuth, Cloudflare, preview, remote-write, credential, private identity, invented claim, or legacy cleanup entered the diff.
