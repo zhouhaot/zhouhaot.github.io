@@ -126,6 +126,15 @@ describe('production output audit', () => {
     ).not.toThrow();
   });
 
+  it('rejects HTTP canonical and alternate link relations', () => {
+    for (const tag of [
+      '<link rel="canonical" href="http://example.com/page">',
+      '<link rel="alternate" hreflang="en" href="http://example.com/en/page">',
+    ]) {
+      expectFailure({ 'index.html': tag }, /remote/i);
+    }
+  });
+
   it('rejects protocol-relative links even for canonical and alternate relations', () => {
     for (const tag of [
       '<link rel="canonical" href="//example.com/page">',

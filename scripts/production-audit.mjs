@@ -90,7 +90,7 @@ function assertReference(root, file, tag, attrs) {
     }
     if (/^https?:\/\//i.test(value)) {
       if (/^<link\b/i.test(tag)) {
-        if (name === 'href' && isAllowedExternalLink(tag, attrs)) continue;
+        if (name === 'href' && /^https:\/\//i.test(value) && isAllowedExternalLink(tag, attrs)) continue;
         throw new Error(`Remote media reference ${value} in ${file}`);
       }
       if (name !== 'href' || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {

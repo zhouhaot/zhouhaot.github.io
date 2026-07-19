@@ -128,3 +128,16 @@ The local default npm registry is `https://registry.npmmirror.com`; its audit en
 - `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org`: `found 0 vulnerabilities`.
 - `npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"`: 88 passed.
 - `npm run test:e2e -- e2e/specs/visual.spec.ts`: 8 approved Windows Chromium visual baselines passed.
+
+## Fifth review remediation: RED → GREEN evidence
+
+1. Explicit HTTPS external link allowance
+   - RED: `npm test -- tests/production-audit.test.ts` failed 1/49 test case after adding the reviewer’s minimal HTTP canonical and alternate fixtures; the relation allowlist accepted both `http://` URLs.
+   - GREEN: the same command passed 49/49. A remote `<link>` now passes only when its href begins with explicit `https://` and every rel token is canonical or alternate. HTTP and protocol-relative links fail, while local links, HTTPS canonical/alternate links, and normal HTTPS navigation anchors remain accepted.
+
+## Fifth review final verification
+
+- `npm run format`, `npm run format:check`, `npm run lint`, `npm run check` (0 errors, 0 warnings, 0 hints), `npm test` (26 files/184 tests), `npm run build`, and `npm run audit:production` all passed.
+- `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org`: `found 0 vulnerabilities`.
+- `npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"`: 88 passed.
+- `npm run test:e2e -- e2e/specs/visual.spec.ts`: 8 approved Windows Chromium visual baselines passed.
