@@ -85,6 +85,10 @@ function assertReference(root, file, tag, attrs) {
     const value = attrs[name];
     if (!value) continue;
     if (/^(?:javascript|data|vbscript):/i.test(value)) throw new Error(`Unsafe reference ${value} in ${file}`);
+    if (name === 'href' && /^<(?:a|area)\b/i.test(tag)) {
+      if (/^https:\/\//i.test(value) || (/^<a\b/i.test(tag) && /^mailto:/i.test(value))) continue;
+      if (/^[a-z][a-z\d+.-]*:/i.test(value)) throw new Error(`Unsafe reference ${value} in ${file}`);
+    }
     if (value.startsWith('//')) {
       outputTarget(root, value, file);
     }

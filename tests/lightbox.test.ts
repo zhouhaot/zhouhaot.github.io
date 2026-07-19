@@ -30,6 +30,23 @@ afterEach(() => {
 });
 
 describe('portfolio lightbox', () => {
+  it.each([
+    ['owned', '自有'],
+    ['licensed', '已获授权'],
+    ['cc-by', '知识共享署名'],
+    ['public-domain', '公共领域'],
+  ] as const)('renders the Chinese %s license label from a raw enum', (rawLicense, label) => {
+    const root = mount();
+    const item = root
+      .querySelector<HTMLTemplateElement>('[data-lightbox-items]')
+      ?.content.querySelector<HTMLElement>('[data-lightbox-item]');
+    if (!item) throw new Error('Lightbox fixture item is required.');
+    item.dataset.license = rawLicense;
+    const cleanup = initPortfolioLightboxes(root);
+    document.body.querySelector<HTMLButtonElement>('[data-lightbox-trigger]')?.click();
+    expect(document.body.querySelector('[data-lightbox-license]')?.textContent).toBe(label);
+    cleanup();
+  });
   it('opens the selected trigger and loops keyboard navigation with an atomic position status', () => {
     const root = mount();
     const cleanup = initPortfolioLightboxes(root);

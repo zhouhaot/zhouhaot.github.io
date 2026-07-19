@@ -159,6 +159,19 @@ describe('production output audit', () => {
     ).not.toThrow();
   });
 
+  it.each([
+    ['rejects HTTP navigation', '<a href="http://example.com/profile">Profile</a>', /unsafe/i],
+    ['allows HTTPS navigation', '<area href="https://example.com/profile">Profile</area>', undefined],
+    ['allows public contact mailto links', '<a href="mailto:public@example.com">Contact</a>', undefined],
+    ['rejects unsupported navigation protocols', '<area href="ftp://example.com/file">File</area>', /unsafe/i],
+  ])('classifies $0 URLs by protocol', (_name, tag, error) => {
+    if (error) {
+      expectFailure({ 'index.html': tag }, error);
+      return;
+    }
+    expect(() => auditProductionOutput(fixture({ 'index.html': tag }))).not.toThrow();
+  });
+
   it('rejects remote CSS imports in quoted and url forms', () => {
     expectFailure({ 'site.css': '@import "https://cdn.example/site.css";' }, /remote/i);
     expectFailure({ 'site.css': '@import url(https://cdn.example/site.css);' }, /remote/i);

@@ -17,6 +17,17 @@ export type PortfolioMedia = {
   evidenceUrl?: string;
 };
 
+export const PORTFOLIO_LICENSE_LABELS = {
+  owned: '自有',
+  licensed: '已获授权',
+  'cc-by': '知识共享署名',
+  'public-domain': '公共领域',
+} satisfies Record<PortfolioMedia['license'], string>;
+
+export function portfolioLicenseLabel(license: PortfolioMedia['license'] | string): string {
+  return PORTFOLIO_LICENSE_LABELS[license as PortfolioMedia['license']] ?? license;
+}
+
 export type PortfolioSeriesData = {
   title: string;
   summary: string;

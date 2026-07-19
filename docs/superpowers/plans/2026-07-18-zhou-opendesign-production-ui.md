@@ -165,4 +165,3 @@
 ## Completion Gate
 
 The plan is complete only after every task has an implementation report, an independent approved review, fresh verification output, and a focused commit. The old SPA and admin files remain until a separate launch-migration plan is approved and executed.
-

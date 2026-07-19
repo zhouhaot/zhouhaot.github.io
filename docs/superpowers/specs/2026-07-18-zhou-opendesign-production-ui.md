@@ -117,4 +117,3 @@ Hero 明确 AI 应用开发定位、企业 AI 转型价值、GitHub 主按钮与
 - 原 Task 6 的 RSS、sitemap、robots 与结构化数据保留，但路径改为 `/articles`、`/projects`、`/portfolio`。
 - 原 Task 7 扩展为完整原型交互、可访问性与多视口验收。
 - 原 Task 8 的 CI 门保持不变，并在新 UI 完成后执行。
-

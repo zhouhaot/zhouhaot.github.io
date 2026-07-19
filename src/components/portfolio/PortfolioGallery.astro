@@ -1,5 +1,5 @@
 ---
-import type { PublicPortfolioSeries } from '@/domain/portfolio';
+import { portfolioLicenseLabel, type PublicPortfolioSeries } from '@/domain/portfolio';
 
 interface Props {
   series: PublicPortfolioSeries[];
@@ -56,7 +56,7 @@ const galleryItems = series.flatMap((entry) => entry.items);
                 {item.credit && <p>{item.credit}</p>}
                 {item.licenseUrl && <a href={item.licenseUrl}>许可说明</a>}
                 {item.evidenceUrl && <a href={item.evidenceUrl}>来源说明</a>}
-                <p>许可：{item.license}</p>
+                <p>许可：{portfolioLicenseLabel(item.license)}</p>
               </figcaption>
               <button
                 type="button"

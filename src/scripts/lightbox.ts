@@ -1,10 +1,12 @@
+import { portfolioLicenseLabel, type PortfolioMedia } from '@/domain/portfolio';
+
 type GalleryItem = {
   type: 'image' | 'video';
   src: string;
   poster?: string;
   alt: string;
   caption: string;
-  license: string;
+  license: PortfolioMedia['license'];
   credit?: string;
   licenseUrl?: string;
   evidenceUrl?: string;
@@ -28,7 +30,7 @@ function galleryItems(gallery: HTMLElement): GalleryItem[] {
         src,
         alt: element.dataset.alt ?? '',
         caption,
-        license,
+        license: license as PortfolioMedia['license'],
         ...(element.dataset.poster ? { poster: element.dataset.poster } : {}),
         ...(element.dataset.credit ? { credit: element.dataset.credit } : {}),
         ...(element.dataset.licenseUrl ? { licenseUrl: element.dataset.licenseUrl } : {}),
@@ -126,7 +128,7 @@ export function initPortfolioLightboxes(root: HTMLElement): () => void {
       media.replaceChildren(video);
     }
     caption.textContent = item.caption;
-    license.textContent = item.license;
+    license.textContent = portfolioLicenseLabel(item.license);
     credit.textContent = item.credit ?? '';
     licenseLink.hidden = !item.licenseUrl;
     evidenceLink.hidden = !item.evidenceUrl;
