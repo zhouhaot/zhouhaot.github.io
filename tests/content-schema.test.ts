@@ -75,4 +75,31 @@ describe('content schemas', () => {
       ).toMatchObject({ items: [expect.objectContaining({ license: item.license })] });
     }
   });
+
+  it('rejects non-HTTPS optional portfolio provenance URLs for owned media', () => {
+    const media = {
+      type: 'image',
+      source: 'image.webp',
+      alt: 'Image',
+      caption: 'Caption',
+      width: 1,
+      height: 1,
+      license: 'owned',
+    };
+    for (const optionalUrl of [
+      { licenseUrl: 'http://example.com/license' },
+      { evidenceUrl: 'http://example.com/evidence' },
+    ]) {
+      expect(() =>
+        portfolioSchema.parse({
+          title: 'Portfolio',
+          summary: 'Summary',
+          publishedAt: '2026-07-18',
+          order: 0,
+          status: 'published',
+          items: [{ ...media, ...optionalUrl }],
+        }),
+      ).toThrow();
+    }
+  });
 });

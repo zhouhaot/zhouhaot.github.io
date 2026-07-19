@@ -96,13 +96,45 @@ describe('production output audit', () => {
     expectFailure({ 'site.css': '.hero { background-image: url(https://cdn.example/hero.png); }' }, /remote/i);
   });
 
-  it('rejects a remote stylesheet href by tag purpose', () => {
-    expectFailure({ 'index.html': '<link rel="stylesheet" href="https://cdn.example/site.css">' }, /remote/i);
+  it('rejects remote hrefs for resource-loading link relations', () => {
+    for (const tag of [
+      '<link rel="stylesheet" href="https://cdn.example/site.css">',
+      '<link rel="preload" as="style" href="https://cdn.example/site.css">',
+      '<link rel="modulepreload" href="https://cdn.example/module.js">',
+      '<link rel="icon" href="https://cdn.example/favicon.ico">',
+      '<link rel="apple-touch-icon" href="https://cdn.example/apple-touch-icon.png">',
+      '<link rel="manifest" href="https://cdn.example/site.webmanifest">',
+    ]) {
+      expectFailure({ 'index.html': tag }, /remote/i);
+    }
+  });
+
+  it('allows normal remote navigation and metadata link relations', () => {
+    expect(() =>
+      auditProductionOutput(
+        fixture({
+          'index.html':
+            '<link rel="canonical" href="https://example.com/page"><link rel="alternate" hreflang="en" href="https://example.com/en/page">',
+        }),
+      ),
+    ).not.toThrow();
   });
 
   it('rejects remote CSS imports in quoted and url forms', () => {
     expectFailure({ 'site.css': '@import "https://cdn.example/site.css";' }, /remote/i);
     expectFailure({ 'site.css': '@import url(https://cdn.example/site.css);' }, /remote/i);
+  });
+
+  it('ignores remote references inside CSS comments while rejecting active references', () => {
+    expect(() =>
+      auditProductionOutput(
+        fixture({
+          'site.css':
+            '/* @import "https://cdn.example/commented.css"; .hero { background: url(https://cdn.example/commented.png); } */ .safe { color: green; }',
+        }),
+      ),
+    ).not.toThrow();
+    expectFailure({ 'site.css': '.hero { background: url(https://cdn.example/active.png); }' }, /remote/i);
   });
 
   it('rejects protocol-relative values before local path resolution', () => {
@@ -140,7 +172,15 @@ describe('production output audit', () => {
     });
   }
 
-  for (const metric of ['3&times;', '3&#215;', '3 conversion', '3 conversions']) {
+  for (const metric of [
+    '3&times;',
+    '3&#215;',
+    '3&#215 faster',
+    '3&#xD7 faster',
+    '3&times faster',
+    '3 conversion',
+    '3 conversions',
+  ]) {
     it(`decodes and rejects the unsupported visible metric ${metric}`, () => {
       expectFailure({ 'index.html': `<p>${metric}</p>` }, /metric/i);
     });
@@ -172,6 +212,8 @@ describe('production output audit', () => {
     ],
     ['cc-by credit', 'data-license="cc-by" data-license-url="https://example.com/license"'],
     ['public-domain evidence', 'data-license="public-domain"'],
+    ['owned HTTP license URL', 'data-license="owned" data-license-url="http://example.com/license"'],
+    ['owned HTTP evidence URL', 'data-license="owned" data-evidence-url="http://example.com/evidence"'],
   ]) {
     it(`rejects portfolio media with missing ${name}`, () => {
       expectFailure(
@@ -186,6 +228,10 @@ describe('production output audit', () => {
 
   for (const [name, attrs] of [
     ['owned', 'data-license="owned"'],
+    [
+      'owned with optional HTTPS provenance URLs',
+      'data-license="owned" data-license-url="https://example.com/license" data-evidence-url="https://example.com/evidence"',
+    ],
     ['licensed', 'data-license="licensed" data-credit="Source" data-license-url="https://example.com/license"'],
     ['cc-by', 'data-license="cc-by" data-credit="Source" data-license-url="https://example.com/license"'],
     ['public-domain', 'data-license="public-domain" data-evidence-url="https://example.com/evidence"'],

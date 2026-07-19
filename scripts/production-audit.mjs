@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { relative, resolve, sep } from 'node:path';
+import { JSDOM } from 'jsdom';
 
 const MARKERS =
   /LAB\.LOG|VOID\.DEV|\b(?:TODO|TBD|sample|coming soon|contact@example|resume|education|customer|testimonial)\b/i;
@@ -27,15 +28,9 @@ function attributes(tag) {
 }
 
 function visibleText(html) {
-  return html
-    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&(times|nbsp|amp|lt|gt|quot|apos);|&#(\d+);|&#x([\da-f]+);/gi, (_match, named, decimal, hexadecimal) => {
-      if (decimal) return String.fromCodePoint(Number(decimal));
-      if (hexadecimal) return String.fromCodePoint(Number.parseInt(hexadecimal, 16));
-      return { times: '×', nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }[named.toLowerCase()];
-    })
-    .replace(/\s+/g, ' ');
+  const document = new JSDOM(html).window.document;
+  document.querySelectorAll('script, style').forEach((node) => node.remove());
+  return (document.body.textContent ?? '').replace(/\s+/g, ' ');
 }
 
 function isOutside(root, target) {
@@ -79,14 +74,20 @@ function assertMediaValue(root, file, value) {
   return outputTarget(root, value, file);
 }
 
+function isResourceLoadingLink(tag, attrs) {
+  if (!/^<link\b/i.test(tag)) return false;
+  const rel = new Set((attrs.rel ?? '').toLowerCase().trim().split(/\s+/).filter(Boolean));
+  const resourceRelations = new Set(['stylesheet', 'preload', 'modulepreload', 'manifest']);
+  return [...rel].some((relation) => resourceRelations.has(relation) || relation.endsWith('icon'));
+}
+
 function assertReference(root, file, tag, attrs) {
   for (const name of ['href', 'src', 'poster']) {
     const value = attrs[name];
     if (!value) continue;
     if (/^(?:javascript|data|vbscript):/i.test(value)) throw new Error(`Unsafe reference ${value} in ${file}`);
     if (/^https?:\/\//i.test(value)) {
-      const stylesheet = /^<link\b/i.test(tag) && /\bstylesheet\b/i.test(attrs.rel ?? '');
-      if (name !== 'href' || stylesheet || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {
+      if (name !== 'href' || isResourceLoadingLink(tag, attrs) || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {
         throw new Error(`Remote media reference ${value} in ${file}`);
       }
       continue;
@@ -123,6 +124,11 @@ function assertMedia(file, tag, attrs) {
         return false;
       }
     };
+    for (const name of ['data-license-url', 'data-evidence-url']) {
+      if (Object.hasOwn(attrs, name) && !https(attrs[name])) {
+        throw new Error(`Portfolio ${name} must use HTTPS in ${file}`);
+      }
+    }
     if (
       (license === 'licensed' || license === 'cc-by') &&
       (!attrs['data-credit'] || !https(attrs['data-license-url']))
@@ -135,15 +141,21 @@ function assertMedia(file, tag, attrs) {
   }
 }
 
+function activeCss(css) {
+  return css.replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
 function assertCssUrls(root, file, css) {
-  for (const [, doubleQuoted, singleQuoted, bare] of css.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi)) {
+  for (const [, doubleQuoted, singleQuoted, bare] of activeCss(css).matchAll(
+    /url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi,
+  )) {
     const url = doubleQuoted ?? singleQuoted ?? bare;
     if (url) assertMediaValue(root, file, url);
   }
 }
 
 function assertCssImports(root, file, css) {
-  for (const [, doubleQuoted, singleQuoted, urlDoubleQuoted, urlSingleQuoted, urlBare] of css.matchAll(
+  for (const [, doubleQuoted, singleQuoted, urlDoubleQuoted, urlSingleQuoted, urlBare] of activeCss(css).matchAll(
     /@import\s+(?:"([^"]+)"|'([^']+)'|url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\))/gi,
   )) {
     const url = doubleQuoted ?? singleQuoted ?? urlDoubleQuoted ?? urlSingleQuoted ?? urlBare;

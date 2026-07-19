@@ -86,3 +86,29 @@ The local default npm registry is `https://registry.npmmirror.com`; its audit en
 
 - Full: format/lint/check (0 errors, 0 warnings, 0 hints), 26 test files/171 tests, build, production audit, generic E2E (88 passed), and Windows visual baselines (8 passed) all passed.
 - The first official-registry audit request in the combined run had a transient TLS disconnect. An immediate standalone retry of `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org` completed with `found 0 vulnerabilities`.
+
+## Third review remediation: RED → GREEN evidence
+
+1. Resource-loading link relations
+   - RED: `npm test -- tests/production-audit.test.ts tests/content-schema.test.ts` failed 7/52 assertions. Remote `link` href values for preload (`as=style`), modulepreload, and icon were permitted alongside the existing stylesheet gap.
+   - GREEN: the same command passed 52/52. The audit classifies stylesheet, preload, modulepreload, and icon relations as resource loads and rejects remote or protocol-relative hrefs, while canonical and alternate HTTPS navigation/metadata links remain permitted.
+   - Self-review RED → GREEN: `apple-touch-icon` and `manifest` added an additional expected 1/52 focused failure; relation-token coverage was extended and the same suite returned to 52/52.
+2. License provenance URL parity
+   - RED: owned portfolio media accepted optional HTTP `data-license-url` and `data-evidence-url` values. The schema regression test confirmed HTTPS is already required there.
+   - GREEN: every present provenance URL is first validated as HTTPS; then the existing owned/licensed/CC-BY/public-domain required-field branches apply. Fixtures cover owned HTTP failures and legal optional HTTPS provenance combinations.
+3. Browser-compatible entity decoding
+   - RED: semicolonless `3&#215 faster`, `3&#xD7 faster`, and `3&times faster` did not reach the visible metric check.
+   - GREEN: visible text is now obtained with the existing `jsdom` HTML parser after removing script/style nodes, so browser entity semantics apply before metric detection.
+4. CSS comment isolation
+   - RED: remote `url()` and `@import` values inside comments were treated as active CSS references.
+   - GREEN: CSS comments are removed before URL/import scanning; commented remote references pass and active remote references fail.
+
+## Third review core verification
+
+- `npm run format`, `npm run format:check`, `npm run lint`, `npm run check` (0 errors, 0 warnings, 0 hints), `npm test` (26 files/180 tests), `npm run build`, and `npm run audit:production` all passed.
+
+## Third review final verification
+
+- `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org`: `found 0 vulnerabilities`.
+- `npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"`: 88 passed.
+- `npm run test:e2e -- e2e/specs/visual.spec.ts`: 8 approved Windows Chromium visual baselines passed.
