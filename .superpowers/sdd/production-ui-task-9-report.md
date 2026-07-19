@@ -112,3 +112,19 @@ The local default npm registry is `https://registry.npmmirror.com`; its audit en
 - `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org`: `found 0 vulnerabilities`.
 - `npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"`: 88 passed.
 - `npm run test:e2e -- e2e/specs/visual.spec.ts`: 8 approved Windows Chromium visual baselines passed.
+
+## Fourth review remediation: RED → GREEN evidence
+
+1. Safe external-link allowlist
+   - RED: `npm test -- tests/production-audit.test.ts` failed 2/46 test cases. `prefetch` and other unenumerated resource/unknown rel values were allowed remotely, while protocol-relative canonical/alternate values incorrectly fell into local-path resolution.
+   - Initial GREEN: the focused suite passed 46/46 with a canonical/alternate allowlist, but that still allowed protocol-relative canonical/alternate links.
+   - Boundary-correction RED: a new protocol-relative canonical/alternate fixture failed 1/47 as required, proving the initial allowlist was too broad for explicit-HTTPS policy.
+   - Final GREEN: the focused suite passed 47/47. For an explicit `https://` `<link href>`, the audit allows only a non-empty rel-token set composed exclusively of `canonical` and/or `alternate`; combinations such as `canonical prefetch` fail. Every protocol-relative `//` link is rejected before allowlist evaluation. Reviewer reproductions cover prefetch, apple-touch-icon-precomposed, prerender, apple-touch-startup-image, and an unknown rel. Explicit HTTPS canonical/alternate pass, and local stylesheet links remain subject to ordinary dist resolution.
+   - Navigation-regression RED → GREEN: the first real `dist` audit rejected the 404 page's ordinary remote GitHub anchor because the new branch was accidentally applied to every tag. A dedicated remote-anchor test failed 1/48, then passed 48/48 after restricting the allowlist to `<link href>` and restoring ordinary external navigation behavior.
+
+## Fourth review final verification
+
+- `npm run format`, `npm run format:check`, `npm run lint`, `npm run check` (0 errors, 0 warnings, 0 hints), `npm test` (26 files/183 tests), `npm run build`, and `npm run audit:production` all passed.
+- `npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org`: `found 0 vulnerabilities`.
+- `npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"`: 88 passed.
+- `npm run test:e2e -- e2e/specs/visual.spec.ts`: 8 approved Windows Chromium visual baselines passed.

@@ -74,11 +74,10 @@ function assertMediaValue(root, file, value) {
   return outputTarget(root, value, file);
 }
 
-function isResourceLoadingLink(tag, attrs) {
+function isAllowedExternalLink(tag, attrs) {
   if (!/^<link\b/i.test(tag)) return false;
   const rel = new Set((attrs.rel ?? '').toLowerCase().trim().split(/\s+/).filter(Boolean));
-  const resourceRelations = new Set(['stylesheet', 'preload', 'modulepreload', 'manifest']);
-  return [...rel].some((relation) => resourceRelations.has(relation) || relation.endsWith('icon'));
+  return rel.size > 0 && [...rel].every((relation) => relation === 'canonical' || relation === 'alternate');
 }
 
 function assertReference(root, file, tag, attrs) {
@@ -86,8 +85,15 @@ function assertReference(root, file, tag, attrs) {
     const value = attrs[name];
     if (!value) continue;
     if (/^(?:javascript|data|vbscript):/i.test(value)) throw new Error(`Unsafe reference ${value} in ${file}`);
+    if (value.startsWith('//')) {
+      outputTarget(root, value, file);
+    }
     if (/^https?:\/\//i.test(value)) {
-      if (name !== 'href' || isResourceLoadingLink(tag, attrs) || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {
+      if (/^<link\b/i.test(tag)) {
+        if (name === 'href' && isAllowedExternalLink(tag, attrs)) continue;
+        throw new Error(`Remote media reference ${value} in ${file}`);
+      }
+      if (name !== 'href' || /<(?:img|video|audio|source|meta)\b/i.test(tag)) {
         throw new Error(`Remote media reference ${value} in ${file}`);
       }
       continue;

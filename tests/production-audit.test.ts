@@ -96,7 +96,7 @@ describe('production output audit', () => {
     expectFailure({ 'site.css': '.hero { background-image: url(https://cdn.example/hero.png); }' }, /remote/i);
   });
 
-  it('rejects remote hrefs for resource-loading link relations', () => {
+  it('rejects non-allowlisted remote and protocol-relative link hrefs', () => {
     for (const tag of [
       '<link rel="stylesheet" href="https://cdn.example/site.css">',
       '<link rel="preload" as="style" href="https://cdn.example/site.css">',
@@ -104,12 +104,18 @@ describe('production output audit', () => {
       '<link rel="icon" href="https://cdn.example/favicon.ico">',
       '<link rel="apple-touch-icon" href="https://cdn.example/apple-touch-icon.png">',
       '<link rel="manifest" href="https://cdn.example/site.webmanifest">',
+      '<link rel="prefetch" href="https://cdn.example/prefetch.js">',
+      '<link rel="apple-touch-icon-precomposed" href="https://cdn.example/apple-touch-icon.png">',
+      '<link rel="prerender" href="https://cdn.example/prerender.html">',
+      '<link rel="apple-touch-startup-image" href="https://cdn.example/startup.png">',
+      '<link rel="future-resource" href="https://cdn.example/resource">',
+      '<link rel="canonical prefetch" href="https://cdn.example/page">',
     ]) {
       expectFailure({ 'index.html': tag }, /remote/i);
     }
   });
 
-  it('allows normal remote navigation and metadata link relations', () => {
+  it('allows only canonical and alternate explicit HTTPS link relations', () => {
     expect(() =>
       auditProductionOutput(
         fixture({
@@ -117,6 +123,30 @@ describe('production output audit', () => {
             '<link rel="canonical" href="https://example.com/page"><link rel="alternate" hreflang="en" href="https://example.com/en/page">',
         }),
       ),
+    ).not.toThrow();
+  });
+
+  it('rejects protocol-relative links even for canonical and alternate relations', () => {
+    for (const tag of [
+      '<link rel="canonical" href="//example.com/page">',
+      '<link rel="alternate" hreflang="fr" href="//example.com/fr/page">',
+      '<link rel="prefetch" href="//cdn.example/prefetch.js">',
+    ]) {
+      expectFailure({ 'index.html': tag }, /unsafe/i);
+    }
+  });
+
+  it('keeps local link references subject to normal output resolution', () => {
+    expect(() =>
+      auditProductionOutput(
+        fixture({ 'index.html': '<link rel="stylesheet" href="/site.css">', 'site.css': '.safe { color: green; }' }),
+      ),
+    ).not.toThrow();
+  });
+
+  it('keeps ordinary remote navigation anchors allowed', () => {
+    expect(() =>
+      auditProductionOutput(fixture({ 'index.html': '<a href="https://example.com/profile">Profile</a>' })),
     ).not.toThrow();
   });
 
