@@ -90,6 +90,10 @@ Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --aud
 - Modify: `src/pages/articles/[id].astro`
 - Modify: `src/pages/projects/index.astro`
 - Modify: `src/pages/projects/[id].astro`
+- Modify: `e2e/fixtures/src/pages/articles/index.astro`
+- Modify: `e2e/fixtures/src/pages/portfolio/index.astro`
+- Modify: `e2e/fixtures/src/pages/projects/index.astro`
+- Modify: `e2e/fixtures/src/pages/reader/index.astro`
 - Modify: `src/components/home/Hero.astro`
 - Modify: `src/components/home/CapabilityMap.astro`
 - Modify: `src/components/home/DeliveryMethod.astro`
@@ -101,6 +105,7 @@ Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --aud
 - Modify: `tests/portfolio-about-output.test.ts`
 - Modify: `tests/responsive-shell-output.test.ts`
 - Modify: `tests/delivery-boundary.test.ts`
+- Modify: `e2e/specs/fixtures.spec.ts`
 
 **Interfaces:**
 
@@ -206,6 +211,7 @@ for (const file of collectSources(resolve('src')).filter(
 
 const redundantHeaderOwners = [
   ...collectSources(resolve('src/pages')).filter((path) => path.endsWith('.astro')),
+  ...collectSources(resolve('e2e/fixtures/src/pages')).filter((path) => path.endsWith('.astro')),
   resolve('src/layouts/ContentLayout.astro'),
 ];
 for (const file of redundantHeaderOwners) {
@@ -226,6 +232,17 @@ expect(shellContacts.map((link) => link.textContent)).toEqual(['GitHub', 'GitHub
 ```
 
 Update `tests/delivery-boundary.test.ts` to read `index.html`, `404.html`, `about/index.html`, `articles/index.html`, `portfolio/index.html`, and `projects/index.html` from the build output and assert each contains exactly one `class="site-header"`. Keep the existing 404 GitHub/return-home assertions, which verify its direct CTA output through a QA literal.
+
+Update `e2e/specs/fixtures.spec.ts` with one focused shell assertion:
+
+```ts
+test('fixture pages inherit exactly one shared header', async ({ page }) => {
+  for (const path of ['/articles/', '/portfolio/', '/projects/', '/reader/']) {
+    await page.goto(`${fixture}${path}`);
+    await expect(page.locator('.site-header')).toHaveCount(1);
+  }
+});
+```
 
 - [ ] **Step 2: Run the tests and verify RED**
 
@@ -476,7 +493,7 @@ Give `src/components/MobileDrawer.astro` the same typed `primaryContact: PublicC
 
 - [ ] **Step 8: Remove redundant headers, migrate direct CTAs, and retire duplicate globals**
 
-Remove the `SiteHeader` import and `<SiteHeader slot="header" />` from all page templates that render `BaseLayout`: `src/pages/index.astro`, `src/pages/about/index.astro`, `src/pages/404.astro`, `src/pages/portfolio/index.astro`, `src/pages/articles/index.astro`, `src/pages/articles/[id].astro`, `src/pages/projects/index.astro`, and `src/pages/projects/[id].astro`. Remove the same redundant import/render from `src/layouts/ContentLayout.astro`. Do not change page content order.
+Remove the `SiteHeader` import and `<SiteHeader slot="header" />` from all page templates that render `BaseLayout`: `src/pages/index.astro`, `src/pages/about/index.astro`, `src/pages/404.astro`, `src/pages/portfolio/index.astro`, `src/pages/articles/index.astro`, `src/pages/articles/[id].astro`, `src/pages/projects/index.astro`, and `src/pages/projects/[id].astro`. Remove the same redundant import/render from `src/layouts/ContentLayout.astro` and from `e2e/fixtures/src/pages/articles/index.astro`, `e2e/fixtures/src/pages/portfolio/index.astro`, `e2e/fixtures/src/pages/projects/index.astro`, and `e2e/fixtures/src/pages/reader/index.astro`; the fixture pages inherit the same BaseLayout-owned header. Do not change page or fixture content order.
 
 In `src/pages/404.astro`, load `getSiteProfile()` in page frontmatter, resolve the required `primaryContact`, and set only the existing primary CTA's `href` to `primaryContact.href`. Keep `访问 GitHub` before `返回首页`.
 
@@ -500,7 +517,8 @@ npm run check
 npm run build
 npm run audit:production
 npm test
-rg -n "SITE\.githubUrl|https://github.com/zhouhaot|<SiteHeader slot=\"header\"" src --glob "!src/content/site/profile.md"
+npm run test:e2e -- e2e/specs/fixtures.spec.ts
+rg -n "SITE\.githubUrl|https://github.com/zhouhaot|<SiteHeader slot=\"header\"" src e2e/fixtures/src/pages --glob "!src/content/site/profile.md"
 git diff -- src/content/site/profile.md src/content/work src/content/lab src/content/notes src/content/portfolio
 ```
 
@@ -509,7 +527,7 @@ Expected: focused tests, Astro check, every static page build, production audit,
 - [ ] **Step 10: Commit Task 1**
 
 ```bash
-git add src/content.config.ts src/content/site/profile.md src/domain/content-schema.ts src/domain/public-profile.ts src/domain/public-profile.server.ts src/config/site.ts src/layouts/BaseLayout.astro src/layouts/ContentLayout.astro src/components/SiteHeader.astro src/components/MobileDrawer.astro src/components/home/Hero.astro src/components/home/CapabilityMap.astro src/components/home/DeliveryMethod.astro src/components/home/CurrentStatus.astro src/pages/index.astro src/pages/about/index.astro src/pages/404.astro src/pages/portfolio/index.astro src/pages/articles/index.astro src/pages/articles/[id].astro src/pages/projects/index.astro src/pages/projects/[id].astro tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts
+git add src/content.config.ts src/content/site/profile.md src/domain/content-schema.ts src/domain/public-profile.ts src/domain/public-profile.server.ts src/config/site.ts src/layouts/BaseLayout.astro src/layouts/ContentLayout.astro src/components/SiteHeader.astro src/components/MobileDrawer.astro src/components/home/Hero.astro src/components/home/CapabilityMap.astro src/components/home/DeliveryMethod.astro src/components/home/CurrentStatus.astro src/pages/index.astro src/pages/about/index.astro src/pages/404.astro src/pages/portfolio/index.astro src/pages/articles/index.astro src/pages/articles/[id].astro src/pages/projects/index.astro src/pages/projects/[id].astro e2e/fixtures/src/pages/articles/index.astro e2e/fixtures/src/pages/portfolio/index.astro e2e/fixtures/src/pages/projects/index.astro e2e/fixtures/src/pages/reader/index.astro tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts e2e/specs/fixtures.spec.ts
 git commit -m "feat: add typed site profile singleton"
 ```
 
