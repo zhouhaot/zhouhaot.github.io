@@ -68,7 +68,7 @@ Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --aud
 
 ---
 
-### Task 1: Add the Site Profile Singleton and Atomically Migrate Home and About
+### Task 1: Add the Site Profile Singleton and Atomically Migrate Every Contact Consumer
 
 **Files:**
 
@@ -78,8 +78,18 @@ Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --aud
 - Modify: `src/domain/content-schema.ts`
 - Modify: `src/domain/public-profile.ts`
 - Modify: `src/config/site.ts`
+- Modify: `src/layouts/BaseLayout.astro`
+- Modify: `src/layouts/ContentLayout.astro`
+- Modify: `src/components/SiteHeader.astro`
+- Modify: `src/components/MobileDrawer.astro`
 - Modify: `src/pages/index.astro`
 - Modify: `src/pages/about/index.astro`
+- Modify: `src/pages/404.astro`
+- Modify: `src/pages/portfolio/index.astro`
+- Modify: `src/pages/articles/index.astro`
+- Modify: `src/pages/articles/[id].astro`
+- Modify: `src/pages/projects/index.astro`
+- Modify: `src/pages/projects/[id].astro`
 - Modify: `src/components/home/Hero.astro`
 - Modify: `src/components/home/CapabilityMap.astro`
 - Modify: `src/components/home/DeliveryMethod.astro`
@@ -89,15 +99,17 @@ Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --aud
 - Modify: `tests/production-ui-contracts.test.ts`
 - Modify: `tests/homepage-output.test.ts`
 - Modify: `tests/portfolio-about-output.test.ts`
+- Modify: `tests/responsive-shell-output.test.ts`
+- Modify: `tests/delivery-boundary.test.ts`
 
 **Interfaces:**
 
-- Produces: `siteProfileSchema`, `SiteProfile`, `PublicContact`, `SITE_PROFILE_ID = 'profile'`, `buildSiteProfile(entries: readonly SiteProfileSource[]): SiteProfile`, `getSiteProfile(): Promise<SiteProfile>`, and home components whose `Props` contain only typed strings/lists/contacts.
+- Produces: `siteProfileSchema`, `SiteProfile`, `PublicContact`, `SITE_PROFILE_ID = 'profile'`, `buildSiteProfile(entries: readonly SiteProfileSource[]): SiteProfile`, `getSiteProfile(): Promise<SiteProfile>`, and home/shell components whose `Props` contain only typed strings/lists/contacts.
 - Consumes: existing `publicContactUrl`, Astro `getEntry('site', 'profile')`, and the approved public copy currently held by `PUBLIC_PROFILE`/`SITE.githubUrl`.
-- Invariant: exactly one `site` entry exists, its ID is `profile`, its schema is strict, and no private identity field is accepted. Each page loads the server adapter once and passes typed props; neither a leaf component nor browser code imports the server adapter, `astro:content`, or a CMS SDK.
-- Atomic boundary: add the singleton/schema/server adapter, migrate every current home/About consumer, and remove `PUBLIC_PROFILE` plus `SITE.githubUrl` in this one task and one commit. The approved copy, CTA order, section structure, and rendered public output remain byte-for-byte equivalent.
+- Invariant: exactly one `site` entry exists, its ID is `profile`, its schema is strict, and no private identity field is accepted. `BaseLayout.astro` is the global shell server boundary: it loads the profile, resolves `primaryContact`, renders one `SiteHeader`, and passes the typed contact through `SiteHeader` to `MobileDrawer`. Home/About load the profile at their page boundary for page content; 404/portfolio load it at their page boundary for direct CTAs. No leaf component or browser code imports the server adapter, `astro:content`, or a CMS SDK.
+- Atomic boundary: add the singleton/schema/server adapter, migrate every home/About/global-shell/direct-CTA consumer, remove redundant page-level header instances, and remove `PUBLIC_PROFILE` plus `SITE.githubUrl` in this one task and one commit. No hidden duplicate or hard-coded GitHub URL remains outside the singleton/QA literals. The approved copy, CTA labels/order, section structure, single header, and rendered public output remain byte-for-byte equivalent.
 
-> **Dirty partial implementation remediation:** Before continuing this task, revert the accidental `public-profile.server`/`astro:content` imports added to leaf components by the interrupted partial implementation. Then implement the typed-props design below: load `getSiteProfile()` only at `src/pages/index.astro` and `src/pages/about/index.astro`, and pass the required strings, lists, and contacts into leaf components. Do not make Task 1 compile by retaining or adding server adapters in leaf components.
+> **Dirty partial implementation remediation:** Before continuing this task, revert the current accidental `public-profile.server`/`astro:content` imports in the home leaf components. Then implement the typed-props/page-load design below: server loads belong only in `BaseLayout.astro` and the home/About/404/portfolio page frontmatter described here; pass the required strings, lists, and contacts into leaf components. Do not make Task 1 compile by retaining or adding server adapters in any leaf component.
 
 - [ ] **Step 1: Write the failing singleton/schema tests**
 
@@ -155,15 +167,65 @@ expect(primary?.getAttribute('href')).toBe(approvedGithub);
 expect(readFileSync(resolve('src/config/site.ts'), 'utf8')).not.toMatch(/githubUrl/);
 ```
 
-Add a source contract to `tests/public-profile.test.ts` that prohibits server loading in leaf components and requires typed props:
+Add source contracts to `tests/public-profile.test.ts` that prohibit server loading in every leaf component, require typed props, and make `BaseLayout.astro` the only global-shell server boundary:
 
 ```ts
-for (const file of ['Hero.astro', 'CapabilityMap.astro', 'DeliveryMethod.astro', 'CurrentStatus.astro']) {
-  const source = readFileSync(resolve('src/components/home', file), 'utf8');
+for (const file of [
+  'src/components/home/Hero.astro',
+  'src/components/home/CapabilityMap.astro',
+  'src/components/home/DeliveryMethod.astro',
+  'src/components/home/CurrentStatus.astro',
+  'src/components/SiteHeader.astro',
+  'src/components/MobileDrawer.astro',
+]) {
+  const source = readFileSync(resolve(file), 'utf8');
   expect(source).not.toMatch(/public-profile\.server|astro:content|decap|cms/i);
   expect(source).toMatch(/interface Props/);
 }
+
+const baseLayout = readFileSync(resolve('src/layouts/BaseLayout.astro'), 'utf8');
+expect(baseLayout).toMatch(/getSiteProfile/);
+expect(baseLayout).toMatch(/<SiteHeader\s+primaryContact=\{primaryContact\}/);
 ```
+
+In `tests/production-ui-contracts.test.ts`, add a recursive production-source contract. Scan `.astro`, `.ts`, `.md`, and `.mdx` files under `src/`, excluding only `src/content/site/profile.md`, and assert that none contains `SITE.githubUrl` or `https://github.com/zhouhaot`. Also scan every `.astro` file under `src/pages/` plus `src/layouts/ContentLayout.astro` and assert that none imports/renders `SiteHeader` or uses `slot="header"`; `BaseLayout.astro` is the single header owner.
+
+```ts
+const collectSources = (directory: string): string[] =>
+  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = resolve(directory, entry.name);
+    return entry.isDirectory() ? collectSources(path) : [path];
+  });
+
+const singleton = resolve('src/content/site/profile.md');
+for (const file of collectSources(resolve('src')).filter(
+  (path) => /\.(?:astro|ts|mdx?)$/.test(path) && path !== singleton,
+)) {
+  expect(readFileSync(file, 'utf8')).not.toMatch(/SITE\.githubUrl|https:\/\/github\.com\/zhouhaot/);
+}
+
+const redundantHeaderOwners = [
+  ...collectSources(resolve('src/pages')).filter((path) => path.endsWith('.astro')),
+  resolve('src/layouts/ContentLayout.astro'),
+];
+for (const file of redundantHeaderOwners) {
+  expect(readFileSync(file, 'utf8')).not.toMatch(/SiteHeader|slot=["']header["']/);
+}
+```
+
+Update `tests/responsive-shell-output.test.ts` with the approved QA literal and assert the built home contains exactly one `.site-header`, while both shell contact links use the singleton URL and keep their existing labels:
+
+```ts
+const approvedGithub = 'https://github.com/zhouhaot';
+expect(builtDocument.querySelectorAll('.site-header')).toHaveLength(1);
+const shellContacts = Array.from(
+  builtDocument.querySelectorAll<HTMLAnchorElement>('.site-header__github, .mobile-drawer__github'),
+);
+expect(shellContacts.map((link) => link.getAttribute('href'))).toEqual([approvedGithub, approvedGithub]);
+expect(shellContacts.map((link) => link.textContent)).toEqual(['GitHub', 'GitHub']);
+```
+
+Update `tests/delivery-boundary.test.ts` to read `index.html`, `404.html`, `about/index.html`, `articles/index.html`, `portfolio/index.html`, and `projects/index.html` from the build output and assert each contains exactly one `class="site-header"`. Keep the existing 404 GitHub/return-home assertions, which verify its direct CTA output through a QA literal.
 
 - [ ] **Step 2: Run the tests and verify RED**
 
@@ -171,10 +233,10 @@ Run:
 
 ```bash
 npm test -- tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts
-npm test -- tests/homepage-output.test.ts tests/portfolio-about-output.test.ts
+npm test -- tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts
 ```
 
-Expected: FAIL because `siteProfileSchema`, `SiteProfileSource`, `buildSiteProfile`, and `collections.site` do not exist; `SITE.githubUrl` and the hard-coded/global profile consumers also remain.
+Expected: FAIL because `siteProfileSchema`, `SiteProfileSource`, `buildSiteProfile`, and `collections.site` do not exist; `SITE.githubUrl`, production hard-coded URL consumers, per-page header instances, and untyped shell contacts also remain.
 
 - [ ] **Step 3: Implement the strict profile schema and pure singleton adapter**
 
@@ -351,7 +413,7 @@ const { currentStatus, primaryContact } = Astro.props;
 
 Replace `PUBLIC_PROFILE.currentStatus`, `SITE.githubUrl`, and the hard-coded contact label in `CurrentStatus.astro` with the props. Keep the existing supporting sentence unchanged.
 
-- [ ] **Step 6: Load once per page, pass typed data, and remove duplicate globals**
+- [ ] **Step 6: Load home/About content at page boundaries and pass typed data**
 
 In `src/pages/index.astro`, add:
 
@@ -385,27 +447,69 @@ Render the migrated components as:
 
 In `src/pages/about/index.astro`, replace `PUBLIC_PROFILE`/`SITE.githubUrl` imports with `getSiteProfile`, load `profile` once at the page level, assert `primaryContact`, and replace each field access with `profile.<field>`. Keep the six sections and button order unchanged. Neither page may pass the full profile object to a leaf component.
 
-After both pages and every leaf consumer use typed props, remove `PUBLIC_PROFILE` from `src/domain/public-profile.ts` and remove only `githubUrl` from `SITE` in `src/config/site.ts`; keep `name`, `title`, `description`, `url`, and `navigation` unchanged. These removals are part of this same atomic change and must not be committed separately.
+- [ ] **Step 7: Make BaseLayout the typed global-shell server boundary**
 
-- [ ] **Step 7: Verify the complete atomic boundary**
+In `src/layouts/BaseLayout.astro`, import `SiteHeader`, load the profile, resolve its required contact, and render the header directly where the named header slot previously appeared:
+
+```astro
+---
+import SiteHeader from '@/components/SiteHeader.astro';
+import { getSiteProfile } from '@/domain/public-profile.server';
+
+const profile = await getSiteProfile();
+const primaryContact = profile.contacts[0];
+if (!primaryContact) throw new Error('Site profile requires a primary public contact.');
+---
+
+<SiteHeader primaryContact={primaryContact} />
+```
+
+Keep the header in its current visual position between the skip link and `<main>`. Remove the named header slot.
+
+Give `src/components/SiteHeader.astro` a typed `primaryContact: PublicContact` prop, change only the desktop contact `href` to `primaryContact.href`, keep its visible `GitHub` label unchanged, and render:
+
+```astro
+<MobileDrawer currentPath={currentPath} primaryContact={primaryContact} />
+```
+
+Give `src/components/MobileDrawer.astro` the same typed `primaryContact: PublicContact` prop and change only the drawer contact `href` to `primaryContact.href`. Keep the visible `GitHub` label and link order unchanged. Neither component imports `public-profile.server`, `astro:content`, or a CMS module.
+
+- [ ] **Step 8: Remove redundant headers, migrate direct CTAs, and retire duplicate globals**
+
+Remove the `SiteHeader` import and `<SiteHeader slot="header" />` from all page templates that render `BaseLayout`: `src/pages/index.astro`, `src/pages/about/index.astro`, `src/pages/404.astro`, `src/pages/portfolio/index.astro`, `src/pages/articles/index.astro`, `src/pages/articles/[id].astro`, `src/pages/projects/index.astro`, and `src/pages/projects/[id].astro`. Remove the same redundant import/render from `src/layouts/ContentLayout.astro`. Do not change page content order.
+
+In `src/pages/404.astro`, load `getSiteProfile()` in page frontmatter, resolve the required `primaryContact`, and set only the existing primary CTA's `href` to `primaryContact.href`. Keep `访问 GitHub` before `返回首页`.
+
+In `src/pages/portfolio/index.astro`, load the profile and portfolio data together, resolve the required contact, and set only the existing primary CTA's `href` to `primaryContact.href`:
+
+```ts
+const [profile, series] = await Promise.all([getSiteProfile(), getPublishedPortfolio()]);
+const primaryContact = profile.contacts[0];
+if (!primaryContact) throw new Error('Site profile requires a primary public contact.');
+```
+
+Keep `访问 GitHub` before `查看项目`. After every consumer uses the singleton, remove `PUBLIC_PROFILE` from `src/domain/public-profile.ts` and remove only `githubUrl` from `SITE` in `src/config/site.ts`; keep `name`, `title`, `description`, `url`, and `navigation` unchanged. These removals, the global-shell migration, and every direct CTA migration are one atomic change and must not be committed separately.
+
+- [ ] **Step 9: Verify the complete atomic boundary**
 
 Run:
 
 ```bash
-npm test -- tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts
+npm test -- tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts tests/theme-foundation.test.ts
 npm run check
 npm run build
 npm run audit:production
 npm test
+rg -n "SITE\.githubUrl|https://github.com/zhouhaot|<SiteHeader slot=\"header\"" src --glob "!src/content/site/profile.md"
 git diff -- src/content/site/profile.md src/content/work src/content/lab src/content/notes src/content/portfolio
 ```
 
-Expected: focused tests, Astro check, build, production audit, and the full unit suite all PASS at this single boundary. Home still has seven sections and three truthful collection empty states; About still has six sections; the approved copy, contact URL/label, CTA order, and rendered public output are byte-for-byte unchanged; no leaf component imports `public-profile.server` or `astro:content`; and the diff contains the real site singleton with no added work/lab/notes/portfolio entry.
+Expected: focused tests, Astro check, every static page build, production audit, and the full unit suite all PASS at this single boundary. The `rg` command reports no matches. Every built page has exactly one header; desktop/mobile shell links and home/About/404/portfolio CTAs use the singleton URL with approved labels/order unchanged; home still has seven sections and three truthful collection empty states; About still has six sections; no leaf component imports `public-profile.server` or `astro:content`; and the diff contains the real site singleton with no added work/lab/notes/portfolio entry.
 
-- [ ] **Step 8: Commit Task 1**
+- [ ] **Step 10: Commit Task 1**
 
 ```bash
-git add src/content.config.ts src/content/site/profile.md src/domain/content-schema.ts src/domain/public-profile.ts src/domain/public-profile.server.ts src/config/site.ts src/pages/index.astro src/pages/about/index.astro src/components/home/Hero.astro src/components/home/CapabilityMap.astro src/components/home/DeliveryMethod.astro src/components/home/CurrentStatus.astro tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts
+git add src/content.config.ts src/content/site/profile.md src/domain/content-schema.ts src/domain/public-profile.ts src/domain/public-profile.server.ts src/config/site.ts src/layouts/BaseLayout.astro src/layouts/ContentLayout.astro src/components/SiteHeader.astro src/components/MobileDrawer.astro src/components/home/Hero.astro src/components/home/CapabilityMap.astro src/components/home/DeliveryMethod.astro src/components/home/CurrentStatus.astro src/pages/index.astro src/pages/about/index.astro src/pages/404.astro src/pages/portfolio/index.astro src/pages/articles/index.astro src/pages/articles/[id].astro src/pages/projects/index.astro src/pages/projects/[id].astro tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts
 git commit -m "feat: add typed site profile singleton"
 ```
 
@@ -2362,7 +2466,7 @@ npm run test:e2e -- --grep-invert "approved Windows Chromium visual baselines"
 git diff --check
 ```
 
-Expected: every command PASS; `audit:content` reports zero work/lab/notes/portfolio entries and zero assets/orphans; existing empty-route and production-isolation E2E pass; `dist/` contains the real site singleton copy only through rendered home/About pages and never contains QA fixtures.
+Expected: every command PASS; `audit:content` reports zero work/lab/notes/portfolio entries and zero assets/orphans; existing empty-route and production-isolation E2E pass; `dist/` contains the real site singleton copy only through the approved rendered shell/pages and never contains QA fixtures.
 
 - [ ] **Step 7: Inspect scope before the final implementation commit**
 
@@ -2389,13 +2493,13 @@ git commit -m "chore: gate publication content"
 - [ ] The final verification sequence in Task 9 has fresh output from the implementation commit, not cached output copied from an earlier task.
 - [ ] Production-only and full dependency audits pass; the full audit covers every Phase 0 devDependency used by the security gates.
 - [ ] `src/content/site/profile.md` is the only non-`.gitkeep` content file added; the four public folder collections remain genuinely empty.
-- [ ] `src/config/site.ts` contains no editable contact URL; home/About render the approved copy from the typed singleton.
+- [ ] `src/config/site.ts` contains no editable contact URL; the global shell and home/About/404/portfolio render their approved contact/copy from the typed singleton.
 - [ ] No admin, Decap, OAuth, Cloudflare, preview, remote-write, credential, private identity, invented claim, or legacy cleanup entered the diff.
 - [ ] A reviewer can reject any one task without needing to reject an unrelated neighboring task; later tasks consume only the interfaces listed above.
 
 ## Plan Author Self-Review
 
-- **Spec coverage:** Task 1 atomically covers the singleton/schema/server adapter, typed-props home/About migration, approved copy, and duplicate-global removal; Task 3 covers slug, filename equality, draft default, attestation, and lab publish gating; Tasks 4–5 cover the shared schema, namespace, registry, MIME/size/dimension/poster/license rules; Task 6 covers Markdown/MDX AST rules; Task 7 covers entry/media references, safe deletion, and orphan reporting; Task 8 provides the CMS-neutral Astro contract foundation; Task 9 composes CI/release enforcement and the 50 MiB/no-overwrite policy. Phase 1–3 concerns remain explicitly excluded.
+- **Spec coverage:** Task 1 atomically covers the singleton/schema/server adapter, typed-props home/About migration, BaseLayout-owned global shell, 404/portfolio direct CTAs, approved output, and duplicate-global removal; Task 3 covers slug, filename equality, draft default, attestation, and lab publish gating; Tasks 4–5 cover the shared schema, namespace, registry, MIME/size/dimension/poster/license rules; Task 6 covers Markdown/MDX AST rules; Task 7 covers entry/media references, safe deletion, and orphan reporting; Task 8 provides the CMS-neutral Astro contract foundation; Task 9 composes CI/release enforcement and the 50 MiB/no-overwrite policy. Phase 1–3 concerns remain explicitly excluded.
 - **Deferred-detail scan:** The plan contains concrete file paths, commands, expected failures, signatures, fixtures, minimal implementations, regressions, and commit commands. No deferred implementation marker or instruction to imitate another task remains.
 - **Type consistency:** `ContentCollectionName`, `MediaReference`, `ContentAssetRegistry`, `ContentRecord`, `ContentReferenceGraph`, `ContentAuditOptions`, and `ContentAuditReport` have one defining task and the same spelling/signature at every consumer.
 - **Review boundaries:** The eight commits separate the atomic profile/content-consumer migration, publication metadata, schema-only media, file inspection, AST inspection, graph integrity, generic contract metadata, and release composition. No task requires Decap/admin/OAuth to be reviewable.
