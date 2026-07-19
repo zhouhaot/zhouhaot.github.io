@@ -94,6 +94,7 @@ Run both `npm audit --omit=dev --audit-level=high` and the full `npm audit --aud
 - Modify: `e2e/fixtures/src/pages/portfolio/index.astro`
 - Modify: `e2e/fixtures/src/pages/projects/index.astro`
 - Modify: `e2e/fixtures/src/pages/reader/index.astro`
+- Create: `e2e/fixtures/src/content.config.ts`
 - Modify: `src/components/home/Hero.astro`
 - Modify: `src/components/home/CapabilityMap.astro`
 - Modify: `src/components/home/DeliveryMethod.astro`
@@ -233,6 +234,16 @@ expect(shellContacts.map((link) => link.textContent)).toEqual(['GitHub', 'GitHub
 
 Update `tests/delivery-boundary.test.ts` to read `index.html`, `404.html`, `about/index.html`, `articles/index.html`, `portfolio/index.html`, and `projects/index.html` from the build output and assert each contains exactly one `class="site-header"`. Keep the existing 404 GitHub/return-home assertions, which verify its direct CTA output through a QA literal.
 
+In `tests/production-ui-contracts.test.ts`, also assert the fixture content config imports `siteProfileSchema`, uses the canonical `../../src/content/site` base, exports only `{ site }`, and does not define `work`, `lab`, `notes`, or `portfolio` collections.
+
+```ts
+const fixtureContentConfig = readFileSync(resolve('e2e/fixtures/src/content.config.ts'), 'utf8');
+expect(fixtureContentConfig).toContain('siteProfileSchema');
+expect(fixtureContentConfig).toContain("base: '../../src/content/site'");
+expect(fixtureContentConfig).toMatch(/export const collections = \{ site \}/);
+expect(fixtureContentConfig).not.toMatch(/\b(?:work|lab|notes|portfolio)\b/);
+```
+
 Update `e2e/specs/fixtures.spec.ts` with one focused shell assertion:
 
 ```ts
@@ -253,7 +264,7 @@ npm test -- tests/site-profile.test.ts tests/public-profile.test.ts tests/produc
 npm test -- tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts
 ```
 
-Expected: FAIL because `siteProfileSchema`, `SiteProfileSource`, `buildSiteProfile`, and `collections.site` do not exist; `SITE.githubUrl`, production hard-coded URL consumers, per-page header instances, and untyped shell contacts also remain.
+Expected: FAIL because `siteProfileSchema`, `SiteProfileSource`, `buildSiteProfile`, and `collections.site` do not exist; the fixture app has no canonical site collection; and `SITE.githubUrl`, production hard-coded URL consumers, per-page header instances, and untyped shell contacts also remain.
 
 - [ ] **Step 3: Implement the strict profile schema and pure singleton adapter**
 
@@ -327,6 +338,23 @@ const site = defineCollection({
 
 export const collections = { site, work, lab, notes, portfolio };
 ```
+
+Create `e2e/fixtures/src/content.config.ts`. Playwright starts this Astro app with `cwd: ./e2e/fixtures`, so `../../src/content/site` resolves to the canonical repository singleton directory. Reuse the production schema and define no fake production collections:
+
+```ts
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { siteProfileSchema } from '../../../src/domain/content-schema';
+
+const site = defineCollection({
+  loader: glob({ base: '../../src/content/site', pattern: 'profile.md' }),
+  schema: siteProfileSchema,
+});
+
+export const collections = { site };
+```
+
+Do not copy profile/contact data into the fixture tree. The fixture shell must load the same `src/content/site/profile.md` entry as production.
 
 Create `src/domain/public-profile.server.ts`:
 
@@ -522,12 +550,12 @@ rg -n "SITE\.githubUrl|https://github.com/zhouhaot|<SiteHeader slot=\"header\"" 
 git diff -- src/content/site/profile.md src/content/work src/content/lab src/content/notes src/content/portfolio
 ```
 
-Expected: focused tests, Astro check, every static page build, production audit, and the full unit suite all PASS at this single boundary. The `rg` command reports no matches. Every built page has exactly one header; desktop/mobile shell links and home/About/404/portfolio CTAs use the singleton URL with approved labels/order unchanged; home still has seven sections and three truthful collection empty states; About still has six sections; no leaf component imports `public-profile.server` or `astro:content`; and the diff contains the real site singleton with no added work/lab/notes/portfolio entry.
+Expected: focused tests, Astro check, every static page build, production audit, the full unit suite, and fixture E2E all PASS at this single boundary. Fixture E2E proves the fixture BaseLayout resolves the canonical site entry and renders exactly one header on all four fixture routes. The `rg` command reports no matches. Every built page has exactly one header; desktop/mobile shell links and home/About/404/portfolio CTAs use the singleton URL with approved labels/order unchanged; home still has seven sections and three truthful collection empty states; About still has six sections; no leaf component imports `public-profile.server` or `astro:content`; and the diff contains the real site singleton with no added work/lab/notes/portfolio entry.
 
 - [ ] **Step 10: Commit Task 1**
 
 ```bash
-git add src/content.config.ts src/content/site/profile.md src/domain/content-schema.ts src/domain/public-profile.ts src/domain/public-profile.server.ts src/config/site.ts src/layouts/BaseLayout.astro src/layouts/ContentLayout.astro src/components/SiteHeader.astro src/components/MobileDrawer.astro src/components/home/Hero.astro src/components/home/CapabilityMap.astro src/components/home/DeliveryMethod.astro src/components/home/CurrentStatus.astro src/pages/index.astro src/pages/about/index.astro src/pages/404.astro src/pages/portfolio/index.astro src/pages/articles/index.astro src/pages/articles/[id].astro src/pages/projects/index.astro src/pages/projects/[id].astro e2e/fixtures/src/pages/articles/index.astro e2e/fixtures/src/pages/portfolio/index.astro e2e/fixtures/src/pages/projects/index.astro e2e/fixtures/src/pages/reader/index.astro tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts e2e/specs/fixtures.spec.ts
+git add src/content.config.ts src/content/site/profile.md src/domain/content-schema.ts src/domain/public-profile.ts src/domain/public-profile.server.ts src/config/site.ts src/layouts/BaseLayout.astro src/layouts/ContentLayout.astro src/components/SiteHeader.astro src/components/MobileDrawer.astro src/components/home/Hero.astro src/components/home/CapabilityMap.astro src/components/home/DeliveryMethod.astro src/components/home/CurrentStatus.astro src/pages/index.astro src/pages/about/index.astro src/pages/404.astro src/pages/portfolio/index.astro src/pages/articles/index.astro src/pages/articles/[id].astro src/pages/projects/index.astro src/pages/projects/[id].astro e2e/fixtures/src/content.config.ts e2e/fixtures/src/pages/articles/index.astro e2e/fixtures/src/pages/portfolio/index.astro e2e/fixtures/src/pages/projects/index.astro e2e/fixtures/src/pages/reader/index.astro tests/site-profile.test.ts tests/public-profile.test.ts tests/production-ui-contracts.test.ts tests/homepage-output.test.ts tests/portfolio-about-output.test.ts tests/responsive-shell-output.test.ts tests/delivery-boundary.test.ts e2e/specs/fixtures.spec.ts
 git commit -m "feat: add typed site profile singleton"
 ```
 
