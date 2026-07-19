@@ -1,13 +1,11 @@
 ---
 import ProjectCard from '../../../../../src/components/projects/ProjectCard.astro';
 import ProjectFilters from '../../../../../src/components/projects/ProjectFilters.astro';
-import SiteHeader from '../../../../../src/components/SiteHeader.astro';
 import BaseLayout from '../../../../../src/layouts/BaseLayout.astro';
 import '../../../../../src/styles/projects.css';
 import { projects } from '../../data';
 ---
 <BaseLayout title="[QA fixture] projects">
-  <SiteHeader slot="header" />
   <section class="projects-page">
     <header class="projects-page__header"><h1>[QA fixture] projects</h1></header>
     <ProjectFilters projects={projects}>

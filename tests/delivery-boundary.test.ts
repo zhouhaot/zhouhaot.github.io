@@ -63,6 +63,19 @@ describe('production delivery boundary', () => {
     expect(html).toMatch(/href="\/"/);
   });
 
+  it('renders exactly one shell header on every public static page', () => {
+    for (const file of [
+      'index.html',
+      '404.html',
+      'about/index.html',
+      'articles/index.html',
+      'portfolio/index.html',
+      'projects/index.html',
+    ]) {
+      expect(readFileSync(resolve(output, file), 'utf8').match(/class="site-header"/g)).toHaveLength(1);
+    }
+  });
+
   it('pins Node 24 and deploys only the built artifact after every gate', () => {
     expect(readFileSync(resolve('.nvmrc'), 'utf8').trim()).toBe('24');
     const ci = readFileSync(resolve('.github/workflows/ci.yml'), 'utf8');

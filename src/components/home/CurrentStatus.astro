@@ -1,6 +1,12 @@
 ---
-import { SITE } from '@/config/site';
-import { PUBLIC_PROFILE } from '@/domain/public-profile';
+import type { PublicContact } from '@/domain/content-schema';
+
+interface Props {
+  currentStatus: string;
+  primaryContact: PublicContact;
+}
+
+const { currentStatus, primaryContact } = Astro.props;
 ---
 
 <section
@@ -10,8 +16,10 @@ import { PUBLIC_PROFILE } from '@/domain/public-profile';
 >
   <header class="home-section-heading">
     <p class="home-kicker">当前状态与联系</p>
-    <h2 id="current-status-title">{PUBLIC_PROFILE.currentStatus}</h2>
+    <h2 id="current-status-title">{currentStatus}</h2>
   </header>
   <p>欢迎通过 GitHub 了解公开代码与持续更新的工作。</p>
-  <a class="home-text-link" href={SITE.githubUrl} rel="me external">访问 GitHub <span aria-hidden="true">→</span></a>
+  <a class="home-text-link" href={primaryContact.href} rel="me external"
+    >{primaryContact.label} <span aria-hidden="true">→</span></a
+  >
 </section>

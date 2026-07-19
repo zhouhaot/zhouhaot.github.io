@@ -1,12 +1,10 @@
 ---
 import ArticleDiscovery from '../../../../../src/components/articles/ArticleDiscovery.astro';
-import SiteHeader from '../../../../../src/components/SiteHeader.astro';
 import BaseLayout from '../../../../../src/layouts/BaseLayout.astro';
 import '../../../../../src/styles/articles.css';
 import { articles } from '../../data';
 ---
 <BaseLayout title="[QA fixture] articles">
-  <SiteHeader slot="header" />
   <section class="articles-page"><header><h1>[QA fixture] articles</h1></header><ArticleDiscovery articles={articles} tags={[{ key: 'accessibility', label: 'Accessibility' }, { key: 'testing', label: 'Testing' }]} /></section>
   <script>import { initArticleDiscovery } from '../../../../../src/scripts/articles'; initArticleDiscovery();</script>
 </BaseLayout>

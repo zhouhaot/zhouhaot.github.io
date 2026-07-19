@@ -1,7 +1,9 @@
 ---
 import { SITE } from '@/config/site';
 import { canonicalUrl, jsonLdScript, pageStructuredData, type SeoPageKind } from '@/domain/seo';
+import { getSiteProfile } from '@/domain/public-profile.server';
 import { themeInitializationScript } from '@/scripts/theme-init';
+import SiteHeader from '@/components/SiteHeader.astro';
 import '@/styles/tokens.css';
 import '@/styles/base.css';
 import '@/styles/components.css';
@@ -25,6 +27,9 @@ const {
 } = Astro.props;
 const canonical = canonicalUrl(canonicalPath);
 const structuredData = pageStructuredData({ kind: seoKind, title, description, path: canonicalPath });
+const profile = await getSiteProfile();
+const primaryContact = profile.contacts[0];
+if (!primaryContact) throw new Error('Site profile requires a primary public contact.');
 ---
 
 <!doctype html>
@@ -54,7 +59,7 @@ const structuredData = pageStructuredData({ kind: seoKind, title, description, p
   <body>
     <div class="site-shell">
       <a class="skip-link" href="#main-content">跳到主要内容</a>
-      <slot name="header" />
+      <SiteHeader primaryContact={primaryContact} />
       <main id="main-content" class="site-main" tabindex="-1"><slot /></main>
     </div>
   </body>

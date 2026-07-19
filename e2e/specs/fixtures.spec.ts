@@ -4,6 +4,13 @@ import { setViewport } from '../helpers/viewports';
 
 const fixture = 'http://127.0.0.1:4322';
 
+test('fixture pages inherit exactly one shared header', async ({ page }) => {
+  for (const path of ['/articles/', '/portfolio/', '/projects/', '/reader/']) {
+    await page.goto(`${fixture}${path}`);
+    await expect(page.locator('.site-header')).toHaveCount(1);
+  }
+});
+
 test('fixture project filters recover from zero results', async ({ page }) => {
   await page.goto(`${fixture}/projects/`);
   await page.locator('[data-project-type="lab"]').click();

@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { SITE } from '../src/config/site';
 
+const approvedGithub = 'https://github.com/zhouhaot';
+
 const outputDirectory = resolve('dist-portfolio-about-test');
 const buildCommand =
   process.platform === 'win32'
@@ -58,7 +60,7 @@ describe('built portfolio and anonymous about routes', () => {
     expect(portfolioHtml).not.toMatch(
       /data-portfolio-gallery|data-lightbox-items|initPortfolioLightboxes|coming soon/i,
     );
-    expect(portfolio.querySelector('[data-portfolio-primary-cta]')?.getAttribute('href')).toBe(SITE.githubUrl);
+    expect(portfolio.querySelector('[data-portfolio-primary-cta]')?.getAttribute('href')).toBe(approvedGithub);
     expect(portfolio.querySelector('[data-portfolio-secondary-cta]')?.getAttribute('href')).toBe('/projects/');
   });
 
@@ -70,7 +72,8 @@ describe('built portfolio and anonymous about routes', () => {
     ).toEqual(['positioning', 'capabilities', 'method', 'principles', 'current-status', 'trust-boundary']);
     const primary = about.querySelector<HTMLAnchorElement>('[data-about-primary-cta]');
     const secondary = about.querySelector<HTMLAnchorElement>('[data-about-secondary-cta]');
-    expect(primary?.getAttribute('href')).toBe(SITE.githubUrl);
+    expect(primary?.getAttribute('href')).toBe(approvedGithub);
+    expect(readFileSync(resolve('src/config/site.ts'), 'utf8')).not.toMatch(/githubUrl/);
     expect(secondary?.getAttribute('href')).toBe('/projects/');
     if (!primary || !secondary) throw new Error('About CTA controls are required.');
     expect(Boolean(primary.compareDocumentPosition(secondary) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);

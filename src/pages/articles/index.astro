@@ -1,7 +1,6 @@
 ---
 import ArticleDiscovery from '@/components/articles/ArticleDiscovery.astro';
 import EmptyState from '@/components/EmptyState.astro';
-import SiteHeader from '@/components/SiteHeader.astro';
 import { articleTagsFor } from '@/domain/articles';
 import { getPublishedArticles } from '@/domain/articles.server';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -11,7 +10,6 @@ const articles = await getPublishedArticles();
 ---
 
 <BaseLayout title="文章 | zhou" description="公开技术笔记和文章。" canonicalPath="/articles/" seoKind="list">
-  <SiteHeader slot="header" />
   <section class="articles-page" aria-labelledby="articles-heading">
     <header><h1 id="articles-heading">文章</h1><p>公开技术笔记和文章。</p></header>
     {

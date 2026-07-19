@@ -8,6 +8,42 @@ export const publicContactUrl = z.url().refine((value) => ['https:', 'mailto:'].
   message: 'Contact URL must use https: or mailto:',
 });
 
+export const contactKindSchema = z.enum(['github', 'email', 'website']);
+
+export const publicContactSchema = z
+  .object({
+    label: z.string().trim().min(1).max(80),
+    kind: contactKindSchema,
+    href: publicContactUrl,
+  })
+  .strict()
+  .superRefine((contact, context) => {
+    const protocol = new URL(contact.href).protocol;
+    const expected = contact.kind === 'email' ? 'mailto:' : 'https:';
+    if (protocol !== expected) {
+      context.addIssue({ code: 'custom', path: ['href'], message: `${contact.kind} contacts must use ${expected}` });
+    }
+  });
+
+export const siteProfileSchema = z
+  .object({
+    heroEyebrow: z.string().trim().min(1).max(80),
+    heroTitle: z.string().trim().min(1).max(120),
+    role: z.string().trim().min(1).max(80),
+    heroSummary: z.string().trim().min(1).max(240),
+    positioning: z.string().trim().min(1).max(320),
+    capabilities: z.array(z.string().trim().min(1).max(120)).min(1),
+    method: z.array(z.string().trim().min(1).max(120)).min(1),
+    principles: z.array(z.string().trim().min(1).max(160)).min(1),
+    currentStatus: z.string().trim().min(1).max(240),
+    trustBoundary: z.string().trim().min(1).max(400),
+    contacts: z.array(publicContactSchema).min(1),
+  })
+  .strict();
+
+export type SiteProfile = z.infer<typeof siteProfileSchema>;
+export type PublicContact = z.infer<typeof publicContactSchema>;
+
 export const localMediaPath = z.string().superRefine((value, context) => {
   const segments = value.split('/');
   const valid =

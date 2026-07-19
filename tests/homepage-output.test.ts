@@ -2,7 +2,8 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { SITE } from '../src/config/site';
+
+const approvedGithub = 'https://github.com/zhouhaot';
 
 const buildCommand =
   process.platform === 'win32'
@@ -45,7 +46,8 @@ describe('built production homepage', () => {
     expect(headings[0]?.textContent).toContain('探索技术边界，让 AI 真正进入业务。');
     expect(builtDocument.body.textContent).toContain('AI 应用开发者');
     expect(primary?.textContent).toContain('访问 GitHub');
-    expect(primary?.getAttribute('href')).toBe(SITE.githubUrl);
+    expect(primary?.getAttribute('href')).toBe(approvedGithub);
+    expect(readFileSync(resolve('src/config/site.ts'), 'utf8')).not.toMatch(/githubUrl/);
     expect(primary?.getAttribute('rel')).toContain('external');
     expect(secondary?.textContent).toContain('查看项目');
     expect(secondary?.getAttribute('href')).toBe('/projects/');

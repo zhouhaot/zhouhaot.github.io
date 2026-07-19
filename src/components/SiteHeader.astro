@@ -1,10 +1,16 @@
 ---
 import { SITE } from '@/config/site';
+import type { PublicContact } from '@/domain/content-schema';
 import MobileDrawer from './MobileDrawer.astro';
 import MobileNavigation from './MobileNavigation.astro';
 import ThemeSwitcher from './ThemeSwitcher.astro';
 import { isCurrentNavigationRoute } from '@/scripts/navigation';
 
+interface Props {
+  primaryContact: PublicContact;
+}
+
+const { primaryContact } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 
@@ -26,7 +32,7 @@ const currentPath = Astro.url.pathname;
     </nav>
     <div class="site-header__actions">
       <ThemeSwitcher />
-      <a class="site-header__github" href={SITE.githubUrl} rel="me external">GitHub</a>
+      <a class="site-header__github" href={primaryContact.href} rel="me external">GitHub</a>
       <button
         type="button"
         class="site-header__menu-trigger"
@@ -40,7 +46,7 @@ const currentPath = Astro.url.pathname;
     </div>
   </div>
 </header>
-<MobileDrawer currentPath={currentPath} />
+<MobileDrawer currentPath={currentPath} primaryContact={primaryContact} />
 <MobileNavigation currentPath={currentPath} />
 
 <script>

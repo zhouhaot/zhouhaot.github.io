@@ -6,16 +6,19 @@ import ExperimentStatus from '@/components/home/ExperimentStatus.astro';
 import FeaturedProjects from '@/components/home/FeaturedProjects.astro';
 import Hero from '@/components/home/Hero.astro';
 import LatestArticles from '@/components/home/LatestArticles.astro';
-import SiteHeader from '@/components/SiteHeader.astro';
 import { getPublishedEntries } from '@/domain/content';
+import { getSiteProfile } from '@/domain/public-profile.server';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import '@/styles/home.css';
 
-const [work, lab, notes] = await Promise.all([
+const [profile, work, lab, notes] = await Promise.all([
+  getSiteProfile(),
   getPublishedEntries('work'),
   getPublishedEntries('lab'),
   getPublishedEntries('notes'),
 ]);
+const primaryContact = profile.contacts[0];
+if (!primaryContact) throw new Error('Site profile requires a primary public contact.');
 
 const featuredWork = work.filter((entry) => entry.data.featured).slice(0, 3);
 const recentLabs = lab.slice(0, 4);
@@ -23,20 +26,25 @@ const recentNotes = notes.slice(0, 3);
 ---
 
 <BaseLayout>
-  <SiteHeader slot="header" />
   <div class="home-page">
     <div class="home-grid home-grid--hero">
-      <Hero />
+      <Hero
+        eyebrow={profile.heroEyebrow}
+        title={profile.heroTitle}
+        role={profile.role}
+        summary={profile.heroSummary}
+        primaryContact={primaryContact}
+      />
       <FeaturedProjects entries={featuredWork} />
     </div>
     <div class="home-grid home-grid--capabilities">
-      <CapabilityMap />
+      <CapabilityMap capabilities={profile.capabilities} />
       <ExperimentStatus entries={recentLabs} />
-      <DeliveryMethod />
+      <DeliveryMethod steps={profile.method} />
     </div>
     <div class="home-grid home-grid--footer">
       <LatestArticles entries={recentNotes} />
-      <CurrentStatus />
+      <CurrentStatus currentStatus={profile.currentStatus} primaryContact={primaryContact} />
     </div>
   </div>
 </BaseLayout>

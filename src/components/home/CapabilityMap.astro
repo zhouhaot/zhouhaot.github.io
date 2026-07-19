@@ -1,7 +1,9 @@
 ---
-import { PUBLIC_PROFILE } from '@/domain/public-profile';
+interface Props {
+  capabilities: readonly string[];
+}
 
-const capabilities = PUBLIC_PROFILE.capabilities;
+const { capabilities } = Astro.props;
 ---
 
 <section class="home-card home-capabilities" data-home-section="capability-map" aria-labelledby="capability-map-title">

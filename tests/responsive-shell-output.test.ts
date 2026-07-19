@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SITE } from '../src/config/site';
 
+const approvedGithub = 'https://github.com/zhouhaot';
+
 const buildCommand =
   process.platform === 'win32'
     ? { command: process.env.ComSpec ?? 'cmd.exe', args: ['/d', '/s', '/c', 'npm run build'] }
@@ -49,6 +51,12 @@ describe('built responsive shell', () => {
     expect(trigger?.getAttribute('aria-expanded')).toBe('false');
     expect(builtDocument.querySelectorAll('[data-theme-button]')).toHaveLength(6);
     expect(builtDocument.querySelectorAll('.site-header__github, .mobile-drawer__github')).toHaveLength(2);
+    expect(builtDocument.querySelectorAll('.site-header')).toHaveLength(1);
+    const shellContacts = Array.from(
+      builtDocument.querySelectorAll<HTMLAnchorElement>('.site-header__github, .mobile-drawer__github'),
+    );
+    expect(shellContacts.map((link) => link.getAttribute('href'))).toEqual([approvedGithub, approvedGithub]);
+    expect(shellContacts.map((link) => link.textContent)).toEqual(['GitHub', 'GitHub']);
     expect(tabbar?.querySelectorAll('a')).toHaveLength(5);
     expect(tabbar?.textContent).not.toContain('GitHub');
   });

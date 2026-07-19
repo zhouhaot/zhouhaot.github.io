@@ -1,18 +1,18 @@
 ---
 import EmptyState from '@/components/EmptyState.astro';
 import PortfolioGallery from '@/components/portfolio/PortfolioGallery.astro';
-import SiteHeader from '@/components/SiteHeader.astro';
-import { SITE } from '@/config/site';
 import { getPublishedPortfolio } from '@/domain/portfolio.server';
+import { getSiteProfile } from '@/domain/public-profile.server';
 import { PUBLIC_ROUTES } from '@/domain/routes';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import '@/styles/portfolio.css';
 
-const series = await getPublishedPortfolio();
+const [profile, series] = await Promise.all([getSiteProfile(), getPublishedPortfolio()]);
+const primaryContact = profile.contacts[0];
+if (!primaryContact) throw new Error('Site profile requires a primary public contact.');
 ---
 
 <BaseLayout title="作品 | zhou" description="经确认可公开的视觉与媒体作品。" canonicalPath="/portfolio/" seoKind="list">
-  <SiteHeader slot="header" />
   <section class="portfolio-page" aria-labelledby="portfolio-heading">
     <header class="portfolio-page__header">
       <p class="portfolio-page__eyebrow">作品</p>
@@ -22,7 +22,7 @@ const series = await getPublishedPortfolio();
         <a
           class="portfolio-page__button portfolio-page__button--primary"
           data-portfolio-primary-cta
-          href={SITE.githubUrl}
+          href={primaryContact.href}
           rel="me external">访问 GitHub</a
         >
         <a class="portfolio-page__button" data-portfolio-secondary-cta href={PUBLIC_ROUTES.projects}>查看项目</a>

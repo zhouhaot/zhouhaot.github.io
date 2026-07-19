@@ -2,7 +2,6 @@
 import EmptyState from '@/components/EmptyState.astro';
 import ProjectCard from '@/components/projects/ProjectCard.astro';
 import ProjectFilters from '@/components/projects/ProjectFilters.astro';
-import SiteHeader from '@/components/SiteHeader.astro';
 import { getPublishedProjects } from '@/domain/projects';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import '@/styles/projects.css';
@@ -11,7 +10,6 @@ const projects = await getPublishedProjects();
 ---
 
 <BaseLayout title="项目 | zhou" description="可验证的项目与实验。" canonicalPath="/projects/" seoKind="list">
-  <SiteHeader slot="header" />
   <section class="projects-page" aria-labelledby="projects-heading">
     <header class="projects-page__header">
       <p class="projects-page__eyebrow">项目</p>

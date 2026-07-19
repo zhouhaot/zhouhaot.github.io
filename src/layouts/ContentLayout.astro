@@ -1,6 +1,5 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import SiteHeader from '@/components/SiteHeader.astro';
 
 interface Props {
   title: string;
@@ -18,7 +17,6 @@ const { title, summary, publishedAt, canonicalPath } = Astro.props;
   type="article"
   seoKind="article"
 >
-  <SiteHeader slot="header" />
   <article>
     <header>
       <h1>{title}</h1>

@@ -1,8 +1,7 @@
 ---
 import PortfolioGallery from '../../../../../src/components/portfolio/PortfolioGallery.astro';
-import SiteHeader from '../../../../../src/components/SiteHeader.astro';
 import BaseLayout from '../../../../../src/layouts/BaseLayout.astro';
 import '../../../../../src/styles/portfolio.css';
 import { portfolio } from '../../data';
 ---
-<BaseLayout title="[QA fixture] portfolio"><SiteHeader slot="header" /><section class="portfolio-page"><header class="portfolio-page__header"><h1>[QA fixture] portfolio</h1></header><PortfolioGallery series={portfolio} /></section></BaseLayout>
+<BaseLayout title="[QA fixture] portfolio"><section class="portfolio-page"><header class="portfolio-page__header"><h1>[QA fixture] portfolio</h1></header><PortfolioGallery series={portfolio} /></section></BaseLayout>

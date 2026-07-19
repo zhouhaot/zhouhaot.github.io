@@ -1,6 +1,5 @@
 ---
 import ArticleReader from '../../../../../src/components/articles/ArticleReader.astro';
-import SiteHeader from '../../../../../src/components/SiteHeader.astro';
 import BaseLayout from '../../../../../src/layouts/BaseLayout.astro';
 import '../../../../../src/styles/articles.css';
 import { articles } from '../../data';
@@ -9,7 +8,7 @@ const toc = [{ depth: 2 as const, slug: 'qa-scope', text: '[QA fixture] scope', 
 const longToken = 'qa-fixture-super-long-token-without-a-natural-break-0123456789'.repeat(8);
 const fixtureText = '[QA fixture] long reader content stays local and wrap-safe.';
 ---
-<BaseLayout title="[QA fixture] reader"><SiteHeader slot="header" />
+<BaseLayout title="[QA fixture] reader">
   <ArticleReader article={article} toc={toc} previous={articles[1]} next={articles[1]}>
     <h2 id="qa-scope">[QA fixture] scope</h2><p>{longToken}</p>
     <h3 id="qa-scope-detail">[QA fixture] scope detail</h3><p>{'https://qa.fixture.invalid/'.repeat(16)}</p>

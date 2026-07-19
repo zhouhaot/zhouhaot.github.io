@@ -1,7 +1,9 @@
 ---
-import { PUBLIC_PROFILE } from '@/domain/public-profile';
+interface Props {
+  steps: readonly string[];
+}
 
-const steps = PUBLIC_PROFILE.method;
+const { steps } = Astro.props;
 ---
 
 <section class="home-card home-delivery" data-home-section="delivery-method" aria-labelledby="delivery-method-title">

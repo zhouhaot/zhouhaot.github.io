@@ -1,7 +1,6 @@
 ---
 import { getEntry, render } from 'astro:content';
 import ArticleReader from '@/components/articles/ArticleReader.astro';
-import SiteHeader from '@/components/SiteHeader.astro';
 import { articleNeighbours, buildArticleToc, type PublicArticle } from '@/domain/articles';
 import { getPublishedArticles } from '@/domain/articles.server';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -30,7 +29,6 @@ const { previous, next } = articleNeighbours(articles, article.id);
   type="article"
   seoKind="article"
 >
-  <SiteHeader slot="header" />
   <ArticleReader article={article} toc={toc} previous={previous} next={next}><Content /></ArticleReader>
   <script>
     import { initArticleReader } from '@/scripts/articles';

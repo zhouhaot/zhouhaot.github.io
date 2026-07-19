@@ -1,13 +1,15 @@
 ---
 import { SITE } from '@/config/site';
+import type { PublicContact } from '@/domain/content-schema';
 import { isCurrentNavigationRoute } from '@/scripts/navigation';
 import ThemeSwitcher from './ThemeSwitcher.astro';
 
 interface Props {
   currentPath: string;
+  primaryContact: PublicContact;
 }
 
-const { currentPath } = Astro.props;
+const { currentPath, primaryContact } = Astro.props;
 ---
 
 <div class="mobile-drawer__overlay" data-drawer-overlay hidden></div>
@@ -39,5 +41,5 @@ const { currentPath } = Astro.props;
     }
   </nav>
   <ThemeSwitcher />
-  <a class="mobile-drawer__github" href={SITE.githubUrl} rel="me external" data-drawer-link>GitHub</a>
+  <a class="mobile-drawer__github" href={primaryContact.href} rel="me external" data-drawer-link>GitHub</a>
 </aside>
