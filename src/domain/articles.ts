@@ -1,3 +1,4 @@
+import { assertEntrySlug, assertPublishable } from './publication';
 import { articleRoute } from './routes';
 
 export type ArticleData = {
@@ -6,6 +7,13 @@ export type ArticleData = {
   publishedAt: Date;
   updatedAt?: Date | undefined;
   draft?: boolean | undefined;
+  slug: string;
+  attestation: {
+    authenticityConfirmed: boolean;
+    rightsConfirmed: boolean;
+    reviewedAt?: Date | undefined;
+    evidenceUrls: string[];
+  };
   tags: string[];
 };
 
@@ -71,6 +79,10 @@ function toPublicArticle(source: ArticleSource): PublicArticle {
 }
 
 export function buildArticles(entries: readonly ArticleSource[], production = import.meta.env.PROD): PublicArticle[] {
+  for (const entry of entries) {
+    assertEntrySlug('notes', entry.id, entry.data.slug);
+    assertPublishable(entry.data);
+  }
   const published = entries.filter((entry) => !production || entry.data.draft !== true);
   assertUniqueSafeIds(published);
   return [...published].sort(newestFirst).map(toPublicArticle);

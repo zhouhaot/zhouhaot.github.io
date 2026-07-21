@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { labSchema, noteSchema, portfolioSchema, publicContactUrl, workSchema } from '../src/domain/content-schema';
 
+const publication = (slug: string) => ({
+  slug,
+  draft: false,
+  attestation: {
+    authenticityConfirmed: true,
+    rightsConfirmed: true,
+    reviewedAt: '2026-07-19',
+    evidenceUrls: [],
+  },
+});
+
 const baseWork = {
+  ...publication('enterprise-knowledge-assistant'),
   title: '企业知识助手',
   summary: '面向内部知识检索的可验证原型',
   problem: '知识分散且检索成本高',
@@ -26,6 +38,7 @@ describe('content schemas', () => {
   it('accepts only explicit lab lifecycle states', () => {
     expect(() =>
       labSchema.parse({
+        ...publication('agent-routing-experiment'),
         title: 'Agent 路由实验',
         summary: '比较路由策略',
         hypothesis: '显式路由更稳定',
@@ -41,6 +54,7 @@ describe('content schemas', () => {
 
   it('coerces note dates and requires draft state', () => {
     const note = noteSchema.parse({
+      ...publication('ai-workflow-eval'),
       title: 'AI 工作流评估',
       summary: '如何建立回归集',
       tags: ['eval'],
@@ -65,6 +79,7 @@ describe('content schemas', () => {
     ]) {
       expect(
         portfolioSchema.parse({
+          ...publication('portfolio-attribution-test'),
           title: 'Portfolio',
           summary: 'Summary',
           publishedAt: '2026-07-18',
@@ -92,6 +107,7 @@ describe('content schemas', () => {
     ]) {
       expect(() =>
         portfolioSchema.parse({
+          ...publication('portfolio-url-test'),
           title: 'Portfolio',
           summary: 'Summary',
           publishedAt: '2026-07-18',

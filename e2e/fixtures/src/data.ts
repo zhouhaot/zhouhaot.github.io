@@ -63,9 +63,16 @@ export const articles: PublicArticle[] = [
 export const portfolio: PublicPortfolioSeries[] = [
   {
     id: 'qa-media',
+    slug: 'qa-media',
     title: `${fixturePrefix} local media`,
     summary: `${fixturePrefix} self-created SVG media.`,
     publishedAt: new Date('2026-01-01'),
+    attestation: {
+      authenticityConfirmed: true,
+      rightsConfirmed: true,
+      reviewedAt: new Date('2026-07-19'),
+      evidenceUrls: [],
+    },
     order: 1,
     status: 'published',
     items: [

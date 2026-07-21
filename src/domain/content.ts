@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { assertEntrySlug, assertPublishable, type ContentCollectionName } from './publication';
 
 type DatedEntry = { data: { publishedAt: Date } };
 
@@ -11,6 +12,14 @@ export function sortNewestFirst<T extends DatedEntry>(entries: readonly T[]): T[
 }
 
 type PublicCollection = 'work' | 'lab' | 'notes';
+
+export function validateCollectionEntry<C extends PublicCollection>(
+  collection: C,
+  entry: CollectionEntry<C>,
+): void {
+  assertEntrySlug(collection as ContentCollectionName, entry.id, entry.data.slug);
+  assertPublishable(entry.data);
+}
 
 export async function getPublishedEntries<C extends PublicCollection>(collection: C): Promise<CollectionEntry<C>[]> {
   const entries = await getCollection(collection, ({ data }) => isPublicEntry(data));

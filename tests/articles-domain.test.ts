@@ -9,36 +9,51 @@ import {
   type ArticleSource,
 } from '../src/domain/articles';
 
-const source = (overrides: Partial<ArticleSource> = {}): ArticleSource => ({
-  id: 'alpha',
-  collection: 'notes',
-  data: {
-    title: 'Public title',
-    summary: 'Public summary',
-    publishedAt: new Date('2026-07-18'),
-    draft: false,
-    tags: ['TypeScript', ' AI  tools '],
+const publication = (slug: string) => ({
+  slug,
+  draft: false,
+  attestation: {
+    authenticityConfirmed: true,
+    rightsConfirmed: true,
+    reviewedAt: new Date('2026-07-19'),
+    evidenceUrls: [],
   },
-  ...overrides,
 });
+
+function source(overrides: Record<string, unknown> = {}): ArticleSource {
+  const id = (overrides.id as string) ?? 'alpha';
+  const data = overrides.data as Record<string, unknown> | undefined;
+  return {
+    id,
+    collection: 'notes',
+    data: {
+      ...publication(id),
+      title: 'Public title',
+      summary: 'Public summary',
+      publishedAt: new Date('2026-07-18'),
+      tags: ['TypeScript', ' AI  tools '],
+      ...data,
+    },
+  } as ArticleSource;
+}
 
 describe('article domain', () => {
   it('filters production drafts and sorts a copy newest first with canonical id ties', () => {
     const entries = [
       source({ id: 'zeta' }),
       source({ id: 'alpha' }),
-      source({ id: 'draft', data: { ...source().data, draft: true, publishedAt: new Date('2026-07-19') } }),
+      source({ id: 'draft', data: { draft: true, publishedAt: new Date('2026-07-19') } }),
     ];
     expect(buildArticles(entries, true).map((article) => article.id)).toEqual(['alpha', 'zeta']);
     expect(entries.map((entry) => entry.id)).toEqual(['zeta', 'alpha', 'draft']);
     expect(buildArticles(entries, false)).toHaveLength(3);
   });
 
-  it('rejects unsafe and canonically duplicate ids while deriving hrefs from the route builder', () => {
-    expect(() => buildArticles([source({ id: 'nested/id' })], true)).toThrow(/safe/i);
-    expect(() => buildArticles([source({ id: ' cafe\u0301' })], true)).toThrow(/canonical/i);
-    expect(() => buildArticles([source({ id: 'CAFÉ' }), source({ id: 'café' })], true)).toThrow(/duplicate/i);
-    expect(buildArticles([source({ id: 'a b' })], true)[0]?.href).toBe('/articles/a%20b/');
+  it('rejects unsafe and non-slug ids while deriving hrefs from the route builder', () => {
+    expect(() => buildArticles([source({ id: 'nested/id' })], true)).toThrow(/slug/i);
+    expect(() => buildArticles([source({ id: 'has space' })], true)).toThrow(/slug/i);
+    expect(() => buildArticles([source({ id: 'UPPER' })], true)).toThrow(/slug/i);
+    expect(buildArticles([source({ id: 'a-b' })], true)[0]?.href).toBe('/articles/a-b/');
   });
 
   it('normalizes search and tags while keeping public search text free of body or private fields', () => {
@@ -46,7 +61,6 @@ describe('article domain', () => {
       [
         source({
           data: {
-            ...source().data,
             title: 'ＡＩ  Notes',
             summary: '  Useful\nsummary ',
             tags: [' TypeScript ', 'ＡＩ'],
@@ -62,16 +76,14 @@ describe('article domain', () => {
     ]);
     expect(article?.searchText).toBe('ai notes useful summary ai typescript');
     expect(JSON.stringify(article)).not.toMatch(/body|private/i);
-    expect(() => buildArticles([source({ data: { ...source().data, tags: ['AI', ' ai '] } })], true)).toThrow(
-      /duplicate tag/i,
-    );
+    expect(() => buildArticles([source({ data: { tags: ['AI', ' ai '] } })], true)).toThrow(/duplicate tag/i);
   });
 
   it('returns non-circular previous older and next newer neighbours', () => {
     const articles = buildArticles([
-      source({ id: 'new', data: { ...source().data, publishedAt: new Date('2026-07-20') } }),
-      source({ id: 'middle', data: { ...source().data, publishedAt: new Date('2026-07-19') } }),
-      source({ id: 'old', data: { ...source().data, publishedAt: new Date('2026-07-18') } }),
+      source({ id: 'new', data: { publishedAt: new Date('2026-07-20') } }),
+      source({ id: 'middle', data: { publishedAt: new Date('2026-07-19') } }),
+      source({ id: 'old', data: { publishedAt: new Date('2026-07-18') } }),
     ]);
     expect(articleNeighbours(articles, 'middle')).toMatchObject({ previous: { id: 'old' }, next: { id: 'new' } });
     expect(articleNeighbours(articles, 'new')).toMatchObject({ previous: { id: 'middle' }, next: undefined });

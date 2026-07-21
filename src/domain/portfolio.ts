@@ -1,3 +1,4 @@
+import { assertEntrySlug, assertPublishable } from './publication';
 import type { PublicProject } from './projects';
 
 export type PortfolioAsset = { src: string; width?: number; height?: number };
@@ -33,13 +34,20 @@ export type PortfolioSeriesData = {
   summary: string;
   publishedAt: Date;
   draft?: boolean;
+  slug: string;
+  attestation: {
+    authenticityConfirmed: boolean;
+    rightsConfirmed: boolean;
+    reviewedAt?: Date | undefined;
+    evidenceUrls: string[];
+  };
   order: number;
   status: 'published' | 'archived';
   relatedProject?: string;
   items: PortfolioMedia[];
 };
 
-export type PortfolioSource = { id: string; data: PortfolioSeriesData };
+export type PortfolioSource = { id: string; collection: 'portfolio'; data: PortfolioSeriesData };
 
 export type PortfolioMediaView = PortfolioMedia & {
   asset: PortfolioAsset;
@@ -97,6 +105,10 @@ export function buildPortfolioSeries(
   projects: readonly Pick<PublicProject, 'id' | 'href' | 'title'>[],
   resolveAsset: PortfolioAssetResolver,
 ): PublicPortfolioSeries[] {
+  for (const entry of entries) {
+    assertEntrySlug('portfolio', entry.id, entry.data.slug);
+    assertPublishable(entry.data);
+  }
   const publicEntries = entries.filter((entry) => entry.data.draft !== true && entry.data.status === 'published');
   const seenIds = new Set<string>();
 

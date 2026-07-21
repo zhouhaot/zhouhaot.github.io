@@ -1,4 +1,5 @@
 import { z } from 'astro/zod';
+import { canonicalSlugSchema } from './publication';
 
 export const httpsUrl = z.url().refine((value) => new URL(value).protocol === 'https:', {
   message: 'URL must use https:',
@@ -83,15 +84,28 @@ const canonicalProjectId = z.string().superRefine((value, context) => {
   }
 });
 
-const commonSchema = z.object({
-  title: z.string().min(1).max(120),
-  summary: z.string().min(1).max(240),
-  publishedAt: z.coerce.date(),
-  updatedAt: z.coerce.date().optional(),
-  draft: z.boolean().default(false),
+export const attestationSchema = z.object({
+  authenticityConfirmed: z.boolean().default(false),
+  rightsConfirmed: z.boolean().default(false),
+  reviewedAt: z.coerce.date().optional(),
+  evidenceUrls: z.array(httpsUrl).default([]),
 });
 
-export const workSchema = commonSchema.extend({
+const commonPublicationFields = {
+  slug: canonicalSlugSchema,
+  title: z.string().trim().min(1).max(120),
+  summary: z.string().trim().min(1).max(240),
+  publishedAt: z.coerce.date(),
+  updatedAt: z.coerce.date().optional(),
+  draft: z.boolean().default(true),
+  attestation: attestationSchema,
+} as const;
+
+function publicationSchema<T extends z.ZodRawShape>(fields: T) {
+  return z.object({ ...commonPublicationFields, ...fields });
+}
+
+export const workSchema = publicationSchema({
   problem: z.string().min(1),
   role: z.string().min(1),
   solution: z.string().min(1),
@@ -109,18 +123,18 @@ export const workSchema = commonSchema.extend({
   nextSteps: z.array(z.string().min(1)).default([]),
 });
 
-export const labSchema = commonSchema.extend({
+export const labSchema = publicationSchema({
   hypothesis: z.string().min(1),
   workflow: z.array(z.string().min(1)).min(1),
   modelOrTools: z.array(z.string().min(1)).min(1),
-  result: z.string().min(1),
-  evaluation: z.string().min(1),
+  result: z.string().trim().default(''),
+  evaluation: z.string().trim().default(''),
   status: z.enum(['prototype', 'validated', 'archived']),
   repositoryUrl: httpsUrl.optional(),
   demoUrl: httpsUrl.optional(),
 });
 
-export const noteSchema = commonSchema.extend({
+export const noteSchema = publicationSchema({
   tags: z.array(z.string().min(1)).min(1),
 });
 
@@ -157,7 +171,7 @@ const portfolioMediaSchema = z.discriminatedUnion('type', [
   }),
 ]);
 
-export const portfolioSchema = commonSchema.extend({
+export const portfolioSchema = publicationSchema({
   order: z.number().int().nonnegative(),
   status: z.enum(['published', 'archived']),
   relatedProject: canonicalProjectId.optional(),

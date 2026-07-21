@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { portfolioSchema } from '../src/domain/content-schema';
 import { buildPortfolioSeries, createPortfolioAssetResolver, type PortfolioSource } from '../src/domain/portfolio';
 
+const publication = (slug: string) => ({
+  slug,
+  draft: false,
+  attestation: {
+    authenticityConfirmed: true,
+    rightsConfirmed: true,
+    reviewedAt: new Date('2026-07-19'),
+    evidenceUrls: [],
+  },
+});
+
 const image = {
   type: 'image' as const,
   source: 'workflow/map.webp',
@@ -12,20 +23,25 @@ const image = {
   license: 'owned' as const,
 };
 
-const series = (overrides: Partial<PortfolioSource> = {}): PortfolioSource => ({
-  id: 'workflow-map',
-  data: {
-    title: '工作流图谱',
-    summary: '经确认的视觉记录。',
-    publishedAt: new Date('2026-07-18'),
-    draft: false,
-    order: 1,
-    status: 'published',
-    relatedProject: 'workflow-assistant',
-    items: [image],
-  },
-  ...overrides,
-});
+function series(overrides: Record<string, unknown> = {}): PortfolioSource {
+  const id = (overrides.id as string) ?? 'workflow-map';
+  const data = overrides.data as Record<string, unknown> | undefined;
+  return {
+    id,
+    collection: 'portfolio',
+    data: {
+      ...publication(id),
+      title: '工作流图谱',
+      summary: '经确认的视觉记录。',
+      publishedAt: new Date('2026-07-18'),
+      order: 1,
+      status: 'published',
+      relatedProject: 'workflow-assistant',
+      items: [image],
+      ...data,
+    },
+  } as PortfolioSource;
+}
 
 const publicProject = { id: 'workflow-assistant', href: '/projects/workflow-assistant/', title: '工作流助手' };
 
@@ -45,7 +61,7 @@ describe('portfolio schema', () => {
   });
 
   it('accepts only canonical local media paths with media-specific extensions and a video poster', () => {
-    for (const source of [
+    for (const src of [
       './workflow/map.webp',
       'workflow/../map.webp',
       'workflow\\map.webp',
@@ -60,7 +76,7 @@ describe('portfolio schema', () => {
       'C:asset.webp',
       'workflow/asset.WEBP',
     ]) {
-      expect(() => portfolioSchema.parse({ ...series().data, items: [{ ...image, source }] })).toThrow();
+      expect(() => portfolioSchema.parse({ ...series().data, items: [{ ...image, source: src }] })).toThrow();
     }
 
     expect(
@@ -99,7 +115,7 @@ describe('portfolio view model', () => {
     expect(() => buildPortfolioSeries([series()], [publicProject], createPortfolioAssetResolver({}))).toThrow(/asset/i);
     expect(() =>
       buildPortfolioSeries(
-        [series({ data: { ...series().data, relatedProject: ' workflow-assistant ' } })],
+        [series({ data: { relatedProject: ' workflow-assistant ' } })],
         [publicProject],
         resolver,
       ),
@@ -112,10 +128,10 @@ describe('portfolio view model', () => {
       'workflow/map.webp': { src: '/_astro/map.hash.webp', width: 1600, height: 900 },
     });
     const sources = [
-      series({ id: 'zeta', data: { ...series().data, order: 2, publishedAt: new Date('2026-07-17') } }),
-      series({ id: 'alpha', data: { ...series().data, order: 2, publishedAt: new Date('2026-07-18') } }),
-      series({ id: 'archived', data: { ...series().data, status: 'archived' } }),
-      series({ id: 'draft', data: { ...series().data, draft: true } }),
+      series({ id: 'zeta', data: { order: 2, publishedAt: new Date('2026-07-17') } }),
+      series({ id: 'alpha', data: { order: 2, publishedAt: new Date('2026-07-18') } }),
+      series({ id: 'archived', data: { status: 'archived' } }),
+      series({ id: 'draft', data: { draft: true } }),
     ];
 
     expect(buildPortfolioSeries(sources, [publicProject], resolver).map((entry) => entry.id)).toEqual([
@@ -124,7 +140,7 @@ describe('portfolio view model', () => {
     ]);
     expect(sources.map((entry) => entry.id)).toEqual(['zeta', 'alpha', 'archived', 'draft']);
     expect(() =>
-      buildPortfolioSeries([series({ id: 'Same' }), series({ id: 'same' })], [publicProject], resolver),
+      buildPortfolioSeries([series({ id: 'same' }), series({ id: 'same' })], [publicProject], resolver),
     ).toThrow(/duplicate/i);
   });
 });

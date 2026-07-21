@@ -1,5 +1,6 @@
 import { getCollection } from 'astro:content';
 import { isPublicEntry } from './content';
+import { assertEntrySlug, assertPublishable } from './publication';
 import { projectRoute } from './routes';
 
 type ProjectStatus = 'prototype' | 'validated' | 'shipped' | 'archived';
@@ -9,6 +10,13 @@ type SharedProjectData = {
   summary: string;
   publishedAt: Date;
   draft?: boolean | undefined;
+  slug: string;
+  attestation: {
+    authenticityConfirmed: boolean;
+    rightsConfirmed: boolean;
+    reviewedAt?: Date | undefined;
+    evidenceUrls: string[];
+  };
   status: ProjectStatus;
   repositoryUrl?: string | undefined;
   demoUrl?: string | undefined;
@@ -156,6 +164,10 @@ export function projectSectionId(_projectId: string, sectionKey: ProjectDetailSe
 }
 
 export function buildProjects(entries: readonly ProjectSource[], production = import.meta.env.PROD): PublicProject[] {
+  for (const entry of entries) {
+    assertEntrySlug(entry.collection, entry.id, entry.data.slug);
+    assertPublishable(entry.data);
+  }
   const published = entries.filter((entry) => isPublicEntry(entry.data, production));
   assertUniqueSafeIds(published);
   return [...published].sort(newestFirst).map(toPublicProject);

@@ -8,11 +8,22 @@ import { collections } from '../src/content.config';
 import { portfolioSchema } from '../src/domain/content-schema';
 import { PUBLIC_ROUTES, articleRoute, projectRoute } from '../src/domain/routes';
 
+const publication = (slug: string) => ({
+  slug,
+  draft: false,
+  attestation: {
+    authenticityConfirmed: true,
+    rightsConfirmed: true,
+    reviewedAt: '2026-07-19',
+    evidenceUrls: [],
+  },
+});
+
 const portfolioEntry = {
+  ...publication('workflow-map'),
   title: 'Workflow map',
   summary: 'A licensed visual record of an approved workflow.',
   publishedAt: '2026-07-18',
-  draft: false,
   order: 0,
   status: 'published',
   items: [

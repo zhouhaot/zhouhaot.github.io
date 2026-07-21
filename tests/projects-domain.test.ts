@@ -9,46 +9,65 @@ import {
   type WorkProjectSource,
 } from '../src/domain/projects';
 
-const work = (overrides: Partial<WorkProjectSource> = {}): WorkProjectSource => ({
-  id: 'workflow-assistant',
-  collection: 'work',
-  data: {
-    title: 'Workflow assistant',
-    summary: 'A verified workflow prototype.',
-    publishedAt: new Date('2026-07-18'),
-    draft: false,
-    problem: 'Teams cannot find approved guidance quickly.',
-    role: 'AI application developer',
-    solution: 'A retrieval-assisted workflow.',
-    stack: ['TypeScript', 'Astro'],
-    contributions: ['Designed the retrieval flow.'],
-    status: 'validated',
-    featured: false,
+const publication = (slug: string) => ({
+  slug,
+  draft: false,
+  attestation: {
+    authenticityConfirmed: true,
+    rightsConfirmed: true,
+    reviewedAt: new Date('2026-07-19'),
+    evidenceUrls: [],
   },
-  ...overrides,
 });
 
-const lab = (overrides: Partial<LabProjectSource> = {}): LabProjectSource => ({
-  id: 'routing-lab',
-  collection: 'lab',
-  data: {
-    title: 'Routing experiment',
-    summary: 'Compares routing strategies.',
-    publishedAt: new Date('2026-07-19'),
-    draft: false,
-    hypothesis: 'Explicit routing improves repeatability.',
-    workflow: ['Classify', 'Execute', 'Evaluate'],
-    modelOrTools: ['TypeScript'],
-    result: 'A baseline was established.',
-    evaluation: 'Measured with fixed fixtures.',
-    status: 'prototype',
-  },
-  ...overrides,
-});
+function work(overrides: Record<string, unknown> = {}): WorkProjectSource {
+  const id = (overrides.id as string) ?? 'workflow-assistant';
+  const data = overrides.data as Record<string, unknown> | undefined;
+  return {
+    id,
+    collection: 'work',
+    data: {
+      ...publication(id),
+      title: 'Workflow assistant',
+      summary: 'A verified workflow prototype.',
+      publishedAt: new Date('2026-07-18'),
+      problem: 'Teams cannot find approved guidance quickly.',
+      role: 'AI application developer',
+      solution: 'A retrieval-assisted workflow.',
+      stack: ['TypeScript', 'Astro'],
+      contributions: ['Designed the retrieval flow.'],
+      status: 'validated',
+      featured: false,
+      ...data,
+    },
+  } as WorkProjectSource;
+}
+
+function lab(overrides: Record<string, unknown> = {}): LabProjectSource {
+  const id = (overrides.id as string) ?? 'routing-lab';
+  const data = overrides.data as Record<string, unknown> | undefined;
+  return {
+    id,
+    collection: 'lab',
+    data: {
+      ...publication(id),
+      title: 'Routing experiment',
+      summary: 'Compares routing strategies.',
+      publishedAt: new Date('2026-07-19'),
+      hypothesis: 'Explicit routing improves repeatability.',
+      workflow: ['Classify', 'Execute', 'Evaluate'],
+      modelOrTools: ['TypeScript'],
+      result: 'A baseline was established.',
+      evaluation: 'Measured with fixed fixtures.',
+      status: 'prototype',
+      ...data,
+    },
+  } as LabProjectSource;
+}
 
 describe('project domain', () => {
   it('merges only published work and lab entries newest first without mutating sources', () => {
-    const sources = [work(), lab(), work({ id: 'draft-work', data: { ...work().data, draft: true } })];
+    const sources = [work(), lab(), work({ id: 'draft-work', data: { draft: true } })];
 
     const projects = buildProjects(sources, true);
 
@@ -62,8 +81,8 @@ describe('project domain', () => {
     expect(
       buildProjects(
         [
-          work({ id: 'zeta', data: { ...work().data, publishedAt: sameDay } }),
-          work({ id: 'alpha', data: { ...work().data, publishedAt: sameDay } }),
+          work({ id: 'zeta', data: { publishedAt: sameDay } }),
+          work({ id: 'alpha', data: { publishedAt: sameDay } }),
         ],
         true,
       ).map((project) => project.id),
@@ -71,21 +90,21 @@ describe('project domain', () => {
   });
 
   it('rejects duplicate ids case-insensitively before route generation', () => {
-    expect(() => buildProjects([work({ id: 'Same-id' }), lab({ id: 'same-ID' })], true)).toThrow(/duplicate/i);
+    expect(() => buildProjects([work({ id: 'same-id' }), lab({ id: 'same-id' })], true)).toThrow(/duplicate/i);
   });
 
   it('rejects non-canonical whitespace ids and case-folded duplicates', () => {
-    expect(() => buildProjects([work({ id: 'alpha' }), lab({ id: ' alpha ' })], true)).toThrow(/canonical/i);
-    expect(() => buildProjects([work({ id: 'ALPHA' }), lab({ id: 'alpha' })], true)).toThrow(/duplicate/i);
+    expect(() => buildProjects([work({ id: 'alpha' }), lab({ id: ' alpha ' })], true)).toThrow(/slug/i);
+    expect(() => buildProjects([work({ id: 'alpha' }), lab({ id: 'alpha' })], true)).toThrow(/duplicate/i);
   });
 
   it('rejects non-NFC ids and rejects unsafe ids first', () => {
-    expect(() => buildProjects([work({ id: 'caf\u00e9' }), lab({ id: 'cafe\u0301' })], true)).toThrow(/canonical/i);
-    expect(() => buildProjects([work({ id: ' unsafe/id ' }), lab({ id: 'unsafe/id' })], true)).toThrow(/safe/i);
+    expect(() => buildProjects([work({ id: 'café' }), lab({ id: 'café' })], true)).toThrow(/slug/i);
+    expect(() => buildProjects([work({ id: ' unsafe/id ' }), lab({ id: 'unsafe/id' })], true)).toThrow(/slug/i);
   });
 
   it('rejects non-canonical ids before static params can diverge from project hrefs', () => {
-    expect(() => buildProjects([work({ id: ' alpha ' })], true)).toThrow(/canonical/i);
+    expect(() => buildProjects([work({ id: ' alpha ' })], true)).toThrow(/slug/i);
 
     const [project] = buildProjects([work({ id: 'alpha' })], true);
     const [path] = projectStaticPaths(project ? [project] : []);
@@ -94,7 +113,7 @@ describe('project domain', () => {
   });
 
   it('rejects ids that cannot create safe project routes', () => {
-    expect(() => buildProjects([work({ id: 'nested/project' })], true)).toThrow(/safe/i);
+    expect(() => buildProjects([work({ id: 'nested/project' })], true)).toThrow(/slug/i);
   });
 
   it('creates truthful kind metadata and ordered work detail sections', () => {
@@ -102,7 +121,6 @@ describe('project domain', () => {
       [
         work({
           data: {
-            ...work().data,
             constraints: ['No runtime API'],
             architecture: 'Static content and native enhancement.',
             outcomes: ['A repeatable baseline.'],
@@ -156,9 +174,8 @@ describe('project domain', () => {
     const [project] = buildProjects(
       [
         work({
-          id: 'workflow assistant',
+          id: 'workflow-assistant',
           data: {
-            ...work().data,
             repositoryUrl: 'https://github.com/zhou/workflow-assistant',
             demoUrl: 'https://example.com/workflow-assistant',
           },
@@ -171,6 +188,6 @@ describe('project domain', () => {
       repositoryUrl: 'https://github.com/zhou/workflow-assistant',
       demoUrl: 'https://example.com/workflow-assistant',
     });
-    expect(projectSectionId('workflow assistant', 'problem')).toBe('project-problem');
+    expect(projectSectionId('workflow-assistant', 'problem')).toBe('project-problem');
   });
 });
