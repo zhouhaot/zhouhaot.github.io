@@ -574,6 +574,7 @@ git commit -m "feat: add typed site profile singleton"
 - Modify: `tests/projects-domain.test.ts`
 - Modify: `tests/articles-domain.test.ts`
 - Modify: `tests/portfolio-domain.test.ts`
+- Modify: `tests/production-ui-contracts.test.ts`
 
 **Interfaces:**
 
@@ -672,6 +673,8 @@ const publication = (slug: string) => ({
 
 Spread `publication('qa-work')`, `publication('qa-lab')`, `publication('qa-note')`, or `publication('qa-series')` into the matching existing fixture. Add this default assertion:
 
+In `tests/production-ui-contracts.test.ts`, define the same `publication(slug)` QA helper and spread `publication('qa-series')` into the existing `portfolioEntry` before its title/media fields. This supplies the mandatory canonical `slug`, `draft`, and complete attestation to every `portfolioSchema.parse(portfolioEntry)` variant without adding any production content or weakening the schema.
+
 ```ts
 const draft = noteSchema.parse({
   slug: 'qa-note',
@@ -691,7 +694,7 @@ Add negative domain cases for HTTP evidence, missing `reviewedAt`, either false 
 Run:
 
 ```bash
-npm test -- tests/content-schema.test.ts tests/content-domain.test.ts tests/projects-domain.test.ts tests/articles-domain.test.ts tests/portfolio-domain.test.ts
+npm test -- tests/content-schema.test.ts tests/content-domain.test.ts tests/projects-domain.test.ts tests/articles-domain.test.ts tests/portfolio-domain.test.ts tests/production-ui-contracts.test.ts
 ```
 
 Expected: FAIL because the shared publication exports do not exist and existing schemas default `draft` to false.
@@ -803,7 +806,7 @@ Call it in the `getCollection` filter before `isPublicEntry`. Replace duplicate 
 Run:
 
 ```bash
-npm test -- tests/content-schema.test.ts tests/content-domain.test.ts tests/projects-domain.test.ts tests/articles-domain.test.ts tests/portfolio-domain.test.ts
+npm test -- tests/content-schema.test.ts tests/content-domain.test.ts tests/projects-domain.test.ts tests/articles-domain.test.ts tests/portfolio-domain.test.ts tests/production-ui-contracts.test.ts
 npm run check
 npm test
 ```
@@ -813,7 +816,7 @@ Expected: focused and full tests PASS; the four real folder collections remain e
 - [ ] **Step 7: Commit Task 3**
 
 ```bash
-git add src/domain/publication.ts src/domain/content-schema.ts src/domain/content.ts src/domain/projects.ts src/domain/articles.ts src/domain/portfolio.ts tests/content-schema.test.ts tests/content-domain.test.ts tests/projects-domain.test.ts tests/articles-domain.test.ts tests/portfolio-domain.test.ts
+git add src/domain/publication.ts src/domain/content-schema.ts src/domain/content.ts src/domain/projects.ts src/domain/articles.ts src/domain/portfolio.ts tests/content-schema.test.ts tests/content-domain.test.ts tests/projects-domain.test.ts tests/articles-domain.test.ts tests/portfolio-domain.test.ts tests/production-ui-contracts.test.ts
 git commit -m "feat: enforce publication metadata"
 ```
 
