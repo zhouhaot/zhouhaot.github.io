@@ -55,3 +55,22 @@ jobs:
       - run: npm ci
       - run: npx playwright install chromium
       - run: npm run test:e2e -- e2e/specs/visual.spec.ts
+
+  content-audit-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22.12.0, 24]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test -- tests/content-assets.test.ts
