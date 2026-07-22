@@ -83,9 +83,9 @@ describe('production delivery boundary', () => {
     for (const workflow of [ci, deploy]) {
       expect(workflow).toMatch(/node-version-file:\s*['"]?\.nvmrc/);
       expect(workflow).toMatch(
-        /npm run format:check[\s\S]*npm run lint[\s\S]*npm run check[\s\S]*npm test[\s\S]*npm run build[\s\S]*npm run audit:production/,
+        /npm run format:check[\s\S]*npm run lint[\s\S]*npm run check[\s\S]*npm run audit:content[\s\S]*npm test[\s\S]*npm run build[\s\S]*npm run audit:production/,
       );
-      expect(workflow).toContain('npm audit --omit=dev --audit-level=high');
+      expect(workflow).toMatch(/npm audit --omit=dev --audit-level=high[\s\S]*npm audit --audit-level=high/);
     }
     expect(deploy).toMatch(/path:\s*['"]?dist['"]?/);
     expect(deploy).not.toMatch(/path:\s*['"]?\.["']?/);

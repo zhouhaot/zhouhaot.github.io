@@ -12,12 +12,13 @@
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint js/ themes/ admin/ scripts/ src/ tests/ e2e/",
-    "format:check": "prettier --check \"src/**/*.{astro,ts,md,mdx,css}\" \"scripts/**/*.{js,mjs}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
-    "format": "prettier --write \"src/**/*.{astro,ts,md,mdx,css}\" \"scripts/**/*.{js,mjs}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
+    "format:check": "prettier --check \"src/**/*.{astro,ts,md,mdx,css}\" \"scripts/**/*.{js,mjs,ts}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
+    "format": "prettier --write \"src/**/*.{astro,ts,md,mdx,css}\" \"scripts/**/*.{js,mjs,ts}\" \"tests/**/*.ts\" \"e2e/**/*.ts\" \"*.{js,ts,json}\" \".github/**/*.{yml,yaml}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "audit:production": "node scripts/production-audit.mjs dist"
+    "audit:production": "node scripts/production-audit.mjs dist",
+    "audit:content": "tsx scripts/content-audit.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "7.0.3",
