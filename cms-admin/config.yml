@@ -1,0 +1,812 @@
+# AUTO-GENERATED — do not edit by hand.
+# Source: src/domain/content-contract.ts + scripts/generate-decap-config.ts
+# Regenerate: npm run generate:decap
+
+backend:
+  name: github
+  repo: zhouhaot/zhouhaot.github.io
+  branch: main
+  base_url: https://cms-admin.pages.dev
+  auth_endpoint: /oauth
+publish_mode: editorial_workflow
+media_folder: src/assets/content
+public_folder: /src/assets/content
+site_url: https://zhouhaot.github.io
+display_url: https://zhouhaot.github.io
+collections:
+  - name: site
+    label: 站点信息
+    files:
+      - name: profile
+        label: 站点信息
+        file: src/content/site/profile.md
+        fields:
+          - name: heroEyebrow
+            label: 副标题
+            widget: string
+            required: true
+          - name: heroTitle
+            label: 主标题
+            widget: string
+            required: true
+          - name: role
+            label: 角色
+            widget: string
+            required: true
+          - name: heroSummary
+            label: 摘要
+            widget: text
+            required: true
+          - name: positioning
+            label: 定位描述
+            widget: text
+            required: true
+          - name: capabilities
+            label: 能力列表
+            widget: list
+            required: true
+            field:
+              name: item
+              label: 项目
+              widget: string
+          - name: method
+            label: 工作方法
+            widget: list
+            required: true
+            field:
+              name: item
+              label: 项目
+              widget: string
+          - name: principles
+            label: 原则
+            widget: list
+            required: true
+            field:
+              name: item
+              label: 项目
+              widget: string
+          - name: currentStatus
+            label: 当前状态
+            widget: text
+            required: true
+          - name: trustBoundary
+            label: 信任边界说明
+            widget: text
+            required: true
+          - name: contacts
+            label: 联系方式
+            widget: list
+            required: false
+            default: []
+            fields:
+              - name: label
+                label: 标签
+                widget: string
+                required: true
+              - name: kind
+                label: 类型
+                widget: select
+                required: true
+                options:
+                  - github
+                  - email
+                  - website
+              - name: href
+                label: 链接
+                widget: string
+                required: true
+  - name: work
+    label: 工作项目
+    label_singular: 工作项目
+    folder: src/content/work
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    identifier_field: slug
+    fields:
+      - name: slug
+        label: Slug
+        widget: string
+        required: true
+      - name: title
+        label: 标题
+        widget: string
+        required: true
+      - name: summary
+        label: 摘要
+        widget: text
+        required: true
+      - name: publishedAt
+        label: 发布日期
+        widget: datetime
+        required: true
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: updatedAt
+        label: 更新日期
+        widget: datetime
+        required: false
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: draft
+        label: 草稿模式
+        widget: boolean
+        required: false
+        default: true
+      - name: attestation
+        label: 发布声明
+        widget: object
+        required: true
+        fields:
+          - name: authenticityConfirmed
+            label: 已确认真实性
+            widget: boolean
+            required: true
+            default: false
+          - name: rightsConfirmed
+            label: 已确认版权
+            widget: boolean
+            required: true
+            default: false
+          - name: reviewedAt
+            label: 审核日期
+            widget: datetime
+            required: false
+            date_format: YYYY-MM-DD
+            time_format: false
+            hint: 发布前必填
+          - name: evidenceUrls
+            label: 证据链接
+            widget: list
+            required: false
+            default: []
+            field:
+              name: item
+              label: 项目
+              widget: string
+      - name: problem
+        label: 问题描述
+        widget: text
+        required: true
+      - name: role
+        label: 角色
+        widget: string
+        required: true
+      - name: solution
+        label: 解决方案
+        widget: text
+        required: true
+      - name: stack
+        label: 技术栈
+        widget: list
+        required: true
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: contributions
+        label: 贡献
+        widget: list
+        required: true
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: status
+        label: 状态
+        widget: select
+        required: true
+        options:
+          - prototype
+          - validated
+          - shipped
+          - archived
+      - name: featured
+        label: 精选
+        widget: boolean
+        required: false
+        default: false
+      - name: repositoryUrl
+        label: 仓库地址
+        widget: string
+        required: false
+      - name: demoUrl
+        label: 演示地址
+        widget: string
+        required: false
+      - name: architecture
+        label: 架构说明
+        widget: text
+        required: false
+      - name: constraints
+        label: 约束条件
+        widget: list
+        required: false
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: media
+        label: 媒体
+        widget: list
+        required: false
+        default: []
+      - name: outcomes
+        label: 成果
+        widget: list
+        required: false
+        default: []
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: limitations
+        label: 局限性
+        widget: list
+        required: false
+        default: []
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: nextSteps
+        label: 后续步骤
+        widget: list
+        required: false
+        default: []
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: media
+        label: 媒体
+        widget: list
+        required: false
+        default: []
+        fields:
+          - name: type
+            label: 类型
+            widget: select
+            required: true
+            options:
+              - image
+              - video
+          - name: source
+            label: 文件路径
+            widget: string
+            required: true
+          - name: alt
+            label: 替代文本
+            widget: string
+            required: true
+          - name: caption
+            label: 说明文字
+            widget: string
+            required: true
+          - name: width
+            label: 宽度
+            widget: number
+            required: true
+            value_type: int
+          - name: height
+            label: 高度
+            widget: number
+            required: true
+            value_type: int
+          - name: license
+            label: 许可证
+            widget: select
+            required: true
+            options:
+              - owned
+              - licensed
+              - cc-by
+              - public-domain
+          - name: poster
+            label: 封面图
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: credit
+            label: 版权归属
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: licenseUrl
+            label: 许可证链接
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: evidenceUrl
+            label: 证据链接
+            widget: string
+            required: false
+            hint: 发布前必填
+  - name: lab
+    label: 实验项目
+    label_singular: 实验项目
+    folder: src/content/lab
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    identifier_field: slug
+    fields:
+      - name: slug
+        label: Slug
+        widget: string
+        required: true
+      - name: title
+        label: 标题
+        widget: string
+        required: true
+      - name: summary
+        label: 摘要
+        widget: text
+        required: true
+      - name: publishedAt
+        label: 发布日期
+        widget: datetime
+        required: true
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: updatedAt
+        label: 更新日期
+        widget: datetime
+        required: false
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: draft
+        label: 草稿模式
+        widget: boolean
+        required: false
+        default: true
+      - name: attestation
+        label: 发布声明
+        widget: object
+        required: true
+        fields:
+          - name: authenticityConfirmed
+            label: 已确认真实性
+            widget: boolean
+            required: true
+            default: false
+          - name: rightsConfirmed
+            label: 已确认版权
+            widget: boolean
+            required: true
+            default: false
+          - name: reviewedAt
+            label: 审核日期
+            widget: datetime
+            required: false
+            date_format: YYYY-MM-DD
+            time_format: false
+            hint: 发布前必填
+          - name: evidenceUrls
+            label: 证据链接
+            widget: list
+            required: false
+            default: []
+            field:
+              name: item
+              label: 项目
+              widget: string
+      - name: hypothesis
+        label: 假设
+        widget: text
+        required: true
+      - name: workflow
+        label: 工作流程
+        widget: list
+        required: true
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: modelOrTools
+        label: 模型/工具
+        widget: list
+        required: true
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: status
+        label: 状态
+        widget: select
+        required: true
+        options:
+          - prototype
+          - validated
+          - archived
+      - name: result
+        label: 结果
+        widget: text
+        required: false
+        default: ''
+        hint: 发布前必填
+      - name: evaluation
+        label: 评估
+        widget: text
+        required: false
+        default: ''
+        hint: 发布前必填
+      - name: repositoryUrl
+        label: 仓库地址
+        widget: string
+        required: false
+      - name: demoUrl
+        label: 演示地址
+        widget: string
+        required: false
+      - name: media
+        label: 媒体
+        widget: list
+        required: false
+        default: []
+      - name: media
+        label: 媒体
+        widget: list
+        required: false
+        default: []
+        fields:
+          - name: type
+            label: 类型
+            widget: select
+            required: true
+            options:
+              - image
+              - video
+          - name: source
+            label: 文件路径
+            widget: string
+            required: true
+          - name: alt
+            label: 替代文本
+            widget: string
+            required: true
+          - name: caption
+            label: 说明文字
+            widget: string
+            required: true
+          - name: width
+            label: 宽度
+            widget: number
+            required: true
+            value_type: int
+          - name: height
+            label: 高度
+            widget: number
+            required: true
+            value_type: int
+          - name: license
+            label: 许可证
+            widget: select
+            required: true
+            options:
+              - owned
+              - licensed
+              - cc-by
+              - public-domain
+          - name: poster
+            label: 封面图
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: credit
+            label: 版权归属
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: licenseUrl
+            label: 许可证链接
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: evidenceUrl
+            label: 证据链接
+            widget: string
+            required: false
+            hint: 发布前必填
+  - name: notes
+    label: 文章
+    label_singular: 文章
+    folder: src/content/notes
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    identifier_field: slug
+    fields:
+      - name: slug
+        label: Slug
+        widget: string
+        required: true
+      - name: title
+        label: 标题
+        widget: string
+        required: true
+      - name: summary
+        label: 摘要
+        widget: text
+        required: true
+      - name: publishedAt
+        label: 发布日期
+        widget: datetime
+        required: true
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: updatedAt
+        label: 更新日期
+        widget: datetime
+        required: false
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: draft
+        label: 草稿模式
+        widget: boolean
+        required: false
+        default: true
+      - name: attestation
+        label: 发布声明
+        widget: object
+        required: true
+        fields:
+          - name: authenticityConfirmed
+            label: 已确认真实性
+            widget: boolean
+            required: true
+            default: false
+          - name: rightsConfirmed
+            label: 已确认版权
+            widget: boolean
+            required: true
+            default: false
+          - name: reviewedAt
+            label: 审核日期
+            widget: datetime
+            required: false
+            date_format: YYYY-MM-DD
+            time_format: false
+            hint: 发布前必填
+          - name: evidenceUrls
+            label: 证据链接
+            widget: list
+            required: false
+            default: []
+            field:
+              name: item
+              label: 项目
+              widget: string
+      - name: tags
+        label: 标签
+        widget: list
+        required: true
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: media
+        label: 媒体
+        widget: list
+        required: false
+        default: []
+      - name: media
+        label: 媒体
+        widget: list
+        required: false
+        default: []
+        fields:
+          - name: type
+            label: 类型
+            widget: select
+            required: true
+            options:
+              - image
+              - video
+          - name: source
+            label: 文件路径
+            widget: string
+            required: true
+          - name: alt
+            label: 替代文本
+            widget: string
+            required: true
+          - name: caption
+            label: 说明文字
+            widget: string
+            required: true
+          - name: width
+            label: 宽度
+            widget: number
+            required: true
+            value_type: int
+          - name: height
+            label: 高度
+            widget: number
+            required: true
+            value_type: int
+          - name: license
+            label: 许可证
+            widget: select
+            required: true
+            options:
+              - owned
+              - licensed
+              - cc-by
+              - public-domain
+          - name: poster
+            label: 封面图
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: credit
+            label: 版权归属
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: licenseUrl
+            label: 许可证链接
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: evidenceUrl
+            label: 证据链接
+            widget: string
+            required: false
+            hint: 发布前必填
+  - name: portfolio
+    label: 作品集
+    label_singular: 作品集系列
+    folder: src/content/portfolio
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{slug}}'
+    identifier_field: slug
+    fields:
+      - name: slug
+        label: Slug
+        widget: string
+        required: true
+      - name: title
+        label: 标题
+        widget: string
+        required: true
+      - name: summary
+        label: 摘要
+        widget: text
+        required: true
+      - name: publishedAt
+        label: 发布日期
+        widget: datetime
+        required: true
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: updatedAt
+        label: 更新日期
+        widget: datetime
+        required: false
+        date_format: YYYY-MM-DD
+        time_format: false
+      - name: draft
+        label: 草稿模式
+        widget: boolean
+        required: false
+        default: true
+      - name: attestation
+        label: 发布声明
+        widget: object
+        required: true
+        fields:
+          - name: authenticityConfirmed
+            label: 已确认真实性
+            widget: boolean
+            required: true
+            default: false
+          - name: rightsConfirmed
+            label: 已确认版权
+            widget: boolean
+            required: true
+            default: false
+          - name: reviewedAt
+            label: 审核日期
+            widget: datetime
+            required: false
+            date_format: YYYY-MM-DD
+            time_format: false
+            hint: 发布前必填
+          - name: evidenceUrls
+            label: 证据链接
+            widget: list
+            required: false
+            default: []
+            field:
+              name: item
+              label: 项目
+              widget: string
+      - name: order
+        label: 排序
+        widget: number
+        required: true
+        value_type: int
+      - name: status
+        label: 状态
+        widget: select
+        required: true
+        options:
+          - published
+          - archived
+      - name: relatedProject
+        label: 关联项目
+        widget: string
+        required: false
+      - name: items
+        label: 媒体项目
+        widget: list
+        required: true
+      - name: items
+        label: 媒体项目
+        widget: list
+        required: true
+        fields:
+          - name: type
+            label: 类型
+            widget: select
+            required: true
+            options:
+              - image
+              - video
+          - name: source
+            label: 文件路径
+            widget: string
+            required: true
+          - name: alt
+            label: 替代文本
+            widget: string
+            required: true
+          - name: caption
+            label: 说明文字
+            widget: string
+            required: true
+          - name: width
+            label: 宽度
+            widget: number
+            required: true
+            value_type: int
+          - name: height
+            label: 高度
+            widget: number
+            required: true
+            value_type: int
+          - name: license
+            label: 许可证
+            widget: select
+            required: true
+            options:
+              - owned
+              - licensed
+              - cc-by
+              - public-domain
+          - name: poster
+            label: 封面图
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: credit
+            label: 版权归属
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: licenseUrl
+            label: 许可证链接
+            widget: string
+            required: false
+            hint: 发布前必填
+          - name: evidenceUrl
+            label: 证据链接
+            widget: string
+            required: false
+            hint: 发布前必填
