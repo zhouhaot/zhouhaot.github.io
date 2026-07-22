@@ -1,4 +1,5 @@
 import { z } from 'astro/zod';
+import { IMAGE_EXTENSIONS, MEDIA_LICENSES, VIDEO_EXTENSIONS, parseContentMediaPath } from './media';
 import { canonicalSlugSchema } from './publication';
 
 export const httpsUrl = z.url().refine((value) => new URL(value).protocol === 'https:', {
@@ -45,30 +46,44 @@ export const siteProfileSchema = z
 export type SiteProfile = z.infer<typeof siteProfileSchema>;
 export type PublicContact = z.infer<typeof publicContactSchema>;
 
-export const localMediaPath = z.string().superRefine((value, context) => {
-  const segments = value.split('/');
-  const valid =
-    value === value.normalize('NFC') &&
-    value === value.trim() &&
-    value.length > 0 &&
-    !value.startsWith('/') &&
-    !value.startsWith('./') &&
-    !value.includes(':') &&
-    !value.includes('\\') &&
-    !value.includes('%') &&
-    !value.includes('..') &&
-    segments.every((segment) => segment.length > 0 && !segment.startsWith('.'));
-
-  if (!valid) {
-    context.addIssue({ code: 'custom', message: 'Media path must be a canonical local relative path.' });
-  }
+export const localMediaPath = z.string().refine((value) => parseContentMediaPath(value) !== undefined, {
+  message: 'Media path must be canonical under src/assets/content.',
 });
 
-function localMediaPathWithExtension(extensions: readonly string[]) {
+const mediaBaseSchema = z.object({
+  alt: z.string().trim().min(1),
+  caption: z.string().trim().min(1),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  license: z.enum(MEDIA_LICENSES),
+  credit: z.string().trim().min(1).optional(),
+  licenseUrl: httpsUrl.optional(),
+  evidenceUrl: httpsUrl.optional(),
+});
+
+function mediaPathWith(extensions: readonly string[]) {
   return localMediaPath.refine((value) => extensions.some((extension) => value.endsWith(`.${extension}`)), {
     message: `Media path must use one of: ${extensions.join(', ')}.`,
   });
 }
+
+export const mediaSchema = z
+  .discriminatedUnion('type', [
+    mediaBaseSchema.extend({ type: z.literal('image'), source: mediaPathWith(IMAGE_EXTENSIONS) }),
+    mediaBaseSchema.extend({
+      type: z.literal('video'),
+      source: mediaPathWith(VIDEO_EXTENSIONS),
+      poster: mediaPathWith(IMAGE_EXTENSIONS),
+    }),
+  ])
+  .superRefine((media, context) => {
+    if ((media.license === 'licensed' || media.license === 'cc-by') && (!media.credit || !media.licenseUrl)) {
+      context.addIssue({ code: 'custom', message: 'Licensed media requires credit and an HTTPS license URL.' });
+    }
+    if (media.license === 'public-domain' && !media.evidenceUrl) {
+      context.addIssue({ code: 'custom', message: 'Public-domain media requires an HTTPS evidence URL.' });
+    }
+  });
 
 const canonicalProjectId = z.string().superRefine((value, context) => {
   const canonical = value.normalize('NFC').trim();
@@ -116,7 +131,7 @@ export const workSchema = publicationSchema({
   repositoryUrl: httpsUrl.optional(),
   demoUrl: httpsUrl.optional(),
   architecture: z.string().optional(),
-  screenshots: z.array(z.string().min(1)).default([]),
+  media: z.array(mediaSchema).default([]),
   constraints: z.array(z.string().min(1)).optional(),
   outcomes: z.array(z.string().min(1)).default([]),
   limitations: z.array(z.string().min(1)).default([]),
@@ -132,48 +147,17 @@ export const labSchema = publicationSchema({
   status: z.enum(['prototype', 'validated', 'archived']),
   repositoryUrl: httpsUrl.optional(),
   demoUrl: httpsUrl.optional(),
+  media: z.array(mediaSchema).default([]),
 });
 
 export const noteSchema = publicationSchema({
   tags: z.array(z.string().min(1)).min(1),
+  media: z.array(mediaSchema).default([]),
 });
-
-const portfolioMediaBaseSchema = z
-  .object({
-    alt: z.string().min(1),
-    caption: z.string().min(1),
-    width: z.number().int().positive(),
-    height: z.number().int().positive(),
-    license: z.enum(['owned', 'licensed', 'cc-by', 'public-domain']),
-    credit: z.string().min(1).optional(),
-    licenseUrl: httpsUrl.optional(),
-    evidenceUrl: httpsUrl.optional(),
-  })
-  .superRefine((media, context) => {
-    if ((media.license === 'licensed' || media.license === 'cc-by') && (!media.credit || !media.licenseUrl)) {
-      context.addIssue({ code: 'custom', message: 'Licensed media requires credit and an HTTPS license URL.' });
-    }
-
-    if (media.license === 'public-domain' && !media.evidenceUrl) {
-      context.addIssue({ code: 'custom', message: 'Public-domain media requires an HTTPS evidence URL.' });
-    }
-  });
-
-const portfolioMediaSchema = z.discriminatedUnion('type', [
-  portfolioMediaBaseSchema.extend({
-    type: z.literal('image'),
-    source: localMediaPathWithExtension(['avif', 'jpeg', 'jpg', 'png', 'webp']),
-  }),
-  portfolioMediaBaseSchema.extend({
-    type: z.literal('video'),
-    source: localMediaPathWithExtension(['mp4', 'webm']),
-    poster: localMediaPathWithExtension(['avif', 'jpeg', 'jpg', 'png', 'webp']),
-  }),
-]);
 
 export const portfolioSchema = publicationSchema({
   order: z.number().int().nonnegative(),
   status: z.enum(['published', 'archived']),
   relatedProject: canonicalProjectId.optional(),
-  items: z.array(portfolioMediaSchema).min(1),
+  items: z.array(mediaSchema).min(1),
 });

@@ -29,7 +29,7 @@ const portfolioEntry = {
   items: [
     {
       type: 'image',
-      source: 'workflow-map.webp',
+      source: 'portfolio/workflow-map.webp',
       alt: 'A workflow map showing the approved process.',
       caption: 'An approved visual record of the workflow.',
       width: 1600,
@@ -103,7 +103,7 @@ describe('production UI contracts', () => {
         items: [
           {
             type: 'image',
-            source: 'workflow-map.webp',
+            source: 'portfolio/workflow-map.webp',
             alt: 'A workflow map showing the approved process.',
             width: 1600,
             height: 900,

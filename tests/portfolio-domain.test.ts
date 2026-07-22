@@ -15,7 +15,7 @@ const publication = (slug: string) => ({
 
 const image = {
   type: 'image' as const,
-  source: 'workflow/map.webp',
+  source: 'portfolio/workflow-map.webp',
   alt: '工作流节点关系图。',
   caption: '经确认可公开的工作流结构图。',
   width: 1600,
@@ -60,34 +60,35 @@ describe('portfolio schema', () => {
     ).toThrow();
   });
 
-  it('accepts only canonical local media paths with media-specific extensions and a video poster', () => {
+  it('accepts only canonical namespaced media paths with valid extensions and a video poster', () => {
     for (const src of [
-      './workflow/map.webp',
-      'workflow/../map.webp',
-      'workflow\\map.webp',
-      'workflow/%2e%2e/map.webp',
-      '.hidden/map.webp',
-      'workflow/map.svg',
-      'workflow/map.webp ',
-      'workflow/map.mp4',
-      'javascript:asset.webp',
-      'data:asset.webp',
-      'https:asset.webp',
-      'C:asset.webp',
-      'workflow/asset.WEBP',
+      './portfolio/workflow-map.webp',
+      'portfolio/../workflow-map.webp',
+      'portfolio\\workflow-map.webp',
+      'portfolio/%2e%2e/workflow-map.webp',
+      'portfolio/.hidden.webp',
+      'workflow/map.webp',
+      'portfolio/workflow-map.svg',
+      'portfolio/workflow-map.webp ',
+      'portfolio/workflow-map.mp4',
+      'javascript:portfolio/asset.webp',
+      'data:portfolio/asset.webp',
+      'https:portfolio/asset.webp',
+      'C:portfolio/asset.webp',
+      'portfolio/asset.WEBP',
     ]) {
       expect(() => portfolioSchema.parse({ ...series().data, items: [{ ...image, source: src }] })).toThrow();
     }
 
     expect(
-      portfolioSchema.parse({ ...series().data, items: [{ ...image, source: 'workflow-archive/asset-1.webp' }] })
+      portfolioSchema.parse({ ...series().data, items: [{ ...image, source: 'portfolio/workflow-archive.webp' }] })
         .items[0]?.source,
-    ).toBe('workflow-archive/asset-1.webp');
+    ).toBe('portfolio/workflow-archive.webp');
 
     expect(() =>
       portfolioSchema.parse({
         ...series().data,
-        items: [{ ...image, type: 'video', source: 'workflow/demo.webm', poster: undefined }],
+        items: [{ ...image, type: 'video', source: 'portfolio/workflow-demo.webm', poster: undefined }],
       }),
     ).toThrow();
   });
@@ -96,7 +97,7 @@ describe('portfolio schema', () => {
 describe('portfolio view model', () => {
   it('validates assets and public related projects, then preserves media order', () => {
     const resolveAsset = createPortfolioAssetResolver({
-      'workflow/map.webp': { src: '/_astro/map.hash.webp', width: 1600, height: 900 },
+      'portfolio/workflow-map.webp': { src: '/_astro/map.hash.webp', width: 1600, height: 900 },
     });
 
     const [view] = buildPortfolioSeries([series()], [publicProject], resolveAsset);
@@ -108,7 +109,7 @@ describe('portfolio view model', () => {
 
   it('rejects missing assets, image-dimension mismatches, unsafe project ids, and non-public related projects', () => {
     const resolver = createPortfolioAssetResolver({
-      'workflow/map.webp': { src: '/_astro/map.hash.webp', width: 800, height: 900 },
+      'portfolio/workflow-map.webp': { src: '/_astro/map.hash.webp', width: 800, height: 900 },
     });
 
     expect(() => buildPortfolioSeries([series()], [publicProject], resolver)).toThrow(/dimension/i);
@@ -125,7 +126,7 @@ describe('portfolio view model', () => {
 
   it('filters non-public series, rejects duplicate ids case-insensitively, and sorts without mutating input', () => {
     const resolver = createPortfolioAssetResolver({
-      'workflow/map.webp': { src: '/_astro/map.hash.webp', width: 1600, height: 900 },
+      'portfolio/workflow-map.webp': { src: '/_astro/map.hash.webp', width: 1600, height: 900 },
     });
     const sources = [
       series({ id: 'zeta', data: { order: 2, publishedAt: new Date('2026-07-17') } }),

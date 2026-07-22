@@ -1,22 +1,11 @@
+import type { MediaReference } from './media';
 import { assertEntrySlug, assertPublishable } from './publication';
 import type { PublicProject } from './projects';
 
 export type PortfolioAsset = { src: string; width?: number; height?: number };
 export type PortfolioAssetResolver = (path: string) => PortfolioAsset | undefined;
 
-export type PortfolioMedia = {
-  type: 'image' | 'video';
-  source: string;
-  poster?: string;
-  alt: string;
-  caption: string;
-  width: number;
-  height: number;
-  license: 'owned' | 'licensed' | 'cc-by' | 'public-domain';
-  credit?: string;
-  licenseUrl?: string;
-  evidenceUrl?: string;
-};
+export type PortfolioMedia = MediaReference;
 
 export const PORTFOLIO_LICENSE_LABELS = {
   owned: '自有',

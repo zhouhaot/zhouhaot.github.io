@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { labSchema, noteSchema, portfolioSchema, publicContactUrl, workSchema } from '../src/domain/content-schema';
+import {
+  labSchema,
+  mediaSchema,
+  noteSchema,
+  portfolioSchema,
+  publicContactUrl,
+  workSchema,
+} from '../src/domain/content-schema';
 
 const publication = (slug: string) => ({
   slug,
@@ -69,8 +76,71 @@ describe('content schemas', () => {
     expect(() => publicContactUrl.parse('tel:+8613800000000')).toThrow();
   });
 
+  it('uses one media shape in all four collection schemas', () => {
+    const published = {
+      publishedAt: '2026-07-19',
+      draft: false,
+      attestation: { authenticityConfirmed: true, rightsConfirmed: true, reviewedAt: '2026-07-19', evidenceUrls: [] },
+    };
+    const ownedImage = {
+      type: 'image',
+      source: 'work/qa-work-overview.webp',
+      alt: 'QA-only image description.',
+      caption: 'QA-only schema fixture.',
+      width: 1600,
+      height: 900,
+      license: 'owned',
+    } as const;
+    expect(workSchema.parse({ ...baseWork, slug: 'qa-work', ...published, media: [ownedImage] }).media).toEqual([
+      ownedImage,
+    ]);
+    expect(
+      labSchema.parse({
+        ...publication('qa-lab'),
+        title: 'QA Lab',
+        summary: 'QA lab',
+        hypothesis: 'H',
+        workflow: ['W'],
+        modelOrTools: ['T'],
+        result: 'R',
+        evaluation: 'E',
+        status: 'prototype',
+        ...published,
+        media: [{ ...ownedImage, source: 'lab/qa-lab-overview.webp' }],
+      }).media,
+    ).toHaveLength(1);
+    expect(
+      noteSchema.parse({
+        ...publication('qa-note'),
+        title: 'QA Note',
+        summary: 'QA note',
+        tags: ['qa'],
+        ...published,
+        media: [{ ...ownedImage, source: 'notes/qa-note-overview.webp' }],
+      }).media,
+    ).toHaveLength(1);
+    expect(
+      portfolioSchema.parse({
+        ...publication('qa-series'),
+        title: 'Portfolio',
+        summary: 'Summary',
+        order: 0,
+        status: 'published',
+        ...published,
+        items: [{ ...ownedImage, source: 'portfolio/qa-series-overview.webp' }],
+      }).items,
+    ).toHaveLength(1);
+  });
+
   it('accepts the portfolio attribution combinations enforced by production audit', () => {
-    const media = { type: 'image', source: 'image.webp', alt: 'Image', caption: 'Caption', width: 1, height: 1 };
+    const media = {
+      type: 'image',
+      source: 'portfolio/qa-series-image.webp',
+      alt: 'Image',
+      caption: 'Caption',
+      width: 1,
+      height: 1,
+    };
     for (const item of [
       { ...media, license: 'owned' },
       { ...media, license: 'licensed', credit: 'Source', licenseUrl: 'https://example.com/license' },
@@ -94,7 +164,7 @@ describe('content schemas', () => {
   it('rejects non-HTTPS optional portfolio provenance URLs for owned media', () => {
     const media = {
       type: 'image',
-      source: 'image.webp',
+      source: 'portfolio/qa-series-image.webp',
       alt: 'Image',
       caption: 'Caption',
       width: 1,
@@ -117,5 +187,24 @@ describe('content schemas', () => {
         }),
       ).toThrow();
     }
+  });
+
+  it('rejects bad namespaces, double extensions, blank alt, and incomplete video metadata', () => {
+    const ownedImage = {
+      type: 'image',
+      source: 'work/qa-work-overview.webp',
+      alt: 'Image',
+      caption: 'Caption',
+      width: 1,
+      height: 1,
+      license: 'owned',
+    } as const;
+    expect(() => mediaSchema.parse(ownedImage)).not.toThrow();
+    expect(() => mediaSchema.parse({ ...ownedImage, source: 'work/qa-work-overview.png.exe' })).toThrow();
+    expect(() => mediaSchema.parse({ ...ownedImage, source: 'work/qa-work-overview.exe.png' })).toThrow();
+    expect(() => mediaSchema.parse({ ...ownedImage, alt: '  ' })).toThrow();
+    expect(() =>
+      mediaSchema.parse({ ...ownedImage, type: 'video', source: 'work/qa-work-demo.webm' }),
+    ).toThrow(/poster/i);
   });
 });
