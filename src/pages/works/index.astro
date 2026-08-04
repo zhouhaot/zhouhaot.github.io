@@ -1,0 +1,38 @@
+---
+import EmptyState from '@/components/EmptyState.astro';
+import { getPublishedWorks } from '@/domain/works';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const works = await getPublishedWorks();
+---
+
+<BaseLayout title="作品 | zhou" description="项目与实验作品集。" canonicalPath="/works/" seoKind="list">
+  <section class="works-page" aria-labelledby="works-heading">
+    <header class="works-page__header">
+      <h1 id="works-heading">作品</h1>
+      <p>可访问的项目与实验，包含 demo 链接。</p>
+    </header>
+    {
+      works.length ? (
+        <ul class="works-list">
+          {works.map((work) => (
+            <li>
+              <a href={work.href}>
+                <span class="works-item__kind">{work.kindLabel}</span>
+                <h2>{work.title}</h2>
+                <p>{work.summary}</p>
+                {work.demoUrl && <span class="works-item__demo">查看 Demo</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState
+          collection="works"
+          title="作品正在整理中"
+          description="确认可公开的项目或实验后，会在这里呈现。"
+        />
+      )
+    }
+  </section>
+</BaseLayout>

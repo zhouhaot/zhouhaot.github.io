@@ -15,7 +15,9 @@ const approved = {
   trustBoundary:
     '区分真实状态；只发布经验证的代码、过程与结果；不发布未经确认的身份、第三方、媒体或结果数据；GitHub 是唯一公开联系入口。',
   contacts: [{ label: '访问 GitHub', kind: 'github', href: 'https://github.com/zhouhaot' }],
-} as const;
+  experience: [],
+  skills: [],
+};
 
 describe('site profile singleton', () => {
   it('accepts the approved public profile and contact protocol', () => {

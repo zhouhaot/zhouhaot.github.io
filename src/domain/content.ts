@@ -11,7 +11,7 @@ export function sortNewestFirst<T extends DatedEntry>(entries: readonly T[]): T[
   return [...entries].sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 }
 
-type PublicCollection = 'work' | 'lab' | 'notes';
+type PublicCollection = 'works' | 'notes';
 
 export function validateCollectionEntry<C extends PublicCollection>(
   collection: C,

@@ -5,117 +5,39 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { SITE } from '../src/config/site';
 import { collections } from '../src/content.config';
-import { portfolioSchema } from '../src/domain/content-schema';
-import { PUBLIC_ROUTES, articleRoute, projectRoute } from '../src/domain/routes';
-
-const publication = (slug: string) => ({
-  slug,
-  draft: false,
-  attestation: {
-    authenticityConfirmed: true,
-    rightsConfirmed: true,
-    reviewedAt: '2026-07-19',
-    evidenceUrls: [],
-  },
-});
-
-const portfolioEntry = {
-  ...publication('workflow-map'),
-  title: 'Workflow map',
-  summary: 'A licensed visual record of an approved workflow.',
-  publishedAt: '2026-07-18',
-  order: 0,
-  status: 'published',
-  items: [
-    {
-      type: 'image',
-      source: 'portfolio/workflow-map.webp',
-      alt: 'A workflow map showing the approved process.',
-      caption: 'An approved visual record of the workflow.',
-      width: 1600,
-      height: 900,
-      license: 'owned',
-    },
-  ],
-};
+import { PUBLIC_ROUTES, articleRoute, workRoute } from '../src/domain/routes';
 
 describe('production UI contracts', () => {
   it('exposes only the approved public navigation routes', () => {
     expect(PUBLIC_ROUTES).toEqual({
       home: '/',
-      projects: '/projects/',
-      articles: '/articles/',
-      portfolio: '/portfolio/',
-      about: '/about/',
+      works: '/works/',
+      blog: '/blog/',
+      resume: '/resume/',
     });
     expect(SITE.navigation.map((item) => item.href)).toEqual([
       '/',
-      '/projects/',
-      '/articles/',
-      '/portfolio/',
-      '/about/',
+      '/works/',
+      '/blog/',
+      '/resume/',
     ]);
   });
 
-  it('builds encoded project and article detail routes', () => {
-    expect(projectRoute('workflow assistant')).toBe('/projects/workflow%20assistant/');
-    expect(articleRoute('eval-basics')).toBe('/articles/eval-basics/');
+  it('builds encoded work and article detail routes', () => {
+    expect(workRoute('workflow assistant')).toBe('/works/workflow%20assistant/');
+    expect(articleRoute('eval-basics')).toBe('/blog/eval-basics/');
   });
 
   it('rejects unsafe detail route ids', () => {
     for (const id of ['', '   ', '.', '..', 'nested/project', 'nested\\project']) {
-      expect(() => projectRoute(id)).toThrow();
+      expect(() => workRoute(id)).toThrow();
       expect(() => articleRoute(id)).toThrow();
     }
   });
 
-  it('requires a complete ordered portfolio media series', () => {
-    const entry = portfolioSchema.parse(portfolioEntry);
-    expect(entry.items).toHaveLength(1);
-    expect(entry.order).toBe(0);
-  });
-
-  it('rejects remote, executable, absolute, and traversing portfolio media sources', () => {
-    for (const source of [
-      'https://cdn.example.com/workflow-map.webp',
-      'javascript:alert(1)',
-      'data:image/png;base64,unsafe',
-      '/workflow-map.webp',
-      '../workflow-map.webp',
-    ]) {
-      expect(() =>
-        portfolioSchema.parse({ ...portfolioEntry, items: [{ ...portfolioEntry.items[0], source }] }),
-      ).toThrow();
-    }
-  });
-
-  it('rejects incomplete portfolio media metadata', () => {
-    expect(() => portfolioSchema.parse({ ...portfolioEntry, items: [] })).toThrow();
-    expect(() =>
-      portfolioSchema.parse({
-        ...portfolioEntry,
-        items: [{ ...portfolioEntry.items[0], alt: '', width: 0 }],
-      }),
-    ).toThrow();
-    expect(() =>
-      portfolioSchema.parse({
-        ...portfolioEntry,
-        items: [
-          {
-            type: 'image',
-            source: 'portfolio/workflow-map.webp',
-            alt: 'A workflow map showing the approved process.',
-            width: 1600,
-            height: 900,
-          },
-        ],
-      }),
-    ).toThrow();
-  });
-
   it('registers the site singleton and preserves empty public entry collections', () => {
     expect(collections).toHaveProperty('site');
-    for (const collection of ['work', 'lab', 'notes', 'portfolio']) {
+    for (const collection of ['works', 'notes']) {
       expect(readdirSync(resolve(`src/content/${collection}`))).toEqual(['.gitkeep']);
     }
   });
@@ -157,6 +79,6 @@ describe('production UI contracts', () => {
     expect(fixtureContentConfig).toContain('siteProfileSchema');
     expect(fixtureContentConfig).toContain("base: '../../src/content/site'");
     expect(fixtureContentConfig).toMatch(/export const collections = \{ site \}/);
-    expect(fixtureContentConfig).not.toMatch(/\b(?:work|lab|notes|portfolio)\b/);
+    expect(fixtureContentConfig).not.toMatch(/\b(?:works|notes)\b/);
   });
 });

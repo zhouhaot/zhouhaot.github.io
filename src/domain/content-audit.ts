@@ -1,7 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import matter from 'gray-matter';
-import { labSchema, noteSchema, portfolioSchema, siteProfileSchema, workSchema } from './content-schema';
+import { noteSchema, siteProfileSchema, worksSchema } from './content-schema';
 import { auditContentAssets, inspectSourceAsset } from './content-assets';
 import { assertMarkdownMedia } from './markdown-media';
 import type { ContentAsset } from './media';
@@ -21,7 +21,7 @@ export type ContentAuditOptions = {
   deletedAssetSources?: readonly string[];
 };
 export type ContentAuditReport = {
-  entryCounts: Record<'work' | 'lab' | 'notes' | 'portfolio', number>;
+  entryCounts: Record<'works' | 'notes', number>;
   assetCount: number;
   orphanAssets: readonly string[];
 };
@@ -31,13 +31,11 @@ export type GitMediaChange =
 export type GitMediaDelta = { addedPaths: readonly string[]; deletedPaths: readonly string[]; addedBytes: number };
 
 const folderSchemas = {
-  work: workSchema,
-  lab: labSchema,
+  works: worksSchema,
   notes: noteSchema,
-  portfolio: portfolioSchema,
 } as const;
 type FolderCollection = keyof typeof folderSchemas;
-const FOLDER_COLLECTIONS: readonly FolderCollection[] = ['work', 'lab', 'notes', 'portfolio'];
+const FOLDER_COLLECTIONS: readonly FolderCollection[] = ['works', 'notes'];
 
 async function loadFolderEntries(
   collection: FolderCollection,
@@ -76,7 +74,6 @@ async function loadFolderEntries(
       collection,
       slug: (parsed as { slug: string }).slug,
       media,
-      relatedProject: collection === 'portfolio' ? (parsed as { relatedProject?: string }).relatedProject : undefined,
     });
   }
   return records;
@@ -101,7 +98,7 @@ export async function auditContentRepository(options: ContentAuditOptions): Prom
 
   // Load all folder collections
   const allRecords: ContentRecord[] = [];
-  const entryCounts: Record<FolderCollection, number> = { work: 0, lab: 0, notes: 0, portfolio: 0 };
+  const entryCounts: Record<FolderCollection, number> = { works: 0, notes: 0 };
   for (const collection of FOLDER_COLLECTIONS) {
     const records = await loadFolderEntries(collection, join(root, 'src/content', collection), options);
     entryCounts[collection] = records.length;

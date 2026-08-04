@@ -1,20 +1,15 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { labSchema, noteSchema, portfolioSchema, siteProfileSchema, workSchema } from '@/domain/content-schema';
+import { noteSchema, siteProfileSchema, worksSchema } from '@/domain/content-schema';
 
 const site = defineCollection({
   loader: glob({ base: './src/content/site', pattern: 'profile.md' }),
   schema: siteProfileSchema,
 });
 
-const work = defineCollection({
-  loader: glob({ base: './src/content/work', pattern: '**/*.{md,mdx}' }),
-  schema: workSchema,
-});
-
-const lab = defineCollection({
-  loader: glob({ base: './src/content/lab', pattern: '**/*.{md,mdx}' }),
-  schema: labSchema,
+const works = defineCollection({
+  loader: glob({ base: './src/content/works', pattern: '**/*.{md,mdx}' }),
+  schema: worksSchema,
 });
 
 const notes = defineCollection({
@@ -22,9 +17,4 @@ const notes = defineCollection({
   schema: noteSchema,
 });
 
-const portfolio = defineCollection({
-  loader: glob({ base: './src/content/portfolio', pattern: '**/*.{md,mdx}' }),
-  schema: portfolioSchema,
-});
-
-export const collections = { site, work, lab, notes, portfolio };
+export const collections = { site, works, notes };

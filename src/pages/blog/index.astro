@@ -9,16 +9,14 @@ import '@/styles/articles.css';
 const articles = await getPublishedArticles();
 ---
 
-<BaseLayout title="文章 | zhou" description="公开技术笔记和文章。" canonicalPath="/articles/" seoKind="list">
-  <section class="articles-page" aria-labelledby="articles-heading">
-    <header><h1 id="articles-heading">文章</h1><p>公开技术笔记和文章。</p></header>
+<BaseLayout title="博客 | zhou" description="技术文章与经验积累。" canonicalPath="/blog/" seoKind="list">
+  <section class="articles-page" aria-labelledby="blog-heading">
+    <header><h1 id="blog-heading">博客</h1><p>技术文章与经验积累。</p></header>
     {
       articles.length ? (
         <>
-          <>
-            <ArticleDiscovery articles={articles} tags={articleTagsFor(articles)} />
-            <script>import {initArticleDiscovery} from '@/scripts/articles'; initArticleDiscovery();</script>
-          </>
+          <ArticleDiscovery articles={articles} tags={articleTagsFor(articles)} />
+          <script>import {initArticleDiscovery} from '@/scripts/articles'; initArticleDiscovery();</script>
         </>
       ) : (
         <EmptyState collection="notes" title="暂无公开文章" description="已确认可公开的笔记会在这里呈现。" />

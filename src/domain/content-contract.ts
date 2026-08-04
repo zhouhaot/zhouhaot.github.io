@@ -1,14 +1,8 @@
 import matter from 'gray-matter';
-import {
-  labSchema,
-  noteSchema,
-  portfolioSchema,
-  siteProfileSchema,
-  workSchema,
-} from './content-schema';
+import { noteSchema, siteProfileSchema, worksSchema } from './content-schema';
 import { MEDIA_LICENSES } from './media';
 
-export type ContractCollection = 'site' | 'work' | 'lab' | 'notes' | 'portfolio';
+export type ContractCollection = 'site' | 'works' | 'notes';
 export type ContractField = {
   path: string;
   type: 'string' | 'text' | 'date' | 'boolean' | 'number' | 'string-list' | 'object-list' | 'media-list';
@@ -72,43 +66,22 @@ const siteFields: readonly ContractField[] = [
   field('contacts[].label', 'string', 'always'),
   field('contacts[].kind', 'string', 'always', { enum: ['github', 'email', 'website'] }),
   field('contacts[].href', 'string', 'always'),
+  field('experience[].company', 'string', 'optional'),
+  field('experience[].role', 'string', 'optional'),
+  field('experience[].period', 'string', 'optional'),
+  field('experience[].description', 'text', 'optional'),
+  field('skills[].group', 'string', 'optional'),
+  field('skills[].items', 'string-list', 'optional'),
 ];
 
-const workFields: readonly ContractField[] = [
-  field('problem', 'text', 'always'),
-  field('role', 'string', 'always'),
-  field('solution', 'text', 'always'),
-  field('stack', 'string-list', 'always'),
-  field('contributions', 'string-list', 'always'),
+const worksFields: readonly ContractField[] = [
+  field('kind', 'string', 'always', { enum: ['project', 'experiment'] }),
+  field('tags', 'string-list', 'always'),
   field('status', 'string', 'always', { enum: ['prototype', 'validated', 'shipped', 'archived'] }),
   field('featured', 'boolean', 'optional', { default: false }),
-  field('repositoryUrl', 'string', 'optional'),
   field('demoUrl', 'string', 'optional'),
-  field('architecture', 'text', 'optional'),
-  field('constraints', 'string-list', 'optional'),
-  field('media', 'media-list', 'optional', { default: [] }),
-  field('outcomes', 'string-list', 'optional', { default: [] }),
-  field('limitations', 'string-list', 'optional', { default: [] }),
-  field('nextSteps', 'string-list', 'optional', { default: [] }),
-];
-
-const labFields: readonly ContractField[] = [
-  field('hypothesis', 'text', 'always'),
-  field('workflow', 'string-list', 'always'),
-  field('modelOrTools', 'string-list', 'always'),
-  field('status', 'string', 'always', { enum: ['prototype', 'validated', 'archived'] }),
-  field('result', 'text', 'publish', { default: '' }),
-  field('evaluation', 'text', 'publish', { default: '' }),
   field('repositoryUrl', 'string', 'optional'),
-  field('demoUrl', 'string', 'optional'),
   field('media', 'media-list', 'optional', { default: [] }),
-];
-
-const portfolioFields: readonly ContractField[] = [
-  field('order', 'number', 'always'),
-  field('status', 'string', 'always', { enum: ['published', 'archived'] }),
-  field('relatedProject', 'string', 'optional'),
-  field('items', 'media-list', 'always'),
 ];
 
 export const CONTENT_CONTRACT = {
@@ -119,19 +92,12 @@ export const CONTENT_CONTRACT = {
     create: false,
     fields: siteFields,
   },
-  work: {
+  works: {
     kind: 'folder',
-    source: 'src/content/work',
+    source: 'src/content/works',
     extension: 'md',
     create: true,
-    fields: [...sharedFields, ...workFields, ...mediaFields('media[]')],
-  },
-  lab: {
-    kind: 'folder',
-    source: 'src/content/lab',
-    extension: 'md',
-    create: true,
-    fields: [...sharedFields, ...labFields, ...mediaFields('media[]')],
+    fields: [...sharedFields, ...worksFields, ...mediaFields('media[]')],
   },
   notes: {
     kind: 'folder',
@@ -145,21 +111,12 @@ export const CONTENT_CONTRACT = {
       ...mediaFields('media[]'),
     ],
   },
-  portfolio: {
-    kind: 'folder',
-    source: 'src/content/portfolio',
-    extension: 'md',
-    create: true,
-    fields: [...sharedFields, ...portfolioFields, ...mediaFields('items[]')],
-  },
 } as const satisfies Record<ContractCollection, CollectionContract>;
 
 const schemas = {
   site: siteProfileSchema,
-  work: workSchema,
-  lab: labSchema,
+  works: worksSchema,
   notes: noteSchema,
-  portfolio: portfolioSchema,
 } as const;
 
 export function schemaForContractCollection(name: ContractCollection) {

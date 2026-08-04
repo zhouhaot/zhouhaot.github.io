@@ -14,17 +14,17 @@ afterEach(() => {
 describe('repository content audit', () => {
   it('rejects overwrites and media additions above 50 MiB', () => {
     expect(() =>
-      auditMediaGitChanges([{ status: 'M', path: 'src/assets/content/work/qa-work-image.webp' }], new Map()),
+      auditMediaGitChanges([{ status: 'M', path: 'src/assets/content/works/qa-work-image.webp' }], new Map()),
     ).toThrow(/overwrite/i);
     expect(() =>
       auditMediaGitChanges(
         [
-          { status: 'A', path: 'src/assets/content/work/qa-work-a.webp' },
-          { status: 'A', path: 'src/assets/content/work/qa-work-b.webp' },
+          { status: 'A', path: 'src/assets/content/works/qa-work-a.webp' },
+          { status: 'A', path: 'src/assets/content/works/qa-work-b.webp' },
         ],
         new Map([
-          ['src/assets/content/work/qa-work-a.webp', 30 * 1024 * 1024],
-          ['src/assets/content/work/qa-work-b.webp', 21 * 1024 * 1024],
+          ['src/assets/content/works/qa-work-a.webp', 30 * 1024 * 1024],
+          ['src/assets/content/works/qa-work-b.webp', 21 * 1024 * 1024],
         ]),
       ),
     ).toThrow(/50 MiB/i);
@@ -32,7 +32,7 @@ describe('repository content audit', () => {
 
   it('fails closed when an added or renamed asset has no current stat', () => {
     expect(() =>
-      auditMediaGitChanges([{ status: 'A', path: 'src/assets/content/work/qa-work-new.webp' }], new Map()),
+      auditMediaGitChanges([{ status: 'A', path: 'src/assets/content/works/qa-work-new.webp' }], new Map()),
     ).toThrow(/size|stat/i);
     expect(() =>
       auditMediaGitChanges(
@@ -40,8 +40,8 @@ describe('repository content audit', () => {
           {
             status: 'R',
             similarity: 100,
-            oldPath: 'src/assets/content/work/qa-work-old.webp',
-            newPath: 'src/assets/content/work/qa-work-new.webp',
+            oldPath: 'src/assets/content/works/qa-work-old.webp',
+            newPath: 'src/assets/content/works/qa-work-new.webp',
           },
         ],
         new Map(),
@@ -51,19 +51,19 @@ describe('repository content audit', () => {
 
   it('parses R100 old/new paths and returns add/delete sides separately', () => {
     const changes = parseGitMediaChanges(
-      'R100\tsrc/assets/content/work/qa-work-old.webp\tsrc/assets/content/work/qa-work-new.webp\n',
+      'R100\tsrc/assets/content/works/qa-work-old.webp\tsrc/assets/content/works/qa-work-new.webp\n',
     );
     expect(changes).toEqual([
       {
         status: 'R',
         similarity: 100,
-        oldPath: 'src/assets/content/work/qa-work-old.webp',
-        newPath: 'src/assets/content/work/qa-work-new.webp',
+        oldPath: 'src/assets/content/works/qa-work-old.webp',
+        newPath: 'src/assets/content/works/qa-work-new.webp',
       },
     ]);
-    expect(auditMediaGitChanges(changes, new Map([['src/assets/content/work/qa-work-new.webp', 1024]]))).toEqual({
-      addedPaths: ['src/assets/content/work/qa-work-new.webp'],
-      deletedPaths: ['src/assets/content/work/qa-work-old.webp'],
+    expect(auditMediaGitChanges(changes, new Map([['src/assets/content/works/qa-work-new.webp', 1024]]))).toEqual({
+      addedPaths: ['src/assets/content/works/qa-work-new.webp'],
+      deletedPaths: ['src/assets/content/works/qa-work-old.webp'],
       addedBytes: 1024,
     });
   });
@@ -73,14 +73,10 @@ describe('repository content audit', () => {
     roots.push(root);
     for (const path of [
       'src/content/site',
-      'src/content/work',
-      'src/content/lab',
+      'src/content/works',
       'src/content/notes',
-      'src/content/portfolio',
-      'src/assets/content/work',
-      'src/assets/content/lab',
+      'src/assets/content/works',
       'src/assets/content/notes',
-      'src/assets/content/portfolio',
     ])
       mkdirSync(join(root, path), { recursive: true });
     writeFileSync(join(root, 'src/content/site/profile.md'), approvedProfileFixture, 'utf8');
@@ -90,7 +86,7 @@ describe('repository content audit', () => {
         throw new Error('No assets expected.');
       },
     });
-    expect(report.entryCounts).toEqual({ work: 0, lab: 0, notes: 0, portfolio: 0 });
+    expect(report.entryCounts).toEqual({ works: 0, notes: 0 });
     expect(report.orphanAssets).toEqual([]);
   });
 
@@ -107,19 +103,15 @@ describe('repository content audit', () => {
     roots.push(root);
     for (const path of [
       'src/content/site',
-      'src/content/work',
-      'src/content/lab',
+      'src/content/works',
       'src/content/notes',
-      'src/content/portfolio',
-      'src/assets/content/work',
-      'src/assets/content/lab',
+      'src/assets/content/works',
       'src/assets/content/notes',
-      'src/assets/content/portfolio',
     ])
       mkdirSync(join(root, path), { recursive: true });
     writeFileSync(join(root, 'src/content/site/profile.md'), approvedProfileFixture, 'utf8');
     writeFileSync(
-      join(root, 'src/content/work/different-slug.md'),
+      join(root, 'src/content/works/different-slug.md'),
       [
         '---',
         'slug: not-matching',
@@ -131,11 +123,8 @@ describe('repository content audit', () => {
         '  authenticityConfirmed: false',
         '  rightsConfirmed: false',
         '  evidenceUrls: []',
-        'problem: P',
-        'role: R',
-        'solution: S',
-        'stack: [ts]',
-        'contributions: [c]',
+        'kind: project',
+        'tags: [qa]',
         'status: prototype',
         'featured: false',
         '---',

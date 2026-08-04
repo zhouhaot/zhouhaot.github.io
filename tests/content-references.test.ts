@@ -8,28 +8,12 @@ import {
 } from '../src/domain/content-references';
 
 const work: ContentRecord = {
-  collection: 'work',
+  collection: 'works',
   slug: 'qa-work',
   media: [
     {
       type: 'image',
-      source: 'work/qa-work-overview.webp',
-      alt: 'QA',
-      caption: 'QA',
-      width: 2,
-      height: 1,
-      license: 'owned',
-    },
-  ],
-};
-const portfolio: ContentRecord = {
-  collection: 'portfolio',
-  slug: 'qa-series',
-  relatedProject: 'qa-work',
-  media: [
-    {
-      type: 'image',
-      source: 'portfolio/qa-series-overview.webp',
+      source: 'works/qa-work-overview.webp',
       alt: 'QA',
       caption: 'QA',
       width: 2,
@@ -40,29 +24,23 @@ const portfolio: ContentRecord = {
 };
 
 describe('content reference graph', () => {
-  it('resolves project and asset references', () => {
+  it('resolves asset references', () => {
     const graph = buildContentReferenceGraph(
-      [work, portfolio],
-      ['work/qa-work-overview.webp', 'portfolio/qa-series-overview.webp'],
+      [work],
+      ['works/qa-work-overview.webp'],
     );
     expect(() => assertReferenceSafe(graph)).not.toThrow();
-    expect(graph.references).toContainEqual({ from: 'portfolio:qa-series', to: 'work:qa-work', kind: 'entry' });
-  });
-
-  it('blocks deleting a referenced project', () => {
-    const graph = buildContentReferenceGraph([portfolio], ['portfolio/qa-series-overview.webp']);
-    expect(() => assertReferenceSafe(graph)).toThrow(/qa-work/);
   });
 
   it('blocks deleting a referenced source or video poster', () => {
     const video: ContentRecord = {
-      collection: 'lab',
-      slug: 'qa-lab',
+      collection: 'works',
+      slug: 'qa-video',
       media: [
         {
           type: 'video',
-          source: 'lab/qa-lab-demo.webm',
-          poster: 'lab/qa-lab-poster.webp',
+          source: 'works/qa-video-demo.webm',
+          poster: 'works/qa-video-poster.webp',
           alt: 'QA',
           caption: 'QA',
           width: 2,
@@ -71,47 +49,33 @@ describe('content reference graph', () => {
         },
       ],
     };
-    expect(() => assertReferenceSafe(buildContentReferenceGraph([video], ['lab/qa-lab-demo.webm']))).toThrow(/poster/);
+    expect(() => assertReferenceSafe(buildContentReferenceGraph([video], ['works/qa-video-demo.webm']))).toThrow(/poster/);
   });
 
   it('reports orphans in stable order without failing or deleting', () => {
     const graph = buildContentReferenceGraph(
       [work],
-      ['work/qa-work-z.webp', 'work/qa-work-overview.webp', 'work/qa-work-a.webp'],
+      ['works/qa-work-z.webp', 'works/qa-work-overview.webp', 'works/qa-work-a.webp'],
     );
-    expect(reportOrphanAssets(graph)).toEqual(['work/qa-work-a.webp', 'work/qa-work-z.webp']);
+    expect(reportOrphanAssets(graph)).toEqual(['works/qa-work-a.webp', 'works/qa-work-z.webp']);
     expect(() => assertReferenceSafe(graph)).not.toThrow();
   });
 
-  it('rejects an ambiguous project slug across work and lab', () => {
-    const lab = { ...work, collection: 'lab' as const };
-    expect(() => buildContentReferenceGraph([work, lab, portfolio], ['work/qa-work-overview.webp'])).toThrow(
-      /ambiguous/i,
-    );
-  });
-
   it('allows deleting an unreferenced work entry', () => {
-    const unreferenced: ContentRecord = { collection: 'work', slug: 'qa-other', media: [] };
+    const unreferenced: ContentRecord = { collection: 'works', slug: 'qa-other', media: [] };
     const graph = buildContentReferenceGraph([unreferenced], []);
     expect(() => assertReferenceSafe(graph)).not.toThrow();
   });
 
-  it('blocks slug change when portfolio still references the old slug', () => {
-    // portfolio references 'qa-work' but only 'qa-work-renamed' is present
-    const renamed: ContentRecord = { collection: 'work', slug: 'qa-work-renamed', media: [] };
-    const graph = buildContentReferenceGraph([renamed, portfolio], ['portfolio/qa-series-overview.webp']);
-    expect(() => assertReferenceSafe(graph)).toThrow(/qa-work/);
-  });
-
   it('blocks deleting an image used only as a video poster', () => {
     const withPoster: ContentRecord = {
-      collection: 'lab',
-      slug: 'qa-lab',
+      collection: 'works',
+      slug: 'qa-poster',
       media: [
         {
           type: 'video',
-          source: 'lab/qa-lab-demo.webm',
-          poster: 'lab/qa-lab-poster.webp',
+          source: 'works/qa-poster-demo.webm',
+          poster: 'works/qa-poster-thumb.webp',
           alt: 'QA',
           caption: 'QA',
           width: 2,
@@ -120,20 +84,16 @@ describe('content reference graph', () => {
         },
       ],
     };
-    // Both source and poster declared, but poster file is absent
-    const graph = buildContentReferenceGraph(
-      [withPoster],
-      ['lab/qa-lab-demo.webm'],
-    );
+    const graph = buildContentReferenceGraph([withPoster], ['works/qa-poster-demo.webm']);
     expect(() => assertReferenceSafe(graph)).toThrow(/poster/);
   });
 
   it('reports an unused asset without failing', () => {
     const graph = buildContentReferenceGraph([work], [
-      'work/qa-work-overview.webp',
-      'work/qa-work-unused.webp',
+      'works/qa-work-overview.webp',
+      'works/qa-work-unused.webp',
     ]);
     expect(() => assertReferenceSafe(graph)).not.toThrow();
-    expect(reportOrphanAssets(graph)).toEqual(['work/qa-work-unused.webp']);
+    expect(reportOrphanAssets(graph)).toEqual(['works/qa-work-unused.webp']);
   });
 });

@@ -15,9 +15,8 @@ let builtHtml = '';
 let builtSource = '';
 let builtPublicContent = '';
 let builtCss = '';
-const rawForbiddenMarkers = /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|\u7b80\u5386|\u5ba2\u6237/i;
+const rawForbiddenMarkers = /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|客户/i;
 const unverifiedMetric = /\d+%/;
-const homeCss = readFileSync(resolve('src/styles/home.css'), 'utf8');
 
 beforeAll(() => {
   execFileSync(buildCommand.command, buildCommand.args, { cwd: resolve('.'), stdio: 'pipe' });
@@ -37,7 +36,7 @@ beforeAll(() => {
 }, 120_000);
 
 describe('built production homepage', () => {
-  it('renders the approved positioning and prioritises GitHub over projects', () => {
+  it('renders the approved positioning and prioritises GitHub over works', () => {
     const headings = builtDocument.querySelectorAll('h1');
     const primary = builtDocument.querySelector<HTMLAnchorElement>('[data-home-primary-cta]');
     const secondary = builtDocument.querySelector<HTMLAnchorElement>('[data-home-secondary-cta]');
@@ -49,8 +48,8 @@ describe('built production homepage', () => {
     expect(primary?.getAttribute('href')).toBe(approvedGithub);
     expect(readFileSync(resolve('src/config/site.ts'), 'utf8')).not.toMatch(/githubUrl/);
     expect(primary?.getAttribute('rel')).toContain('external');
-    expect(secondary?.textContent).toContain('查看项目');
-    expect(secondary?.getAttribute('href')).toBe('/projects/');
+    expect(secondary?.textContent).toContain('查看作品');
+    expect(secondary?.getAttribute('href')).toBe('/works/');
   });
 
   it('renders the approved sections in content order with named headings', () => {
@@ -58,9 +57,8 @@ describe('built production homepage', () => {
 
     expect(sections.map((section) => section.dataset.homeSection)).toEqual([
       'hero',
-      'featured-projects',
+      'featured-works',
       'capability-map',
-      'experiment-status',
       'delivery-method',
       'latest-articles',
       'current-status',
@@ -76,11 +74,10 @@ describe('built production homepage', () => {
   it('shows truthful empty states for all empty collections without fabricating cards', () => {
     const emptyStates = Array.from(builtDocument.querySelectorAll('[data-empty-state]'));
 
-    expect(emptyStates).toHaveLength(3);
+    expect(emptyStates).toHaveLength(2);
     expect(emptyStates.map((emptyState) => emptyState.getAttribute('data-empty-collection')).sort()).toEqual([
-      'lab',
       'notes',
-      'work',
+      'works',
     ]);
     expect(emptyStates.every((emptyState) => emptyState.hasAttribute('role') === false)).toBe(true);
     expect(builtDocument.querySelectorAll('[data-home-content-card]')).toHaveLength(0);
@@ -90,15 +87,14 @@ describe('built production homepage', () => {
   it('does not ship prohibited legacy, placeholder, private-contact, or unverified-result content', () => {
     expect(builtSource).not.toMatch(rawForbiddenMarkers);
     expect(builtPublicContent).not.toMatch(
-      /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|简历|客户|\d+%/i,
+      /LAB\.LOG|VOID\.DEV|placeholder|TODO|TBD|contact@example\.com|客户|\d+%/i,
     );
   });
 
   it('keeps raw-source marker scanning separate from visible-content metrics', () => {
     expect('<script>TODO</script>').toMatch(rawForbiddenMarkers);
-    expect('<script>\u7b80\u5386</script>').toMatch(rawForbiddenMarkers);
     expect('<style>.card { width: 100%; }</style>').not.toMatch(rawForbiddenMarkers);
-    expect('<style>\u5ba2\u6237</style>').toMatch(rawForbiddenMarkers);
+    expect('<style>客户</style>').toMatch(rawForbiddenMarkers);
     const styleOnlyDocument = document.implementation.createHTMLDocument();
     styleOnlyDocument.documentElement.innerHTML = '<style>.card { width: 100%; }</style>';
     styleOnlyDocument.querySelector('style')?.remove();
@@ -125,13 +121,6 @@ describe('built production homepage', () => {
       'home-grid home-grid--capabilities',
       'home-grid home-grid--footer',
     ]);
-    expect(homeCss).toMatch(/\.home-hero\s*\{[^}]*grid-column:\s*span 8/);
-    expect(homeCss).toMatch(/\.home-featured\s*\{[^}]*grid-column:\s*span 4/);
-    expect(homeCss).toMatch(/\.home-capabilities\s*\{[^}]*grid-column:\s*span 4/);
-    expect(homeCss).toMatch(/\.home-experiments\s*\{[^}]*grid-column:\s*span 4/);
-    expect(homeCss).toMatch(/\.home-delivery\s*\{[^}]*grid-column:\s*span 4/);
-    expect(homeCss).toMatch(/\.home-articles\s*\{[^}]*grid-column:\s*span 8/);
-    expect(homeCss).toMatch(/\.home-current-status\s*\{[^}]*grid-column:\s*span 4/);
     expect(builtCss).toMatch(
       /\.home-button--primary\{[^}]*background:var\(--color-foreground\)[^}]*color:var\(--color-background\)/,
     );

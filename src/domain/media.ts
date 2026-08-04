@@ -14,7 +14,7 @@ export type ContentMediaPath = {
 export function parseContentMediaPath(value: string): ContentMediaPath | undefined {
   if (value !== value.normalize('NFC') || value !== value.trim() || /[\\%:]/.test(value) || value.includes('..'))
     return;
-  const match = /^(work|lab|notes|portfolio)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.([a-z0-9]+)$/.exec(value);
+  const match = /^(works|notes)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.([a-z0-9]+)$/.exec(value);
   if (!match) return;
   const [, collection, filename, extension] = match;
   if (!CONTENT_MEDIA_EXTENSIONS.includes(extension as (typeof CONTENT_MEDIA_EXTENSIONS)[number])) return;
@@ -64,7 +64,7 @@ export function mediaReferencesFor(
   slug: string,
   data: MediaContainer,
 ): readonly MediaReference[] {
-  const media = collection === 'portfolio' ? (data.items ?? []) : (data.media ?? []);
+  const media = data.media ?? [];
   for (const item of media) assertMediaOwnership(collection, slug, item);
   return media;
 }

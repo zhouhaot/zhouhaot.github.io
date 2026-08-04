@@ -6,7 +6,6 @@ export type ContentRecord = {
   collection: ContentCollectionName;
   slug: string;
   media: readonly MediaReference[];
-  relatedProject?: string | undefined;
 };
 export type ContentReference = { from: ContentKey; to: ContentKey | string; kind: 'entry' | 'source' | 'poster' };
 export type ContentReferenceGraph = {
@@ -27,21 +26,9 @@ export function buildContentReferenceGraph(
   const entries = new Set(records.map(contentKey));
   const assets = new Set(assetSources);
   const references: ContentReference[] = [];
-  const projectTargets = new Map<string, ContentKey[]>();
-  for (const record of records.filter((item) => item.collection === 'work' || item.collection === 'lab')) {
-    const targets = projectTargets.get(record.slug) ?? [];
-    targets.push(contentKey(record));
-    projectTargets.set(record.slug, targets);
-  }
-  for (const [slug, targets] of projectTargets)
-    if (targets.length > 1) throw new Error(`Ambiguous project slug: ${slug}`);
 
   for (const record of records) {
     const from = contentKey(record);
-    if (record.collection === 'portfolio' && record.relatedProject) {
-      const [target] = projectTargets.get(record.relatedProject) ?? [];
-      references.push({ from, to: target ?? `work:${record.relatedProject}`, kind: 'entry' });
-    }
     for (const media of record.media) {
       references.push({ from, to: media.source, kind: 'source' });
       if (media.type === 'video') references.push({ from, to: media.poster, kind: 'poster' });

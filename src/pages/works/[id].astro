@@ -1,0 +1,40 @@
+---
+import { getPublishedWorks, workStaticPaths, type PublicWork } from '@/domain/works';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  return workStaticPaths(await getPublishedWorks());
+}
+
+interface Props {
+  work: PublicWork;
+}
+
+const { work } = Astro.props;
+---
+
+<BaseLayout
+  title={`${work.title} | zhou`}
+  description={work.summary}
+  canonicalPath={work.href}
+  seoKind="work"
+>
+  <article class="work-detail" aria-labelledby="work-heading">
+    <header>
+      <span class="work-detail__kind">{work.kindLabel}</span>
+      <h1 id="work-heading">{work.title}</h1>
+      <p>{work.summary}</p>
+      <div class="work-detail__meta">
+        <span>{work.year}</span>
+        <span>{work.statusLabel}</span>
+        <ul>
+          {work.tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+      </div>
+    </header>
+    <nav class="work-detail__actions" aria-label="作品链接">
+      {work.demoUrl && <a href={work.demoUrl} rel="external noopener" target="_blank">查看 Demo</a>}
+      {work.repositoryUrl && <a href={work.repositoryUrl} rel="external noopener" target="_blank">查看代码</a>}
+    </nav>
+  </article>
+</BaseLayout>

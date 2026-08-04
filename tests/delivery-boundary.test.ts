@@ -67,10 +67,9 @@ describe('production delivery boundary', () => {
     for (const file of [
       'index.html',
       '404.html',
-      'about/index.html',
-      'articles/index.html',
-      'portfolio/index.html',
-      'projects/index.html',
+      'works/index.html',
+      'blog/index.html',
+      'resume/index.html',
     ]) {
       expect(readFileSync(resolve(output, file), 'utf8').match(/class="site-header"/g)).toHaveLength(1);
     }

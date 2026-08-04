@@ -1,0 +1,58 @@
+---
+import { getSiteProfile } from '@/domain/public-profile.server';
+import { PUBLIC_ROUTES } from '@/domain/routes';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const profile = await getSiteProfile();
+const primaryContact = profile.contacts[0];
+if (!primaryContact) throw new Error('Site profile requires a primary public contact.');
+---
+
+<BaseLayout title="简历 | zhou" description="AI 应用开发者职业资料。" canonicalPath="/resume/" seoKind="resume">
+  <article class="resume-page" aria-labelledby="resume-heading">
+    <header class="resume-page__header">
+      <h1 id="resume-heading">{profile.role}</h1>
+      <p>{profile.positioning}</p>
+    </header>
+
+    {profile.skills.length > 0 && (
+      <section aria-labelledby="resume-skills">
+        <h2 id="resume-skills">技能</h2>
+        {profile.skills.map((group) => (
+          <div class="resume-skills__group">
+            <h3>{group.group}</h3>
+            <ul>{group.items.map((item) => <li>{item}</li>)}</ul>
+          </div>
+        ))}
+      </section>
+    )}
+
+    {profile.experience.length > 0 && (
+      <section aria-labelledby="resume-experience">
+        <h2 id="resume-experience">经历</h2>
+        {profile.experience.map((exp) => (
+          <div class="resume-experience__item">
+            <h3>{exp.company}</h3>
+            <p class="resume-experience__meta">{exp.role} · {exp.period}</p>
+            <p>{exp.description}</p>
+          </div>
+        ))}
+      </section>
+    )}
+
+    <section aria-labelledby="resume-capabilities">
+      <h2 id="resume-capabilities">能力范围</h2>
+      <ul>{profile.capabilities.map((capability) => <li>{capability}</li>)}</ul>
+    </section>
+
+    <section aria-labelledby="resume-status">
+      <h2 id="resume-status">当前状态</h2>
+      <p>{profile.currentStatus}</p>
+    </section>
+
+    <nav class="resume-page__actions" aria-label="简历操作">
+      <a href={primaryContact.href} rel="me external">{primaryContact.label}</a>
+      <a href={PUBLIC_ROUTES.works}>查看作品</a>
+    </nav>
+  </article>
+</BaseLayout>

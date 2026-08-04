@@ -1,6 +1,6 @@
 import { z } from 'astro/zod';
 
-export const CONTENT_COLLECTIONS = ['work', 'lab', 'notes', 'portfolio'] as const;
+export const CONTENT_COLLECTIONS = ['works', 'notes'] as const;
 export type ContentCollectionName = (typeof CONTENT_COLLECTIONS)[number];
 
 export const canonicalSlugSchema = z

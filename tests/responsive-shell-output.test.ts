@@ -57,7 +57,7 @@ describe('built responsive shell', () => {
     );
     expect(shellContacts.map((link) => link.getAttribute('href'))).toEqual([approvedGithub, approvedGithub]);
     expect(shellContacts.map((link) => link.textContent)).toEqual(['GitHub', 'GitHub']);
-    expect(tabbar?.querySelectorAll('a')).toHaveLength(5);
+    expect(tabbar?.querySelectorAll('a')).toHaveLength(4);
     expect(tabbar?.textContent).not.toContain('GitHub');
   });
 

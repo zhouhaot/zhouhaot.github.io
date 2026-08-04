@@ -1,38 +1,36 @@
 import type { PublicArticle } from '../../../src/domain/articles';
-import type { PublicPortfolioSeries } from '../../../src/domain/portfolio';
-import type { PublicProject } from '../../../src/domain/projects';
+import type { PublicWork } from '../../../src/domain/works';
 
 const fixturePrefix = '[QA fixture]';
 
-export const projects: PublicProject[] = [
+export const works: PublicWork[] = [
   {
     id: 'qa-work',
     title: `${fixturePrefix} research workspace`,
     summary: `${fixturePrefix} a bounded interface exercise.`,
     publishedAt: new Date('2026-01-01'),
     year: '2026',
+    kind: 'project',
+    kindLabel: '项目',
+    tags: ['TypeScript'],
     status: 'prototype',
     statusLabel: '原型',
-    href: '/projects/qa-work/',
-    kind: 'work',
-    kindLabel: '项目',
-    role: `${fixturePrefix} builder`,
-    tools: ['TypeScript'],
-    detailSections: [],
+    featured: false,
+    href: '/works/qa-work/',
   },
   {
-    id: 'qa-lab',
+    id: 'qa-experiment',
     title: `${fixturePrefix} filter laboratory`,
     summary: `${fixturePrefix} a recoverable filter state.`,
     publishedAt: new Date('2025-01-01'),
     year: '2025',
+    kind: 'experiment',
+    kindLabel: '实验',
+    tags: ['Astro'],
     status: 'validated',
     statusLabel: '已验证',
-    href: '/projects/qa-lab/',
-    kind: 'lab',
-    kindLabel: '实验',
-    tools: ['Astro'],
-    detailSections: [],
+    featured: false,
+    href: '/works/qa-experiment/',
   },
 ];
 
@@ -56,36 +54,6 @@ export const articles: PublicArticle[] = [
     publishedAt: new Date('2026-01-15'),
     tags: [{ key: 'testing', label: 'Testing' }],
     searchText: 'qa fixture layout notes testing',
-    href: '/articles/',
-  },
-];
-
-export const portfolio: PublicPortfolioSeries[] = [
-  {
-    id: 'qa-media',
-    slug: 'qa-media',
-    title: `${fixturePrefix} local media`,
-    summary: `${fixturePrefix} self-created SVG media.`,
-    publishedAt: new Date('2026-01-01'),
-    attestation: {
-      authenticityConfirmed: true,
-      rightsConfirmed: true,
-      reviewedAt: new Date('2026-07-19'),
-      evidenceUrls: [],
-    },
-    order: 1,
-    status: 'published',
-    items: [
-      {
-        type: 'image',
-        source: '/qa-fixture.svg',
-        asset: { src: '/qa-fixture.svg', width: 640, height: 360 },
-        alt: `${fixturePrefix} geometric test image`,
-        caption: `${fixturePrefix} local geometric image`,
-        width: 640,
-        height: 360,
-        license: 'owned',
-      },
-    ],
+    href: '/blog/',
   },
 ];

@@ -1,6 +1,6 @@
 import { SITE } from '../config/site';
 
-export type SeoPageKind = 'home' | 'list' | 'article' | 'project' | 'portfolio' | 'about';
+export type SeoPageKind = 'home' | 'list' | 'article' | 'work' | 'resume';
 
 export type StructuredData = Record<string, unknown>;
 
@@ -52,10 +52,9 @@ export function pageStructuredData({
   switch (kind) {
     case 'article':
       return { ...common, '@type': 'Article' };
-    case 'project':
-    case 'portfolio':
+    case 'work':
       return { ...common, '@type': 'CreativeWork' };
-    case 'about':
+    case 'resume':
       return { ...common, '@type': 'ProfilePage', mainEntity: { '@type': 'Person', name: SITE.name } };
     case 'home':
     case 'list':
@@ -73,8 +72,8 @@ export type RssArticle = {
 
 export function rssItems(articles: readonly RssArticle[]) {
   return articles.map((article) => {
-    if (!article.href.startsWith('/articles/') || !article.href.endsWith('/')) {
-      throw new Error(`RSS articles must use /articles/[id]/ routes: ${article.href}`);
+    if (!article.href.startsWith('/blog/') || !article.href.endsWith('/')) {
+      throw new Error(`RSS articles must use /blog/[id]/ routes: ${article.href}`);
     }
     return { title: article.title, description: article.summary, pubDate: article.publishedAt, link: article.href };
   });

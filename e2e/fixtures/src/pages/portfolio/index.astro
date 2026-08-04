@@ -1,7 +1,16 @@
 ---
-import PortfolioGallery from '../../../../../src/components/portfolio/PortfolioGallery.astro';
 import BaseLayout from '../../../../../src/layouts/BaseLayout.astro';
-import '../../../../../src/styles/portfolio.css';
-import { portfolio } from '../../data';
+import { works } from '../../data';
 ---
-<BaseLayout title="[QA fixture] portfolio"><section class="portfolio-page"><header class="portfolio-page__header"><h1>[QA fixture] portfolio</h1></header><PortfolioGallery series={portfolio} /></section></BaseLayout>
+<BaseLayout title="[QA fixture] portfolio">
+  <section class="portfolio-page">
+    <header class="portfolio-page__header"><h1>[QA fixture] works gallery</h1></header>
+    <ul>
+      {works.map((work) => (
+        <li>
+          <a href={work.href}>{work.title}</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>

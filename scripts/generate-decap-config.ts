@@ -42,7 +42,6 @@ const LABEL: Record<string, string> = {
   limitations: '局限性',
   nextSteps: '后续步骤',
   media: '媒体',
-  items: '媒体项目',
   type: '类型',
   source: '文件路径',
   alt: '替代文本',
@@ -54,35 +53,23 @@ const LABEL: Record<string, string> = {
   credit: '版权归属',
   licenseUrl: '许可证链接',
   evidenceUrl: '证据链接',
-  hypothesis: '假设',
-  workflow: '工作流程',
-  modelOrTools: '模型/工具',
-  result: '结果',
-  evaluation: '评估',
   tags: '标签',
-  order: '排序',
-  relatedProject: '关联项目',
-  heroEyebrow: '副标题',
-  heroTitle: '主标题',
-  heroSummary: '摘要',
-  positioning: '定位描述',
-  capabilities: '能力列表',
-  method: '工作方法',
-  principles: '原则',
-  currentStatus: '当前状态',
-  trustBoundary: '信任边界说明',
-  contacts: '联系方式',
-  label: '标签',
-  kind: '类型',
+  kind: '种类',
   href: '链接',
+  label: '标签',
+  experience: '工作经历',
+  company: '公司',
+  period: '时间段',
+  description: '描述',
+  skills: '技能',
+  group: '分组',
+  items: '子项目',
 };
 
 const COLLECTION_LABEL: Record<ContractCollection, [string, string]> = {
-  site:      ['站点信息', '站点信息'],
-  work:      ['工作项目', '工作项目'],
-  lab:       ['实验项目', '实验项目'],
-  notes:     ['文章', '文章'],
-  portfolio: ['作品集', '作品集系列'],
+  site:  ['站点信息', '站点信息'],
+  works: ['作品', '作品'],
+  notes: ['博客文章', '博客文章'],
 };
 
 function fieldLabel(name: string): string {
@@ -318,7 +305,7 @@ const config = {
   site_url: siteUrl,
   display_url: siteUrl,
   collections: (
-    ['site', 'work', 'lab', 'notes', 'portfolio'] as ContractCollection[]
+    ['site', 'works', 'notes'] as ContractCollection[]
   ).map(buildCollection),
 };
 

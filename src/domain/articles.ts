@@ -80,8 +80,7 @@ function toPublicArticle(source: ArticleSource): PublicArticle {
 
 export function buildArticles(entries: readonly ArticleSource[], production = import.meta.env.PROD): PublicArticle[] {
   for (const entry of entries) {
-    assertEntrySlug('notes', entry.id, entry.data.slug);
-    assertPublishable(entry.data);
+    assertEntrySlug('notes', entry.id, entry.data.slug);    assertPublishable(entry.data);
   }
   const published = entries.filter((entry) => !production || entry.data.draft !== true);
   assertUniqueSafeIds(published);

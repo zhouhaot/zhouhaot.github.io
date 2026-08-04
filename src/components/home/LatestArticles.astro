@@ -24,8 +24,7 @@ const { entries } = Astro.props;
               {entry.data.publishedAt.toLocaleDateString('zh-CN')}
             </time>
             <h3>
-              <a href={articleRoute(entry.id)}>{entry.data.title}</a>
-            </h3>
+              <a href={articleRoute(entry.id)}>{entry.data.title}</a>            </h3>
             <p>{entry.data.summary}</p>
           </article>
         ))}

@@ -53,7 +53,7 @@ describe('article domain', () => {
     expect(() => buildArticles([source({ id: 'nested/id' })], true)).toThrow(/slug/i);
     expect(() => buildArticles([source({ id: 'has space' })], true)).toThrow(/slug/i);
     expect(() => buildArticles([source({ id: 'UPPER' })], true)).toThrow(/slug/i);
-    expect(buildArticles([source({ id: 'a-b' })], true)[0]?.href).toBe('/articles/a-b/');
+    expect(buildArticles([source({ id: 'a-b' })], true)[0]?.href).toBe('/blog/a-b/');
   });
 
   it('normalizes search and tags while keeping public search text free of body or private fields', () => {

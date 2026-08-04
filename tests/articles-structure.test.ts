@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('article route structure', () => {
   it('keeps the article view model at build time and uses Astro supplied headings', () => {
-    const detail = readFileSync(resolve('src/pages/articles/[id].astro'), 'utf8');
+    const detail = readFileSync(resolve('src/pages/blog/[id].astro'), 'utf8');
     const domain = readFileSync(resolve('src/domain/articles.ts'), 'utf8');
     expect(detail).toMatch(/await render\(entry\)/);
     expect(detail).toContain('headings');
@@ -16,7 +16,7 @@ describe('article route structure', () => {
     const reader = readFileSync(resolve('src/components/articles/ArticleReader.astro'), 'utf8');
     const card = readFileSync(resolve('src/components/articles/ArticleCard.astro'), 'utf8');
     const discovery = readFileSync(resolve('src/components/articles/ArticleDiscovery.astro'), 'utf8');
-    const index = readFileSync(resolve('src/pages/articles/index.astro'), 'utf8');
+    const index = readFileSync(resolve('src/pages/blog/index.astro'), 'utf8');
     const css = readFileSync(resolve('src/styles/articles.css'), 'utf8');
     expect(reader).toMatch(/<article/);
     expect(reader).toMatch(/<h1/);

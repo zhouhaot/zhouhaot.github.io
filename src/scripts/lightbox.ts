@@ -1,4 +1,17 @@
-import { portfolioLicenseLabel, type PortfolioMedia } from '@/domain/portfolio';
+import type { MediaReference } from '@/domain/media';
+
+type MediaLicense = MediaReference['license'];
+
+const LICENSE_LABELS: Record<MediaLicense, string> = {
+  owned: '自有',
+  licensed: '已获授权',
+  'cc-by': '知识共享署名',
+  'public-domain': '公共领域',
+};
+
+function mediaLicenseLabel(license: MediaLicense | string): string {
+  return LICENSE_LABELS[license as MediaLicense] ?? license;
+}
 
 type GalleryItem = {
   type: 'image' | 'video';
@@ -6,7 +19,7 @@ type GalleryItem = {
   poster?: string;
   alt: string;
   caption: string;
-  license: PortfolioMedia['license'];
+  license: MediaLicense;
   credit?: string;
   licenseUrl?: string;
   evidenceUrl?: string;
@@ -30,7 +43,7 @@ function galleryItems(gallery: HTMLElement): GalleryItem[] {
         src,
         alt: element.dataset.alt ?? '',
         caption,
-        license: license as PortfolioMedia['license'],
+    license: license as MediaLicense,
         ...(element.dataset.poster ? { poster: element.dataset.poster } : {}),
         ...(element.dataset.credit ? { credit: element.dataset.credit } : {}),
         ...(element.dataset.licenseUrl ? { licenseUrl: element.dataset.licenseUrl } : {}),
@@ -128,7 +141,7 @@ export function initPortfolioLightboxes(root: HTMLElement): () => void {
       media.replaceChildren(video);
     }
     caption.textContent = item.caption;
-    license.textContent = portfolioLicenseLabel(item.license);
+    license.textContent = mediaLicenseLabel(item.license);
     credit.textContent = item.credit ?? '';
     licenseLink.hidden = !item.licenseUrl;
     evidenceLink.hidden = !item.evidenceUrl;

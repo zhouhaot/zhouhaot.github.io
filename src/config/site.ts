@@ -2,10 +2,9 @@ import { PUBLIC_ROUTES, type PublicRoute } from '@/domain/routes';
 
 const navigation = [
   { label: '首页', href: PUBLIC_ROUTES.home },
-  { label: '项目', href: PUBLIC_ROUTES.projects },
-  { label: '文章', href: PUBLIC_ROUTES.articles },
-  { label: '作品', href: PUBLIC_ROUTES.portfolio },
-  { label: '关于', href: PUBLIC_ROUTES.about },
+  { label: '作品', href: PUBLIC_ROUTES.works },
+  { label: '博客', href: PUBLIC_ROUTES.blog },
+  { label: '简历', href: PUBLIC_ROUTES.resume },
 ] as const satisfies readonly { label: string; href: PublicRoute }[];
 
 export const SITE = {

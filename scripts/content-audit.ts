@@ -54,9 +54,9 @@ async function main(): Promise<void> {
     : { root: resolve('.') };
   const report = await auditContentRepository(auditOptions);
 
-  const { work, lab, notes, portfolio } = report.entryCounts;
+  const { works, notes } = report.entryCounts;
   console.log(
-    `Content audit passed: work=${work} lab=${lab} notes=${notes} portfolio=${portfolio} assets=${report.assetCount} orphans=${report.orphanAssets.length}`,
+    `Content audit passed: works=${works} notes=${notes} assets=${report.assetCount} orphans=${report.orphanAssets.length}`,
   );
   for (const orphan of report.orphanAssets) {
     console.log(`Orphan content asset: ${orphan}`);

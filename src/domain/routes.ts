@@ -1,9 +1,8 @@
 export const PUBLIC_ROUTES = {
   home: '/',
-  projects: '/projects/',
-  articles: '/articles/',
-  portfolio: '/portfolio/',
-  about: '/about/',
+  works: '/works/',
+  blog: '/blog/',
+  resume: '/resume/',
 } as const;
 
 export type PublicRoute = (typeof PUBLIC_ROUTES)[keyof typeof PUBLIC_ROUTES];
@@ -18,10 +17,10 @@ function detailRoute(base: string, id: string): string {
   return `${base}${encodeURIComponent(segment)}/`;
 }
 
-export function projectRoute(id: string): string {
-  return detailRoute(PUBLIC_ROUTES.projects, id);
+export function workRoute(id: string): string {
+  return detailRoute(PUBLIC_ROUTES.works, id);
 }
 
 export function articleRoute(id: string): string {
-  return detailRoute(PUBLIC_ROUTES.articles, id);
+  return detailRoute(PUBLIC_ROUTES.blog, id);
 }
