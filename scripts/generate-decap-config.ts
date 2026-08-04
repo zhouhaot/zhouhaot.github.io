@@ -134,16 +134,27 @@ function buildFieldTree(fields: readonly ContractField[]): FieldNode[] {
     const { name, rest, isList } = parseFirstSegment(field.path);
 
     if (rest === null) {
-      // Top-level scalar
-      nodes.push({ kind: 'scalar', name, field });
+      if (field.type === 'media-list' || field.type === 'object-list' || field.type === 'string-list') {
+        // List container field — create or update the single ListNode for this name
+        const existing = seenLists.get(name);
+        if (!existing) {
+          const listNode: ListNode = { kind: 'list', name, field, itemChildren: [] };
+          seenLists.set(name, listNode);
+          nodes.push(listNode);
+        } else {
+          existing.field = field; // update placeholder with real contract field
+        }
+      } else {
+        // Top-level scalar
+        nodes.push({ kind: 'scalar', name, field });
+      }
       continue;
     }
 
     if (isList) {
-      // List container
+      // List item child
       let listNode = seenLists.get(name);
       if (!listNode) {
-        // Find or create the list container field entry
         const containerField: ContractField = {
           path: name,
           type: 'media-list',
@@ -168,17 +179,6 @@ function buildFieldTree(fields: readonly ContractField[]): FieldNode[] {
       }
       const childField: ContractField = { ...field, path: rest };
       objNode.children.push(...buildFieldTree([childField]));
-    }
-  }
-
-  // Override list container fields with actual list field from contract (if present)
-  for (const field of fields) {
-    const { name, rest, isList } = parseFirstSegment(field.path);
-    if (!isList && rest === null && (field.type === 'media-list' || field.type === 'object-list' || field.type === 'string-list')) {
-      const listNode = seenLists.get(name);
-      if (listNode) {
-        listNode.field = field;
-      }
     }
   }
 

@@ -6,7 +6,7 @@ backend:
   name: github
   repo: zhouhaot/zhouhaot.github.io
   branch: main
-  base_url: https://cms-admin.pages.dev
+  base_url: https://cms-admin-6y0.pages.dev
   auth_endpoint: /oauth
 publish_mode: editorial_workflow
 media_folder: src/assets/content
@@ -232,38 +232,6 @@ collections:
         widget: list
         required: false
         default: []
-      - name: outcomes
-        label: 成果
-        widget: list
-        required: false
-        default: []
-        field:
-          name: item
-          label: 项目
-          widget: string
-      - name: limitations
-        label: 局限性
-        widget: list
-        required: false
-        default: []
-        field:
-          name: item
-          label: 项目
-          widget: string
-      - name: nextSteps
-        label: 后续步骤
-        widget: list
-        required: false
-        default: []
-        field:
-          name: item
-          label: 项目
-          widget: string
-      - name: media
-        label: 媒体
-        widget: list
-        required: false
-        default: []
         fields:
           - name: type
             label: 类型
@@ -323,6 +291,33 @@ collections:
             widget: string
             required: false
             hint: 发布前必填
+      - name: outcomes
+        label: 成果
+        widget: list
+        required: false
+        default: []
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: limitations
+        label: 局限性
+        widget: list
+        required: false
+        default: []
+        field:
+          name: item
+          label: 项目
+          widget: string
+      - name: nextSteps
+        label: 后续步骤
+        widget: list
+        required: false
+        default: []
+        field:
+          name: item
+          label: 项目
+          widget: string
   - name: lab
     label: 实验项目
     label_singular: 实验项目
@@ -441,11 +436,6 @@ collections:
         label: 演示地址
         widget: string
         required: false
-      - name: media
-        label: 媒体
-        widget: list
-        required: false
-        default: []
       - name: media
         label: 媒体
         widget: list
@@ -588,11 +578,6 @@ collections:
           name: item
           label: 项目
           widget: string
-      - name: media
-        label: 媒体
-        widget: list
-        required: false
-        default: []
       - name: media
         label: 媒体
         widget: list
@@ -743,10 +728,6 @@ collections:
         label: 关联项目
         widget: string
         required: false
-      - name: items
-        label: 媒体项目
-        widget: list
-        required: true
       - name: items
         label: 媒体项目
         widget: list
