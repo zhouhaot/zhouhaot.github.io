@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
 const projects = (await getCollection("projects")).sort(
-	(a, b) => a.data.order - b.data.order
+	(a, b) => a.data.order - b.data.order,
 );
 ---
 

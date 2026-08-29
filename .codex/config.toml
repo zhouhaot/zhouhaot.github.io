@@ -1,0 +1,16 @@
+# 启用 Codex 多 agent 能力（参考 ~/.zcode/AGENTS.md 的 ECC 约定）
+[features]
+multi_agent = true
+
+# 项目本地专家 agent，用 /agent 命令选择
+[agents.blog-architect]
+description = "Astro/fuwari 主题定制与博客架构专家"
+layer = ".codex/agents/blog-architect.toml"
+
+[agents.content-writer]
+description = "博客内容写作专家，按本站 frontmatter 规范产出文章"
+layer = ".codex/agents/content-writer.toml"
+
+[agents.release-pilot]
+description = "构建、部署与线上验证专家"
+layer = ".codex/agents/release-pilot.toml"
