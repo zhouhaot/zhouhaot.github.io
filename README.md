@@ -1,204 +1,99 @@
-# VOID.DEV — 个人博客框架
+# 🍥Fuwari  
+![Node.js >= 20](https://img.shields.io/badge/node.js-%3E%3D20-brightgreen) 
+![pnpm >= 9](https://img.shields.io/badge/pnpm-%3E%3D9-blue) 
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-saicaca%2Ffuwari-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAyCAYAAAAnWDnqAAAAAXNSR0IArs4c6QAAA05JREFUaEPtmUtyEzEQhtWTQyQLHNak2AB7ZnyXZMEjXMGeK/AIi+QuHrMnbChYY7MIh8g01fJoopFb0uhhEqqcbWTp06/uv1saEDv4O3n3dV60RfP947Mm9/SQc0ICFQgzfc4CYZoTPAswgSJCCUJUnAAoRHOAUOcATwbmVLWdGoH//PB8mnKqScAhsD0kYP3j/Yt5LPQe2KvcXmGvRHcDnpxfL2zOYJ1mFwrryWTz0advv1Ut4CJgf5uhDuDj5eUcAUoahrdY/56ebRWeraTjMt/00Sh3UDtjgHtQNHwcRGOC98BJEAEymycmYcWwOprTgcB6VZ5JK5TAJ+fXGLBm3FDAmn6oPPjR4rKCAoJCal2eAiQp2x0vxTPB3ALO2CRkwmDy5WohzBDwSEFKRwPbknEggCPB/imwrycgxX2NzoMCHhPkDwqYMr9tRcP5qNrMZHkVnOjRMWwLCcr8ohBVb1OMjxLwGCvjTikrsBOiA6fNyCrm8V1rP93iVPpwaE+gO0SsWmPiXB+jikdf6SizrT5qKasx5j8ABbHpFTx+vFXp9EnYQmLx02h1QTTrl6eDqxLnGjporxl3NL3agEvXdT0WmEost648sQOYAeJS9Q7bfUVoMGnjo4AZdUMQku50McDcMWcBPvr0SzbTAFDfvJqwLzgxwATnCgnp4wDl6Aa+Ax283gghmj+vj7feE2KBBRMW3FzOpLOADl0Isb5587h/U4gGvkt5v60Z1VLG8BhYjbzRwyQZemwAd6cCR5/XFWLYZRIMpX39AR0tjaGGiGzLVyhse5C9RKC6ai42ppWPKiBagOvaYk8lO7DajerabOZP46Lby5wKjw1HCRx7p9sVMOWGzb/vA1hwiWc6jm3MvQDTogQkiqIhJV0nBQBTU+3okKCFDy9WwferkHjtxib7t3xIUQtHxnIwtx4mpg26/HfwVNVDb4oI9RHmx5WGelRVlrtiw43zboCLaxv46AZeB3IlTkwouebTr1y2NjSpHz68WNFjHvupy3q8TFn3Hos2IAk4Ju5dCo8B3wP7VPr/FGaKiG+T+v+TQqIrOqMTL1VdWV1DdmcbO8KXBz6esmYWYKPwDL5b5FA1a0hwapHiom0r/cKaoqr+27/XcrS5UwSMbQAAAABJRU5ErkJggg==)](https://deepwiki.com/saicaca/fuwari)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari?ref=badge_shield&issueType=license)
 
-可扩展、可维护的个人博客系统。内置管理后台、主题引擎、数据驱动架构。纯静态实现，一键部署到 GitHub Pages。
+A static blog template built with [Astro](https://astro.build).
 
-## ✨ 特性
+[**🖥️ Live Demo (Vercel)**](https://fuwari.vercel.app)
 
-- 🎨 **可切换主题** — 赛博朋克 / 极简白，支持自定义主题导入
-- 🔧 **管理后台** — 可视化编辑所有内容，无需改代码
-- 📝 **数据驱动** — JSON 文件存储，后台编辑 or 手动修改均可
-- 🚀 **零构建部署** — 推送到 GitHub 即自动部署
+![Preview Image](https://raw.githubusercontent.com/saicaca/resource/main/fuwari/home.png)
 
-## 📁 项目结构
+🌏 README in
+[**中文**](https://github.com/saicaca/fuwari/blob/main/docs/README.zh-CN.md) /
+[**日本語**](https://github.com/saicaca/fuwari/blob/main/docs/README.ja.md) /
+[**한국어**](https://github.com/saicaca/fuwari/blob/main/docs/README.ko.md) /
+[**Español**](https://github.com/saicaca/fuwari/blob/main/docs/README.es.md) /
+[**ไทย**](https://github.com/saicaca/fuwari/blob/main/docs/README.th.md) /
+[**Tiếng Việt**](https://github.com/saicaca/fuwari/blob/main/docs/README.vi.md) /
+[**Bahasa Indonesia**](https://github.com/saicaca/fuwari/blob/main/docs/README.id.md) (Provided by the community and may not always be up-to-date)
 
-```
-personalblog/
-├── index.html                     # 前台入口
-├── admin/                         # 管理后台
-│   ├── index.html
-│   ├── admin.css
-│   └── admin.js
-├── js/
-│   ├── core.js                    # 核心框架（数据层 + 主题引擎）
-│   ├── app.js                     # 前台应用入口
-│   ├── animations.js              # 滚动动画、3D 倾斜
-│   ├── particles.js               # 粒子系统
-│   ├── cursor.js                  # 鼠标光晕
-│   └── router.js                  # 哈希路由
-├── themes/
-│   ├── _template/                 # 主题开发模板
-│   │   ├── theme.css              # CSS 模板（带详细注释）
-│   │   └── template.js            # JS 模板（带 API 文档）
-│   ├── cyberpunk/                 # 赛博朋克主题
-│   └── minimal/                   # 极简白主题
-├── data/
-│   ├── config.json                # 统一配置
-│   ├── posts.json                 # 文章数据
-│   └── projects.json              # 项目数据
-└── .github/workflows/deploy.yml
-```
+## ✨ Features
 
-## 🚀 本地运行
+- [x] Built with [Astro](https://astro.build) and [Tailwind CSS](https://tailwindcss.com)
+- [x] Smooth animations and page transitions
+- [x] Light / dark mode
+- [x] Customizable theme colors & banner
+- [x] Responsive design
+- [x] Search functionality with [Pagefind](https://pagefind.app/)
+- [x] [Markdown extended features](https://github.com/saicaca/fuwari?tab=readme-ov-file#-markdown-extended-syntax)
+- [x] Table of contents
+- [x] RSS feed
 
-```bash
-cd personalblog
-python -m http.server 8080
-```
+## 🚀 Getting Started
 
-- 前台：http://localhost:8080
-- 后台：http://localhost:8080/admin/
+1. Create your blog repository:
+    - [Generate a new repository](https://github.com/saicaca/fuwari/generate) from this template or fork this repository.
+    - Or run one of the following commands:
+       ```sh
+       npm create fuwari@latest
+       yarn create fuwari
+       pnpm create fuwari@latest
+       bun create fuwari@latest
+       deno run -A npm:create-fuwari@latest
+       ```
+2. To edit your blog locally, clone your repository, run `pnpm install` to install dependencies.
+    - Install [pnpm](https://pnpm.io) `npm install -g pnpm` if you haven't.
+3. Edit the config file `src/config.ts` to customize your blog.
+4. Run `pnpm new-post <filename>` to create a new post and edit it in `src/content/posts/`.
+5. Deploy your blog to Vercel, Netlify, GitHub Pages, etc. following [the guides](https://docs.astro.build/en/guides/deploy/). You need to edit the site configuration in `astro.config.mjs` before deployment.
 
-## 🔧 管理后台
+## 📝 Frontmatter of Posts
 
-访问 `/admin/` 进入后台：
-
-| 功能 | 说明 |
-|------|------|
-| ⚙️ 站点设置 | 标题、Logo、描述、导航、社交链接、Hero 区 |
-| 👤 个人信息 | 简介、技能、工作经历 |
-| 📝 文章管理 | 新建/编辑/删除文章（Markdown） |
-| 🎯 项目管理 | 新建/编辑/删除项目 |
-| 🎨 主题切换 | 选择内置主题 + 导入自定义主题 |
-| 💾 数据管理 | 导出/导入 JSON、重置、生成部署文件 |
-
-## 🎨 主题开发指南
-
-### 快速开始
-
-1. 复制模板目录：
-```bash
-cp -r themes/_template themes/mytheme
+```yaml
+---
+title: My First Blog Post
+published: 2023-09-09
+description: This is the first post of my new Astro blog.
+image: ./cover.jpg
+tags: [Foo, Bar]
+category: Front-end
+draft: false
+lang: jp      # Set only if the post's language differs from the site's language in `config.ts`
+---
 ```
 
-2. 修改 `themes/mytheme/template.js` 第一行的 ID：
-```js
-window.THEMES.mytheme = {  // 改成你的主题 ID
-```
+## 🧩 Markdown Extended Syntax
 
-3. 在后台「主题」标签页导入你的 CSS 和 JS 文件
+In addition to Astro's default support for [GitHub Flavored Markdown](https://github.github.com/gfm/), several extra Markdown features are included:
 
-4. 选择你的主题 → 保存 → 刷新前台查看效果
+- Admonitions ([Preview and Usage](https://fuwari.vercel.app/posts/markdown-extended/#admonitions))
+- GitHub repository cards ([Preview and Usage](https://fuwari.vercel.app/posts/markdown-extended/#github-repository-cards))
+- Enhanced code blocks with Expressive Code ([Preview](https://fuwari.vercel.app/posts/expressive-code/) / [Docs](https://expressive-code.com/))
 
-### 主题文件说明
+## ⚡ Commands
 
-每个主题包含两个文件：
+All commands are run from the root of the project, from a terminal:
 
-#### `theme.css` — 样式定义
+| Command                    | Action                                              |
+|:---------------------------|:----------------------------------------------------|
+| `pnpm install`             | Installs dependencies                               |
+| `pnpm dev`                 | Starts local dev server at `localhost:4321`         |
+| `pnpm build`               | Build your production site to `./dist/`             |
+| `pnpm preview`             | Preview your build locally, before deploying        |
+| `pnpm check`               | Run checks for errors in your code                  |
+| `pnpm format`              | Format your code using Biome                        |
+| `pnpm new-post <filename>` | Create a new post                                   |
+| `pnpm astro ...`           | Run CLI commands like `astro add`, `astro check`    |
+| `pnpm astro --help`        | Get help using the Astro CLI                        |
 
-定义所有视觉属性。**必须**包含以下 CSS 变量：
+## ✏️ Contributing
 
-| 类别 | 变量 | 说明 |
-|------|------|------|
-| **颜色** | `--color-primary` | 主色调 |
-| | `--color-secondary` | 辅助色 |
-| | `--color-tertiary` | 第三色 |
-| | `--color-bg` | 页面背景 |
-| | `--color-bg-elevated` | 提升层背景 |
-| | `--color-bg-glass` | 毛玻璃背景 |
-| | `--color-text` | 主文字颜色 |
-| | `--color-text-secondary` | 次要文字 |
-| | `--color-text-muted` | 弱化文字 |
-| | `--color-border` | 边框颜色 |
-| **字体** | `--font-display` | 标题字体 |
-| | `--font-body` | 正文字体 |
-| | `--font-mono` | 代码字体 |
-| **大小** | `--text-xs` ~ `--text-hero` | 流式字体大小 |
-| **间距** | `--space-xs` ~ `--space-section` | 流式间距 |
-| **圆角** | `--radius-sm` ~ `--radius-full` | 圆角梯度 |
-| **阴影** | `--shadow-glow-primary` | 主色发光 |
-| | `--shadow-card` | 卡片阴影 |
-| **毛玻璃** | `--glass-blur` | 模糊半径 |
-| | `--glass-border` | 玻璃边框 |
-| **动画** | `--duration-fast` ~ `--duration-reveal` | 时长 |
-| | `--ease-out-expo`, `--ease-smooth` | 缓动曲线 |
-| **布局** | `--max-width` | 最大宽度 |
-| | `--nav-height` | 导航栏高度 |
+Check out the [Contributing Guide](https://github.com/saicaca/fuwari/blob/main/CONTRIBUTING.md) for details on how to contribute to this project.
 
-#### `template.js` — HTML 模板
+## 📄 License
 
-负责将数据渲染为 HTML。必须实现：
+This project is licensed under the MIT License.
 
-```js
-window.THEMES.mytheme = {
-  render(config, posts, projects) {
-    // 渲染首页，写入 #main-content
-  },
-  renderArticle(post) {
-    // 渲染文章详情，写入 #article-view
-  },
-};
-```
-
-**可用的全局工具函数：**
-- `Core.formatDate(dateStr)` — 格式化日期为中文
-- `Core.parseMarkdown(md)` — 简易 Markdown 转 HTML
-
-**HTML 结构约定：**
-
-模板必须包含以下 `id` 的 section（用于导航和动画）：
-- `#hero` — 首屏
-- `#about` — 关于
-- `#blog` — 博客列表
-- `#projects` — 项目
-- `#contact` — 联系
-
-博客卡片必须有 `data-post-id` 属性（用于路由跳转）：
-```html
-<article class="blog-card" data-post-id="my-post">
-```
-
-项目卡片必须有 `data-category` 属性（用于过滤）：
-```html
-<article class="project-card" data-category="frontend">
-```
-
-### 可以修改的方面
-
-| 方面 | 在哪里改 | 示例 |
-|------|----------|------|
-| **配色方案** | `theme.css` :root | 换 `--color-primary` 等变量 |
-| **字体搭配** | `theme.css` :root | 换 `--font-display`、`--font-body` |
-| **圆角风格** | `theme.css` :root | 大圆角 vs 直角 vs 混合 |
-| **间距节奏** | `theme.css` :root | 紧凑 vs 宽松 |
-| **动画效果** | `theme.css` | 入场动画、hover 效果、过渡时长 |
-| **背景效果** | `theme.css` body | 纯色、渐变、纹理、噪点 |
-| **卡片样式** | `theme.css` .blog-card | 毛玻璃、纯色、边框、阴影 |
-| **导航栏** | `template.js` + `theme.css` | 透明、固定、侧边栏 |
-| **Hero 区** | `template.js` + `theme.css` | 全屏、分屏、居中、左对齐 |
-| **布局结构** | `template.js` | 单栏、双栏、网格、瀑布流 |
-| **额外动效** | `theme.css` + `template.js` | 粒子、光标、视差、打字机 |
-| **粒子系统** | `template.js` render 中初始化 | 修改粒子数量、颜色、交互方式 |
-| **暗色/亮色** | `theme.css` :root | 整体调性 |
-
-### 示例：创建一个「海洋」主题
-
-```bash
-# 1. 复制模板
-cp -r themes/_template themes/ocean
-
-# 2. 修改 template.js 中的 ID
-# window.THEMES.ocean = { ... }
-
-# 3. 修改 theme.css 配色
-# --color-primary: oklch(65% 0.2 200);  /* 蓝色 */
-# --color-secondary: oklch(60% 0.15 180); /* 青色 */
-# --color-bg: oklch(12% 0.02 240);       /* 深蓝背景 */
-
-# 4. 在后台导入 theme.css 和 template.js
-# 5. 选择「海洋」主题，保存
-```
-
-## 🌐 部署
-
-```bash
-git init && git add . && git commit -m "feat: init blog"
-git branch -M main
-git remote add origin https://github.com/<username>/<repo>.git
-git push -u origin main
-```
-
-进入仓库 → Settings → Pages → Source 选择 **GitHub Actions**
-
-## 📜 License
-
-MIT
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari?ref=badge_large&issueType=license)
