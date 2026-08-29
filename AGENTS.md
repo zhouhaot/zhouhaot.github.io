@@ -4,7 +4,7 @@
 
 ## 项目是什么
 
-个人博客（品牌 VOID.DEV），基于 [Astro 5](https://astro.build) + [fuwari](https://github.com/saicaca/fuwari) 主题二次开发。
+个人博客（品牌 zevth），基于 [Astro 5](https://astro.build) + [fuwari](https://github.com/saicaca/fuwari) 主题二次开发。
 纯静态站点，内容全是 Git 仓库里的 Markdown，无后台系统。2026-08 从自研零构建框架迁移而来（旧框架在 git 历史 main 分支）。
 
 - 仓库：`zhouhaot/zhouhaot.github.io`

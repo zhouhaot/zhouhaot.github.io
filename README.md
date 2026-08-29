@@ -1,4 +1,4 @@
-# VOID.DEV
+# zevth
 
 基于 [Astro](https://astro.build) + [fuwari](https://github.com/saicaca/fuwari) 主题二次开发的个人博客。内容为纯 Markdown 文件，由 GitHub Actions 构建并部署到自有服务器。
 

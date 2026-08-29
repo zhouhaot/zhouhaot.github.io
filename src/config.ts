@@ -8,7 +8,7 @@ import type {
 import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "VOID.DEV",
+	title: "zevth",
 	subtitle: "数字世界的造梦者",
 	lang: "zh_CN", // Language code, e.g. 'en', 'zh_CN', 'ja', etc.
 	themeColor: {
@@ -58,7 +58,7 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/demo-avatar.png", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "Zero",
+	name: "zevth",
 	bio: "全栈开发者 / 交互设计师 / 数字艺术家。专注于用技术创造令人屏息的视觉体验。",
 	links: [
 		{
@@ -76,7 +76,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Email",
 			icon: "fa6-regular:envelope",
-			url: "mailto:hello@example.com",
+			url: "mailto:1330582146@qq.com",
 		},
 	],
 };
