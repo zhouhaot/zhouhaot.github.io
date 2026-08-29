@@ -1,0 +1,69 @@
+# zevth 内容管理后台配置（Sveltia CMS，兼容 Decap 格式）
+# 后台地址: <site>/admin/
+#
+# 登录需要 GitHub OAuth（一次性配置，见 docs/WRITING.md「后台管理」章节）：
+#   1. GitHub → Settings → Developer settings → OAuth Apps → New OAuth App
+#      Homepage URL: https://<你的域名>
+#      Authorization callback URL: https://<你的auth服务域名>/callback
+#   2. 部署 sveltia-cms-auth（Cloudflare Worker，免费）:
+#      https://github.com/sveltia/sveltia-cms-auth
+#   3. 取消下面 base_url 的注释并填入 auth 服务地址
+
+backend:
+  name: github
+  repo: zhouhaot/zhouhaot.github.io
+  branch: astro-migration   # 合并到 main 后改为 main
+  # base_url: https://<your-auth-worker>.workers.dev
+
+site_url: https://zhouhaot.github.io
+locale: zh_CN
+
+media_folder: public/uploads
+public_path: /uploads
+
+collections:
+  - name: posts
+    label: 文章
+    label_singular: 文章
+    folder: src/content/posts
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    summary: "{{title}} {{draft}}"
+    sortable_fields: [published, title, draft]
+    fields:
+      - { name: title, label: 标题, widget: string }
+      - {
+          name: published,
+          label: 发布日期,
+          widget: datetime,
+          date_format: "YYYY-MM-DD",
+          time_format: false,
+          format: "YYYY-MM-DD",
+        }
+      - { name: description, label: 摘要, widget: text, required: false }
+      - { name: image, label: 封面图, widget: image, required: false, default: "" }
+      - { name: tags, label: 标签, widget: list, required: false, default: [] }
+      - { name: category, label: 分类, widget: string, required: false, default: "" }
+      - { name: draft, label: 草稿, widget: boolean, default: true }
+      - { name: lang, label: 语言, widget: string, required: false, default: "" }
+
+  - name: projects
+    label: 作品
+    label_singular: 作品
+    folder: src/content/projects
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    summary: "{{title}} {{year}}"
+    sortable_fields: [order, title, year]
+    fields:
+      - { name: title, label: 标题, widget: string }
+      - { name: description, label: 简介, widget: text, required: false, default: "" }
+      - { name: tags, label: 标签, widget: list, required: false, default: [] }
+      - { name: tech, label: 技术栈, widget: list, required: false, default: [] }
+      - { name: link, label: 源码链接, widget: string, required: false, default: "" }
+      - { name: demo, label: 演示链接, widget: string, required: false, default: "" }
+      - { name: year, label: 年份, widget: string, required: false, default: "" }
+      - { name: status, label: 状态, widget: string, required: false, default: "" }
+      - { name: order, label: 排序(越小越靠前), widget: number, required: false, default: 0 }

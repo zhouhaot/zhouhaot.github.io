@@ -21,7 +21,13 @@ pnpm build            # 构建 + pagefind 搜索索引 → dist/
 pnpm check            # astro 类型检查
 pnpm lint             # biome 检查并修复格式
 pnpm new-post -- slug # 新建草稿文章
+pnpm push-post -- f.md [--publish]  # AI 推送文章：校验→落盘→构建→git 推送当前分支
 ```
+
+## 后台管理
+
+`/admin/` 路径挂了 Sveltia CMS（Git 作为存储，配置在 `public/admin/config.yml`）。
+OAuth 登录尚未配置（见 docs/WRITING.md「后台管理」），配置好前用 push-post 或 git 提交。
 
 ## 内容约定（写作的完整规范见 docs/WRITING.md）
 

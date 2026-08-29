@@ -57,6 +57,37 @@ lang: ""                   # 留空，继承站点语言 zh_CN
 3. `description` 已填写（影响列表页和搜索摘要）
 4. 预览确认标题层级、代码块、图片路径正确
 
+## 后台管理（CMS）
+
+站点内置 Sveltia CMS，访问 `<你的域名>/admin/`，可在网页上管理文章、作品和上传图片。
+所有修改以 git commit 形式写回 GitHub 仓库，与本地 Markdown 文件完全等价。
+
+首次使用需一次性配置 GitHub OAuth 登录（约 10 分钟）：
+
+1. GitHub → Settings → Developer settings → OAuth Apps → 新建 OAuth App
+   - Homepage URL：`https://<你的域名>`
+   - Authorization callback URL：`https://<你的auth服务>/callback`
+2. 部署 [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth)（Cloudflare Worker，免费额度足够）
+3. 取消 `public/admin/config.yml` 中 `base_url` 的注释，填入 auth 服务地址
+
+配置前的替代方案：用下面的 AI 推送流程或直接 git 提交。
+
+## AI 推送文章流程
+
+任何 AI agent（或人）把写好的 Markdown 变成站内文章：
+
+```bash
+pnpm push-post -- 我的草稿.md             # 落盘为草稿 + 构建验证 + 提交推送当前分支
+pnpm push-post -- 我的草稿.md --publish   # 直接发布（draft: false）
+pnpm push-post -- 我的草稿.md --no-push   # 只落盘和构建，不动 git
+```
+
+脚本自动完成：frontmatter 校验（title/published 格式、发布前必须有 description、slug 命名规则）→
+写入 `src/content/posts/<slug>.md` → `pnpm build` 验证 → git commit + push 当前分支。
+
+注意：推送的是当前分支（如 astro-migration）；发布到线上需合并到 main 触发部署，
+合并 main 属于敏感操作，AI agent 必须先获得用户确认。
+
 ## 作品页（projects）
 
 `src/content/projects/` 下每个 `.md` 是一个项目卡片，frontmatter 字段：`title`、`description`、`tags`、`tech`、`link`（源码）、`demo`（在线演示）、`year`、`status`、`order`（排序，越小越靠前）。正文为项目详细介绍（Markdown）。

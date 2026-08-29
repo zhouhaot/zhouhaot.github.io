@@ -21,6 +21,8 @@ text = """
 5. 文风：第一人称、具体经验优先于抽象论述、给出可运行的例子。站内已有 3 篇文章
    （shader-art-with-webgl / design-system-philosophy / digital-nomad-reflections）是文风基准。
 6. 发布 = 把 draft 改为 false 后 git commit，没有后台系统。发布前跑 pnpm build 自检。
+7. 批量/自动化发布用 `pnpm push-post -- <草稿.md> [--publish]`：自动校验 frontmatter、
+   落盘、构建验证、推送当前分支。push main 前必须获得用户确认。
 7. 作品条目在 src/content/projects/<id>.md，frontmatter：
    title/description/tags/tech/link/demo/year/status/order（order 越小越靠前）。
 
