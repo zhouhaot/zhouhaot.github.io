@@ -65,3 +65,38 @@ collections:
       - { name: year, label: 年份, widget: string, required: false, default: "" }
       - { name: status, label: 状态, widget: string, required: false, default: "" }
       - { name: order, label: 排序(越小越靠前), widget: number, required: false, default: 0 }
+
+  - name: settings
+    label: 站点设置
+    files:
+      - name: profile
+        label: 个人资料
+        file: src/profile.json
+        format: json
+        summary: "名字、简介、头像、GitHub 和社交链接"
+        fields:
+          - { name: name, label: 名字, widget: string }
+          - { name: bio, label: 一句话简介, widget: text }
+          - {
+              name: avatar,
+              label: 头像,
+              widget: image,
+              default: "/uploads/avatar.png",
+              hint: "从资源库选择或上传新图，建议正方形 400x400 以上",
+            }
+          - { name: github, label: GitHub 主页, widget: string }
+          - name: links
+            label: 其他社交链接
+            widget: list
+            required: false
+            hint: "名称填 GitHub/Bilibili/Email 等会自动匹配图标"
+            fields:
+              - { name: name, label: 名称, widget: string }
+              - { name: url, label: 链接, widget: string }
+      - name: about
+        label: 关于页
+        file: src/content/spec/about.md
+        summary: "关于页正文"
+        fields:
+          - { name: title, label: 标题, widget: string, required: false, default: "关于" }
+          - { name: body, label: 正文, widget: markdown }

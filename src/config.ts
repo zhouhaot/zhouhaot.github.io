@@ -6,6 +6,26 @@ import type {
 	SiteConfig,
 } from "./types/config";
 import { LinkPreset } from "./types/config";
+// 个人资料（名字/简介/头像/GitHub/社交链接）抽到 profile.json，
+// 可通过后台 /admin/ 的「站点设置 → 个人资料」直接修改，无需改代码
+import profile from "./profile.json";
+
+/** 由社交链接名称推导 iconify 图标（后台编辑时无需关心图标代码） */
+function iconFor(name: string): string {
+	const key = name.trim().toLowerCase();
+	const map: Record<string, string> = {
+		github: "fa6-brands:github",
+		bilibili: "fa6-brands:bilibili",
+		b站: "fa6-brands:bilibili",
+		twitter: "fa6-brands:x-twitter",
+		x: "fa6-brands:x-twitter",
+		steam: "fa6-brands:steam",
+		email: "fa6-regular:envelope",
+		邮箱: "fa6-regular:envelope",
+		邮件: "fa6-regular:envelope",
+	};
+	return map[key] ?? "fa6-solid:link";
+}
 
 export const siteConfig: SiteConfig = {
 	title: "zevth",
@@ -50,34 +70,27 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.About,
 		{
 			name: "GitHub",
-			url: "https://github.com/zhouhaot", // Internal links should not include the base path, as it is automatically added
+			url: profile.github, // Internal links should not include the base path, as it is automatically added
 			external: true, // Show an external link icon and will open in a new tab
 		},
 	],
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "assets/images/demo-avatar.png", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "zevth",
-	bio: "全栈开发者 / 交互设计师 / 数字艺术家。专注于用技术创造令人屏息的视觉体验。",
+	avatar: profile.avatar, // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+	name: profile.name,
+	bio: profile.bio,
 	links: [
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github", // Visit https://icones.js.org/ for icon codes
-			// You will need to install the corresponding icon set if it's not already included
-			// `pnpm add @iconify-json/<icon-set-name>`
-			url: "https://github.com/zhouhaot",
+			url: profile.github,
 		},
-		{
-			name: "Bilibili",
-			icon: "fa6-brands:bilibili",
-			url: "https://space.bilibili.com",
-		},
-		{
-			name: "Email",
-			icon: "fa6-regular:envelope",
-			url: "mailto:1330582146@qq.com",
-		},
+		...profile.links.map((link) => ({
+			name: link.name,
+			icon: iconFor(link.name),
+			url: link.url,
+		})),
 	],
 };
 

@@ -1,0 +1,10 @@
+{
+	"name": "zevth",
+	"bio": "全栈开发者 / 交互设计师 / 数字艺术家。专注于用技术创造令人屏息的视觉体验。",
+	"avatar": "/uploads/avatar.png",
+	"github": "https://github.com/zhouhaot",
+	"links": [
+		{ "name": "Bilibili", "url": "https://space.bilibili.com" },
+		{ "name": "Email", "url": "mailto:1330582146@qq.com" }
+	]
+}
