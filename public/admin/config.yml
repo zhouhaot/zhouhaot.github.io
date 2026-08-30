@@ -15,7 +15,7 @@ backend:
   branch: main
   # base_url: https://<your-auth-worker>.workers.dev
 
-site_url: https://zhouhaot.github.io
+site_url: https://zevth.work
 locale: zh_CN
 
 media_folder: public/uploads
