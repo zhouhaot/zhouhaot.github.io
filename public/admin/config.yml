@@ -12,7 +12,7 @@
 backend:
   name: github
   repo: zhouhaot/zhouhaot.github.io
-  branch: astro-migration   # 合并到 main 后改为 main
+  branch: main
   # base_url: https://<your-auth-worker>.workers.dev
 
 site_url: https://zhouhaot.github.io
