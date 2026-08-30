@@ -1,19 +1,17 @@
 # zevth 内容管理后台配置（Sveltia CMS，兼容 Decap 格式）
-# 后台地址: <site>/admin/
+# 后台地址: https://zevth.work/admin/
 #
-# 登录需要 GitHub OAuth（一次性配置，见 docs/WRITING.md「后台管理」章节）：
-#   1. GitHub → Settings → Developer settings → OAuth Apps → New OAuth App
-#      Homepage URL: https://<你的域名>
-#      Authorization callback URL: https://<你的auth服务域名>/callback
-#   2. 部署 sveltia-cms-auth（Cloudflare Worker，免费）:
-#      https://github.com/sveltia/sveltia-cms-auth
-#   3. 取消下面 base_url 的注释并填入 auth 服务地址
+# 登录方式（二选一）：
+#   A. 令牌登录（推荐，零配置）：登录页选 Sign In with Token，粘贴 GitHub 个人访问令牌。
+#      令牌需 repo 权限；创建入口见 docs/WRITING.md「后台管理」章节。
+#   B. OAuth 一键登录（可选）：需要 GitHub OAuth App + 认证服务，
+#      部署后取消下面 base_url 注释。见 docs/WRITING.md。
 
 backend:
   name: github
   repo: zhouhaot/zhouhaot.github.io
   branch: main
-  # base_url: https://<your-auth-worker>.workers.dev
+  # base_url: https://<your-auth-service>/oauth
 
 site_url: https://zevth.work
 locale: zh_CN

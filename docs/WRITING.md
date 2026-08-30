@@ -59,18 +59,26 @@ lang: ""                   # 留空，继承站点语言 zh_CN
 
 ## 后台管理（CMS）
 
-站点内置 Sveltia CMS，访问 `<你的域名>/admin/`，可在网页上管理文章、作品和上传图片。
+站点内置 Sveltia CMS（自托管，v0.202.0），访问 `https://zevth.work/admin/`，可在网页上管理文章、作品和上传图片。
 所有修改以 git commit 形式写回 GitHub 仓库，与本地 Markdown 文件完全等价。
 
-首次使用需一次性配置 GitHub OAuth 登录（约 10 分钟）：
+### 登录：GitHub 令牌（推荐，零配置）
 
-1. GitHub → Settings → Developer settings → OAuth Apps → 新建 OAuth App
-   - Homepage URL：`https://<你的域名>`
-   - Authorization callback URL：`https://<你的auth服务>/callback`
-2. 部署 [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth)（Cloudflare Worker，免费额度足够）
-3. 取消 `public/admin/config.yml` 中 `base_url` 的注释，填入 auth 服务地址
+1. 打开 https://zevth.work/admin/ ，选择 **Sign In with Token**
+2. 还没有令牌时，点登录框下方的 GitHub 链接（或手动到
+   GitHub → Settings → Developer settings → **Personal access tokens (classic)** → Generate new token (classic)）：
+   - 勾选 `repo` 权限（建议同时只勾必要项，有效期按需）
+   - 生成后复制 `ghp_` 开头的令牌（只显示一次）
+3. 粘贴令牌登录。令牌保存在你浏览器本地，**不会**提交到仓库
 
-配置前的替代方案：用下面的 AI 推送流程或直接 git 提交。
+后台能做什么：文章/作品的增删改、草稿开关、图片上传（存到 `public/uploads/`）、
+保存时可选直接发布（写 main 触发自动部署）或存为草稿（PR 工作流）。
+
+### OAuth 一键登录（可选，暂未启用）
+
+想用"点击 GitHub 图标直接授权"的方式，需要 GitHub OAuth App + 一个认证服务
+（如 [sveltia-cms-auth](https://github.com/sveltia/sveltia-cms-auth) 或任意 Decap 兼容服务），
+然后把 `public/admin/config.yml` 里 `base_url` 取消注释并指向认证服务即可。
 
 ## AI 推送文章流程
 
