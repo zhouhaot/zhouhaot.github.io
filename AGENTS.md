@@ -63,7 +63,7 @@ Schema 定义在 `src/content/config.ts`。注意 `category` 等字段是 nullab
 
 - `main` 分支 push → GitHub Actions（`.github/workflows/deploy.yml`）构建并 rsync 到服务器。
 - 该 workflow 由仓库变量 `DEPLOY_SERVER == 'true'` 开关：**配置好 SSH secrets（SSH_HOST/SSH_USER/SSH_PORT/SSH_KEY）并验证服务器后再开启**。
-- 服务器站点目录默认 `/var/www/blog`，Nginx/Caddy 指向它。
+- 服务器站点目录为 `/www/wwwroot/zevth.work`（宝塔面板，Nginx，SSL 由 acme.sh 自动续期）。
 
 ## 红线
 

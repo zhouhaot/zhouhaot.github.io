@@ -32,7 +32,7 @@ jobs:
     if: vars.DEPLOY_SERVER == 'true'
     runs-on: ubuntu-latest
     env:
-      SITE_DIR: /var/www/blog
+      SITE_DIR: /www/wwwroot/zevth.work
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +55,7 @@ jobs:
       - name: Upload to server
         uses: burnett01/rsync-deployments@7.0.2
         with:
-          switches: -avzr --delete --exclude=pagefind/ --exclude=.well-known/
+          switches: -avzr --delete --exclude=.well-known/
           path: dist/
           remote_path: ${{ env.SITE_DIR }}/
           remote_host: ${{ secrets.SSH_HOST }}
