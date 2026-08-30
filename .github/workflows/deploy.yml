@@ -55,7 +55,7 @@ jobs:
       - name: Upload to server
         uses: burnett01/rsync-deployments@7.0.2
         with:
-          switches: -avzr --delete --exclude=.well-known/
+          switches: -avzr --delete --exclude=.well-known/ --exclude=.user.ini
           path: dist/
           remote_path: ${{ env.SITE_DIR }}/
           remote_host: ${{ secrets.SSH_HOST }}
