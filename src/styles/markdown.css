@@ -20,7 +20,8 @@
     }
 
     a:not(.no-styling) {
-        @apply relative bg-none link font-medium text-[var(--primary)]
+        /* link 组件类定义在 main.css，跨文件 @apply 的解析顺序在 CI 上不稳定，这里展开等价声明 */
+        @apply relative bg-none transition rounded-md p-1 -m-1 font-medium text-[var(--primary)]
         underline decoration-[var(--link-underline)] decoration-1 decoration-dashed underline-offset-4;
         box-decoration-break: clone;
         -webkit-box-decoration-break: clone;
